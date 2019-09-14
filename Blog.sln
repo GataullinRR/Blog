@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2000
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29230.47
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blog", "Blog\Blog.csproj", "{023B6550-95F6-422B-9BE8-3829CE49B8FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blog", "Blog\Blog.csproj", "{023B6550-95F6-422B-9BE8-3829CE49B8FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBModels", "DBModels\DBModels.csproj", "{07DB6811-601E-4167-9310-D5A22F14EEA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBModels", "DBModels\DBModels.csproj", "{07DB6811-601E-4167-9310-D5A22F14EEA1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ZMisc", "ZMisc", "{29A295E9-7B3E-47D5-8D6F-52B9E191F580}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilitiesStandard", "..\GeneralPurposeLibs\Utilities\UtilitiesStandard\UtilitiesStandard.csproj", "{FBB12841-1E0B-49E8-9A05-C0EA205F4230}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +25,16 @@ Global
 		{07DB6811-601E-4167-9310-D5A22F14EEA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07DB6811-601E-4167-9310-D5A22F14EEA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07DB6811-601E-4167-9310-D5A22F14EEA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBB12841-1E0B-49E8-9A05-C0EA205F4230}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBB12841-1E0B-49E8-9A05-C0EA205F4230}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBB12841-1E0B-49E8-9A05-C0EA205F4230}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBB12841-1E0B-49E8-9A05-C0EA205F4230}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FBB12841-1E0B-49E8-9A05-C0EA205F4230} = {29A295E9-7B3E-47D5-8D6F-52B9E191F580}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8F7366CB-EE4B-459E-85D5-912252FB3C9A}

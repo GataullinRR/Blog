@@ -87,6 +87,8 @@ Chemistry is often referred to as the central science because it joins together 
                 context.Users.AddRange(user1, user2, user3);
                 context.Posts.AddRange(post1, post2, post3, post4);
                 context.Commentaries.AddRange(commentary1, commentary2);
+
+                context.SaveChanges();
             }
         }
     }

@@ -1,0 +1,9 @@
+﻿@page "{id:int}"
+@model Blog.Pages.PostModel
+
+@{
+    ViewData["Title"] = Model.Post.Title;
+}
+
+@Model.Post.Body
+

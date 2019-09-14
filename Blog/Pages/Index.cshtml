@@ -1,0 +1,23 @@
+﻿@page
+@model Blog.Pages.IndexModel
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+<h3>Posts count: @Model.Posts.Count()</h3>
+
+@foreach (var post in Model.Posts)
+{
+    <table>
+        <tr>
+            <td>
+                <a asp-page="./Post" asp-route-id="@post.Id">@post.Title</a>
+            </td>
+            <td>@post.Author.Nickname</td>
+            <td>@post.Date</td>
+        </tr>
+    </table>
+
+    @post.Body.Take(200).Concat("...").AsString();
+}
