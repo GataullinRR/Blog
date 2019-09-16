@@ -24,5 +24,10 @@ namespace Blog.Pages
         {
 
         }
+
+        public void OnPost()
+        {
+
+        }
     }
 }

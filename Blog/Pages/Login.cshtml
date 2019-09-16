@@ -1,0 +1,31 @@
+﻿@page
+@model Blog.Pages.LoginModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+@*<form method="post">
+    <input asp-for="Login" />
+    <input asp-for="Password" />
+
+    <div>
+        <button type="submit">Save</button>
+    </div>
+</form>*@
+
+<form method="post">
+    <div class="container">
+        <div>
+            <label><b>Login</b></label>
+            <input type="text" placeholder="Enter login" asp-for="Login">
+        </div>
+
+        <div>
+            <label><b>Password</b></label>
+            <input type="password" placeholder="Enter password" asp-for="Password">
+        </div>
+
+        <button type="submit">Login</button>
+    </div>
+</form>

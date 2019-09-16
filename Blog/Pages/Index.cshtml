@@ -15,7 +15,7 @@
                 <a asp-page="./Post" asp-route-id="@post.Id">@post.Title</a>
             </td>
             <td>@post.Author.Nickname</td>
-            <td>@post.Date</td>
+            <td>@post.Date.ToString("dd.MM.yyyy")</td>
         </tr>
     </table>
 
