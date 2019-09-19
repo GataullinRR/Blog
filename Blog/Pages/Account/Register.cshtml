@@ -1,0 +1,41 @@
+﻿@page
+@model Blog.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h2>Register</h2>
+
+<form method="post">
+    <div>
+        <label asp-for="Username"></label>
+        <input asp-for="Username" />
+        <span asp-validation-for="Username"></span>
+    </div>
+
+    <div>
+        <label asp-for="EMail"></label>
+        <input asp-for="EMail" />
+        <span asp-validation-for="EMail"></span>
+    </div>
+
+    <div>
+        <label asp-for="Password"></label>
+        <input asp-for="Password" />
+        <span asp-validation-for="Password"></span>
+    </div>
+
+    <div>
+        <label asp-for="ConfirmPassword"></label>
+        <input asp-for="ConfirmPassword" />
+        <span asp-validation-for="ConfirmPassword"></span>
+    </div>
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div>
+        <input type="submit" value="Register" />
+    </div>
+</form>
+
