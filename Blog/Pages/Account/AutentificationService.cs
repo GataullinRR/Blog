@@ -22,22 +22,39 @@ namespace Blog.Pages.Account
             _db = db;
         }
 
-        public async Task AuthenticateAsync(HttpContext httpContext, string userName, string password)
+        public async Task<bool> TryAuthenticateAsync(HttpContext httpContext, string userName, string password)
         {
             //https://metanit.com/sharp/aspnet5/15.2.php
 
-            var claims = new List<Claim>
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Nickname == userName);
+            if (user == null)
             {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, userName)
-            };
-            var id = new ClaimsIdentity(
-                claims,
-                "ApplicationCookie",
-                ClaimsIdentity.DefaultNameClaimType,
-                ClaimsIdentity.DefaultRoleClaimType);
-            await httpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme, 
-                new ClaimsPrincipal(id));
+                return false;
+            }
+            else
+            {
+                if (GetHash(password) == user.PasswordHash)
+                {
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimsIdentity.DefaultNameClaimType, userName)
+                    };
+                    var id = new ClaimsIdentity(
+                        claims,
+                        "ApplicationCookie",
+                        ClaimsIdentity.DefaultNameClaimType,
+                        ClaimsIdentity.DefaultRoleClaimType);
+                    await httpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(id));
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
 
         public async Task LogoutAsync(HttpContext httpContext)

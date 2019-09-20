@@ -41,7 +41,7 @@ namespace Blog.Pages.Account
             }
         }
 
-        public async Task<IActionResult> OnPost()
+        public async Task<IActionResult> OnPostAsync()
         {
             if (ModelState.IsValid)
             {
@@ -54,9 +54,19 @@ namespace Blog.Pages.Account
                 }
                 else
                 {
-                    await _autentification.AuthenticateAsync(HttpContext, user.Nickname, Password);
+                    var isLoggedIn = await _autentification
+                        .TryAuthenticateAsync(HttpContext, user.Nickname, Password);
 
-                    return RedirectToPage("/Index");
+                    if (isLoggedIn)
+                    {
+                        return RedirectToPage("/Index");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Login or password is not valid");
+
+                        return Page();
+                    }
                 }
             }
             else

@@ -66,7 +66,7 @@ namespace Blog.Pages.Account
                         EMail = EMail
                     });
                     await _db.SaveChangesAsync();
-                    await _autentification.AuthenticateAsync(HttpContext, Username, Password);
+                    await _autentification.TryAuthenticateAsync(HttpContext, Username, Password);
 
                     return RedirectToPage("/Index");
                 }

@@ -1,0 +1,12 @@
+﻿@page
+@model Blog.Pages.Account.ProfileModel
+@{
+    ViewData["Title"] = User.Identity.Name;
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h2>Profile information</h2>
+
+<h4>@("Name: " + Model.Username)</h4>
+<h4>@("E-Mail: " + Model.EMail)</h4>
+<h4>@("Registration date: " + Model.RegistrationDate.ToString("dd.MM.yyyy"))</h4>

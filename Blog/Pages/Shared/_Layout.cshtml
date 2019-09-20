@@ -13,7 +13,7 @@
     <a asp-page="/Index">Home</a>
     @if (User.Identity.IsAuthenticated)
     {
-        <a asp-page="">@User.Identity.Name</a>
+        <a asp-page="/Account/Profile">@User.Identity.Name</a>
         <a asp-controller="Account" asp-action="Logout">Logout</a>
     }
     else
