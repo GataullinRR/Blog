@@ -6,15 +6,16 @@ using DBModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Pages
 {
-    [Authorize]
     public class PostModel : PageModel
     {
         readonly BlogContext _db;
 
-        public DBModels.Post Post { get; private set; }
+        public Post Post { get; private set; }
+        public IEnumerable<Commentary> Commentaries { get; private set; }
 
         public PostModel(BlogContext db)
         {
@@ -31,6 +32,11 @@ namespace Blog.Pages
             }
             else
             {
+                Commentaries = _db.Commentaries
+                    .Include(c => c.Post)
+                    .Where(c => c.Post == Post)
+                    .Include(c => c.Author);
+
                 return Page();
             }
         }

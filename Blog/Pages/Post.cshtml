@@ -5,5 +5,17 @@
     ViewData["Title"] = Model.Post.Title;
 }
 
+<h2>@Model.Post.Title</h2>
+
 @Model.Post.Body
 
+<hr />
+<h3>Commentaries:</h3>
+
+@foreach (var commentary in Model.Commentaries)
+{
+    <div>
+        <h4>@($"{commentary.Author.Nickname} - {commentary.Date.ToString("dd.MM.yyyy")}")</h4>
+        <h5>@commentary.Body</h5>
+    </div>
+}
