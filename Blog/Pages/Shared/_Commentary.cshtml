@@ -1,0 +1,6 @@
+﻿@model DBModels.Commentary
+
+<div>
+    <h4>@($"{Model.Author.Nickname} - {Model.Date.ToString("dd.MM.yyyy")}")</h4>
+    @Model.Body
+</div>

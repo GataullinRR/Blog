@@ -40,5 +40,25 @@ namespace Blog.Pages
                 return Page();
             }
         }
+
+        [HttpPost()]
+        public async Task<IActionResult> OnPostAddCommentaryAsync(int postId, string commentBody)
+        {
+            if (commentBody != null)
+            {
+                var comment = new Commentary()
+                {
+                    Author = await _db.Users.FirstAsync(u => u.Nickname == User.Identity.Name),
+                    Body = commentBody,
+                    Date = DateTime.Now,
+                    Post = await _db.Posts.FindAsync(postId)
+                };
+
+                _db.Commentaries.Add(comment);
+                await _db.SaveChangesAsync();
+            }
+
+            return RedirectToPage("/Post", new { id = postId });
+        }
     }
 }

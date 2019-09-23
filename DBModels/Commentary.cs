@@ -5,6 +5,7 @@ namespace DBModels
 {
     public class Commentary
     {
+        [Key]
         public int Id { get; set; }
         [Required]
         public User Author { get; set; }

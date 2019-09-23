@@ -23,5 +23,11 @@ namespace Blog.Controllers
 
             return RedirectToPage("/Index");
         }
+
+        [HttpPost()]
+        public async Task<IActionResult> AddCommentary(int postId, string commentBody)
+        {
+            return RedirectToPage("/Index");
+        }
     }
 }

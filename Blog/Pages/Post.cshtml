@@ -14,8 +14,26 @@
 
 @foreach (var commentary in Model.Commentaries)
 {
-    <div>
-        <h4>@($"{commentary.Author.Nickname} - {commentary.Date.ToString("dd.MM.yyyy")}")</h4>
-        <h5>@commentary.Body</h5>
-    </div>
+    @await Html.PartialAsync("_Commentary", commentary);
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+    @*<form method="post" action="/Account/AddCommentary">
+            <input type="hidden" name="postId" value="@Model.Post.Id"/>
+            <textarea name="body" rows="3" placeholder="Your Comment"></textarea>
+            <button type="submit">Send</button>
+        </form>*@
+    <form method="post" asp-page-handler="AddCommentary">
+        <input type="hidden" name="postId" value="@Model.Post.Id"/>
+        <textarea name="commentBody" rows="3" placeholder="Your Comment"></textarea>
+        <button type="submit">Send</button>
+    </form>
+}
+else
+{
+    <a asp-page="/Account/Login">Login</a>
+    <span> or </span>
+    <a asp-page="/Account/Register">register</a>
+    <span> to comment</span>
 }
