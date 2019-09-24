@@ -25,7 +25,7 @@ namespace Blog.Pages
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            Post = await _db.Posts.FindAsync(id);
+            Post = await _db.Posts.Include(p => p.Author).FirstOrDefaultAsync(p => p.Id == id);
 
             if (Post == null)
             {

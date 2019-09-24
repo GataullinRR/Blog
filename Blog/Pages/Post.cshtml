@@ -5,7 +5,13 @@
     ViewData["Title"] = Model.Post.Title;
 }
 
-<h2>@Model.Post.Title</h2>
+<h2>@Model.Post.Title 
+    @if(User.Identity.Name == Model.Post.Author.Nickname
+        && Model.Post.Date - DateTime.Now < TimeSpan.FromDays(3))
+    { 
+        <a asp-page="/PostCreate" asp-route-editingpostid="@Model.Post.Id">Edit</a> 
+    }
+</h2>
 
 @Model.Post.Body
 

@@ -8,6 +8,7 @@ using DBModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Pages
 {
@@ -27,27 +28,54 @@ namespace Blog.Pages
         public string Title { get; set; }
         [BindProperty]
         public string Body { get; set; }
+        [BindProperty]
+        public bool IsEditMode { get; set; }
+        [BindProperty]
+        public int EditingPostId { get; set; }
 
-        public void OnGet()
+        public async Task OnGetAsync(int? editingPostId)
         {
-
+            IsEditMode = editingPostId.HasValue;
+            if (IsEditMode)
+            {
+                EditingPostId = editingPostId.Value;
+                var editingPost = await _db.Posts.FirstOrDefaultAsync(p => p.Id == EditingPostId);
+                Title = editingPost.Title;
+                Body = editingPost.Body;
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> OnPostCreateAsync()
         {
-            var post = new Post()
+            int postId = 0;
+
+            if (IsEditMode)
             {
-                Author = await _autentification.GetCurrentUserAsync(HttpContext),
-                Body = Body,
-                Date = DateTime.Now,
-                Title = Title
-            };
+                var editingPost = await _db.Posts.FirstOrDefaultAsync(p => p.Id == EditingPostId);
+                editingPost.Title = Title;
+                editingPost.Body = Body;
+                postId = EditingPostId;
 
-            _db.Posts.Add(post);
-            await _db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
+            }
+            else
+            {
+                var post = new Post()
+                {
+                    Author = await _autentification.GetCurrentUserAsync(HttpContext),
+                    Body = Body,
+                    Date = DateTime.Now,
+                    Title = Title
+                };
 
-            return RedirectToPage("/Post", new { id = post.Id });
+                _db.Posts.Add(post);
+                await _db.SaveChangesAsync();
+
+                postId = post.Id;
+            }
+
+            return RedirectToPage("/Post", new { id = postId });
         }
     }
 }
