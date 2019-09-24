@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,31 +15,25 @@ namespace Blog.Pages.Account
     public class ProfileModel : PageModel
     {
         readonly BlogContext _db;
+        readonly AutentificationService _autentification;
+        User _user;
 
-        public ProfileModel(BlogContext db)
+        public ProfileModel(BlogContext db, AutentificationService autentification)
         {
             _db = db;
+            _autentification = autentification;
         }
 
-        public string Username { get; private set; }
-        public string EMail { get; private set; }
-        public DateTime RegistrationDate { get; private set; }
+        public string Username => _user.Nickname;
+        public string EMail => _user.EMail;
+        public DateTime RegistrationDate => _user.RegistrationDate;
+        public IEnumerable<Post> Posts => _db.Posts.Where(p => p.Author == _user);
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Nickname == User.Identity.Name);
-            if (user == null)
-            {
-                return RedirectToPage("/Index");
-            }
-            else
-            {
-                Username = user.Nickname;
-                EMail = user.EMail;
-                RegistrationDate = user.RegistrationDate;
+            _user = await _autentification.GetCurrentUserAsync(HttpContext);
 
-                return Page();
-            }
+            return Page();
         }
     }
 }

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
 
-namespace Blog.Pages.Account
+namespace Blog.Services
 {
     public class AutentificationService
     {
@@ -20,6 +20,19 @@ namespace Blog.Pages.Account
         public AutentificationService(BlogContext db)
         {
             _db = db;
+        }
+
+
+        public async Task<User> GetCurrentUserAsync(HttpContext httpContext)
+        {
+            if (httpContext.User.Identity.IsAuthenticated)
+            {
+                return await _db.Users.FirstAsync(u => u.Nickname == httpContext.User.Identity.Name);
+            }
+            else
+            {
+                throw new InvalidOperationException("User does not exist");
+            }
         }
 
         public async Task<bool> TryAuthenticateAsync(HttpContext httpContext, string userName, string password)

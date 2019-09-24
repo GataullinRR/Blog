@@ -19,14 +19,9 @@
 
 @if (User.Identity.IsAuthenticated)
 {
-    @*<form method="post" action="/Account/AddCommentary">
-            <input type="hidden" name="postId" value="@Model.Post.Id"/>
-            <textarea name="body" rows="3" placeholder="Your Comment"></textarea>
-            <button type="submit">Send</button>
-        </form>*@
     <form method="post" asp-page-handler="AddCommentary">
         <input type="hidden" name="postId" value="@Model.Post.Id"/>
-        <textarea name="commentBody" rows="3" placeholder="Your Comment"></textarea>
+        <textarea name="commentBody" rows="3" placeholder="Your comment"></textarea>
         <button type="submit">Send</button>
     </form>
 }

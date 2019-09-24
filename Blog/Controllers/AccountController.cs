@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Blog.Pages.Account;
+using Blog.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Controllers

@@ -5,8 +5,15 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-<h2>Profile information</h2>
+<h3>Profile information</h3>
 
-<h4>@("Name: " + Model.Username)</h4>
-<h4>@("E-Mail: " + Model.EMail)</h4>
-<h4>@("Registration date: " + Model.RegistrationDate.ToString("dd.MM.yyyy"))</h4>
+<div>@("Name: " + Model.Username)</div>
+<div>@("E-Mail: " + Model.EMail)</div>
+<div>@("Registration date: " + Model.RegistrationDate.ToString("dd.MM.yyyy"))</div>
+
+<h3>Posts</h3>
+
+@foreach (var post in Model.Posts)
+{
+    <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
+}
