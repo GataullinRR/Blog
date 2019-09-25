@@ -50,6 +50,7 @@ namespace Blog
             }
 
             app.UseAuthentication();
+
             app.UseStaticFiles();
             app.UseMvc(routes =>
             {

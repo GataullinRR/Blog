@@ -16,7 +16,7 @@ namespace Blog.Pages.Account
     {
         readonly BlogContext _db;
         readonly AutentificationService _autentification;
-        User _user;
+        public User UserModel { get; private set; }
 
         public ProfileModel(BlogContext db, AutentificationService autentification)
         {
@@ -24,14 +24,10 @@ namespace Blog.Pages.Account
             _autentification = autentification;
         }
 
-        public string Username => _user.Nickname;
-        public string EMail => _user.EMail;
-        public DateTime RegistrationDate => _user.RegistrationDate;
-        public IEnumerable<Post> Posts => _db.Posts.Where(p => p.Author == _user);
-
         public async Task<IActionResult> OnGetAsync()
         {
-            _user = await _autentification.GetCurrentUserAsync(HttpContext);
+            UserModel = await _autentification.GetCurrentUserAsync(HttpContext);
+            UserModel.Posts = await _db.Posts.Where(p => p.Author == UserModel).ToListAsync();
 
             return Page();
         }

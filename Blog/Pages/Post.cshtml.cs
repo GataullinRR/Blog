@@ -42,7 +42,7 @@ namespace Blog.Pages
             }
         }
 
-        [HttpPost()]
+        [HttpPost(), Authorize]
         public async Task<IActionResult> OnPostAddCommentaryAsync(int postId, string commentBody)
         {
             if (commentBody != null)

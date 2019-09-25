@@ -7,13 +7,14 @@
 
 <h3>Profile information</h3>
 
-<div>@("Name: " + Model.Username)</div>
-<div>@("E-Mail: " + Model.EMail)</div>
-<div>@("Registration date: " + Model.RegistrationDate.ToString("dd.MM.yyyy"))</div>
+<div>@("Name: " + Model.UserModel.Nickname)</div>
+<div>@("E-Mail: " + Model.UserModel.EMail)</div>
+<div>@("Role: " + Model.UserModel.Role.GetRoleName())</div>
+<div>@("Registration date: " + Model.UserModel.RegistrationDate.ToString("dd.MM.yyyy"))</div>
 
 <h3>Posts</h3>
 
-@foreach (var post in Model.Posts)
+@foreach (var post in Model.UserModel.Posts)
 {
-    <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
+    <div><a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a></div>
 }

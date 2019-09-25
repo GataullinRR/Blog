@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
+using Utilities;
+using Utilities.Extensions;
 
 namespace Blog.Services
 {
@@ -50,13 +52,12 @@ namespace Blog.Services
                 {
                     var claims = new List<Claim>
                     {
-                        new Claim(ClaimsIdentity.DefaultNameClaimType, userName)
+                        new Claim(ClaimsIdentity.DefaultNameClaimType, userName),
+                        new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.USER.GetRoleName())
                     };
                     var id = new ClaimsIdentity(
                         claims,
-                        "ApplicationCookie",
-                        ClaimsIdentity.DefaultNameClaimType,
-                        ClaimsIdentity.DefaultRoleClaimType);
+                        CookieAuthenticationDefaults.AuthenticationScheme);
                     await httpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(id));

@@ -15,6 +15,9 @@ namespace DBModels
         public string EMail { get; set; }
         [Required]
         public DateTime RegistrationDate { get; set; }
+        [Required]
+        public Role Role { get; set; }
+
         public List<Post> Posts { get; set; }
         public List<Commentary> Commentaries { get; set; }
     }

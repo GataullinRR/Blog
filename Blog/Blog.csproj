@@ -23,4 +23,8 @@
     <ProjectReference Include="..\DBModels\DBModels.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
+
 </Project>
