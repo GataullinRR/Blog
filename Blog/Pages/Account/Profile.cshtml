@@ -9,12 +9,21 @@
 
 <div>@("Name: " + Model.UserModel.Nickname)</div>
 <div>@("E-Mail: " + Model.UserModel.EMail)</div>
+<div>@("E-Mail confirmed: " + Model.UserModel.IsEmailConfirmed.Ternar("Yes", "No"))</div>
 <div>@("Role: " + Model.UserModel.Role.GetRoleName())</div>
 <div>@("Registration date: " + Model.UserModel.RegistrationDate.ToString("dd.MM.yyyy"))</div>
 
-<h3>Posts</h3>
-
-@foreach (var post in Model.UserModel.Posts)
+@if(!Model.UserModel.IsEmailConfirmed)
 {
-    <div><a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a></div>
+    <div><a asp-page="/Account/ConfirmEMail">Confirm email</a></div>
+}
+
+@if (Model.UserModel.Posts.Any())
+{
+    <h3>Posts</h3>
+
+    @foreach (var post in Model.UserModel.Posts)
+    {
+        <div><a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a></div>
+    }
 }

@@ -11,9 +11,13 @@ namespace DBModels
             switch (role)
             {
                 case Role.USER:
-                    return "User";
+                    return Roles.USER;
                 case Role.ADMIN:
-                    return "Admin";
+                    return Roles.ADMIN;
+                case Role.MODERATOR:
+                    return Roles.MODERATOR;
+                case Role.UNCONFIRMED:
+                    return Roles.RESTRICTED;
 
                 default:
                     throw new NotSupportedException();

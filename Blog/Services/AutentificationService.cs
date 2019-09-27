@@ -24,7 +24,6 @@ namespace Blog.Services
             _db = db;
         }
 
-
         public async Task<User> GetCurrentUserAsync(HttpContext httpContext)
         {
             if (httpContext.User.Identity.IsAuthenticated)
@@ -53,7 +52,7 @@ namespace Blog.Services
                     var claims = new List<Claim>
                     {
                         new Claim(ClaimsIdentity.DefaultNameClaimType, userName),
-                        new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.USER.GetRoleName())
+                        new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.GetRoleName())
                     };
                     var id = new ClaimsIdentity(
                         claims,

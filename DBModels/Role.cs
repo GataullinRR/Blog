@@ -7,7 +7,9 @@ namespace DBModels
 {
     public enum Role
     {
-        USER = default,
-        ADMIN
+        UNCONFIRMED = 0,
+        USER = 10,
+        MODERATOR = 20,
+        ADMIN = 30,
     }
 }

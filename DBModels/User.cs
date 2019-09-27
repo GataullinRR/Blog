@@ -14,6 +14,8 @@ namespace DBModels
         [Required]
         public string EMail { get; set; }
         [Required]
+        public bool IsEmailConfirmed { get; set; }
+        [Required]
         public DateTime RegistrationDate { get; set; }
         [Required]
         public Role Role { get; set; }

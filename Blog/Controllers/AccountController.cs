@@ -1,20 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Blog.Pages.Account;
 using Blog.Services;
+using DBModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Controllers
 {
     public class AccountController : Controller
     {
+        readonly BlogContext _db;
         readonly AutentificationService _autentification;
+        readonly EMailConfirmationService _eMailConfirmationService;
 
-        public AccountController(AutentificationService autentification)
+        public AccountController(BlogContext db, AutentificationService autentification, EMailConfirmationService eMailConfirmationService)
         {
+            _db = db;
             _autentification = autentification;
+            _eMailConfirmationService = eMailConfirmationService;
         }
 
         [HttpGet()]
@@ -25,10 +31,30 @@ namespace Blog.Controllers
             return RedirectToPage("/Index");
         }
 
-        [HttpPost()]
-        public async Task<IActionResult> AddCommentary(int postId, string commentBody)
+        [HttpGet()]
+        public async Task<IActionResult> ConfirmEMailByTokenAsync([Required]string confirmationToken)
         {
-            return RedirectToPage("/Index");
+            var user = await _autentification.GetCurrentUserAsync(HttpContext);
+            var expectedToken = _eMailConfirmationService.GetConfirmationToken(user);
+            if (confirmationToken == expectedToken)
+            {
+                if (user.IsEmailConfirmed)
+                {
+                    return RedirectToPage("/Index");
+                }
+                else
+                {
+                    user.IsEmailConfirmed = true;
+                    user.Role = Role.USER;
+                    await _db.SaveChangesAsync();
+
+                    return RedirectToPage("/Account/ConfirmEMail");
+                }
+            }
+            else
+            {
+                throw new Exception("Bad E-Mail confirmatin token");
+            }
         }
     }
 }

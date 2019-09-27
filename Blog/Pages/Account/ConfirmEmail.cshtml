@@ -1,0 +1,34 @@
+﻿@page
+@model Blog.Pages.Account.ConfirmEMailModel
+@{
+    ViewData["Title"] = "E-Mail confirmation";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+@if (Model.UserModel.IsEmailConfirmed)
+{
+    <div>
+        Your E-Mail is now confirmed. You can post and comment now!
+    </div>
+    <div>
+        <a asp-page="/Index">Go home</a>
+    </div>
+}
+else
+{
+    @if (Model.IsConfirmationLinkSent)
+    {
+        <h2>Almost done!</h2>
+
+        <div>
+            We've sent confirmation link to your e-mail
+        </div>
+    }
+    else
+    {
+        <div>We couldn't send confirmation link to your email</div>
+        <div><a asp-page="/Account/ConfirmEMail">Send again</a></div>
+    }
+}
+
+

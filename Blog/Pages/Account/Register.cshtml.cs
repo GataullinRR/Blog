@@ -64,12 +64,13 @@ namespace Blog.Pages.Account
                         Nickname = Username,
                         RegistrationDate = DateTime.Now,
                         PasswordHash = _autentification.GetHash(Password),
+                        Role = Role.UNCONFIRMED,
                         EMail = EMail
                     });
                     await _db.SaveChangesAsync();
                     await _autentification.TryAuthenticateAsync(HttpContext, Username, Password);
 
-                    return RedirectToPage("/Index");
+                    return RedirectToPage("/Account/ConfirmEmail");
                 }
                 else
                 {
