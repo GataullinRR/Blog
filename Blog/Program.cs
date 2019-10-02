@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DBModels;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -24,7 +25,9 @@ namespace Blog
                 try
                 {
                     var context = services.GetRequiredService<BlogContext>();
-                    DbSampleData.Initialize(context);
+                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+                    var userManager = services.GetRequiredService<UserManager<User>>();
+                    DbSampleData.Initialize(context, roleManager, userManager);
                 }
                 catch (Exception ex)
                 {

@@ -1,4 +1,5 @@
 ﻿using DBModels;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,31 +9,44 @@ namespace Blog
 {
     class DbSampleData
     {
-        public static void Initialize(BlogContext context)
+        public static void Initialize(BlogContext context, RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
         {
+            if (!roleManager.Roles.Any())
+            {
+                foreach (var roleName in Roles.AllRoles)
+                {
+                    roleManager.CreateAsync(new IdentityRole(roleName)).Wait();
+                }
+            }
+
             if (!context.Users.Any())
             {
                 var user1 = new User()
                 {
-                    EMail = "QTU100@gmail.com",
-                    Nickname = "QTU100",
+                    Email = "QTU100@gmail.com",
+                    UserName = "QTU100",
                     PasswordHash = "123",
                     RegistrationDate = new DateTime(2018, 1, 20)
                 };
+                userManager.AddToRoleAsync(user1, Roles.ADMIN);
+
                 var user2 = new User()
                 {
-                    EMail = "Sasha@yandex.ru",
-                    Nickname = "SashaKeny",
+                    Email = "Sasha@yandex.ru",
+                    UserName = "SashaKeny",
                     PasswordHash = "123",
                     RegistrationDate = new DateTime(2010, 12, 9)
                 };
+                userManager.AddToRoleAsync(user2, Roles.UNCONFIRMED);
+
                 var user3 = new User()
                 {
-                    EMail = "Ksy_chemist@mail.ru",
-                    Nickname = "_KSY_",
+                    Email = "Ksy_chemist@mail.ru",
+                    UserName = "_KSY_",
                     PasswordHash = "123",
                     RegistrationDate = new DateTime(2019, 3, 11)
                 };
+                userManager.AddToRoleAsync(user3, Roles.USER);
 
                 var post1 = new Post()
                 {

@@ -7,8 +7,8 @@
 }
 
 <h2>@Model.Post.Title 
-    @if ((User.Identity.Name == Model.Post.Author.Nickname && Model.Post.Date - DateTime.Now < TimeSpan.FromDays(3))
-        || User.IsInRole(Role.ADMIN.GetRoleName()))
+    @if ((User.Identity.Name == Model.Post.Author.UserName && Model.Post.Date - DateTime.Now < TimeSpan.FromDays(3))
+        || User.IsInRole(Roles.ADMIN))
     { 
         <a asp-page="/PostCreate" asp-route-editingpostid="@Model.Post.Id">Edit</a> 
     }

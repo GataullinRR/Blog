@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Blog.Services;
 using DBModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -14,13 +15,8 @@ namespace Blog.Pages.Account
     public class LoginModel : PageModel
     {
         readonly BlogContext _db;
-        readonly AutentificationService _autentification;
-
-        public LoginModel(BlogContext db, AutentificationService autentification)
-        {
-            _db = db;
-            _autentification = autentification;
-        }
+        readonly SignInManager<User> _signInManager;
+        readonly UserManager<User> _userManager;
 
         [BindProperty]
         [Required(ErrorMessage = "Login is required")]
@@ -29,6 +25,13 @@ namespace Blog.Pages.Account
         [BindProperty]
         [Required(ErrorMessage = "Password is required"), DataType(DataType.Password)]
         public string Password { get; set; }
+
+        public LoginModel(BlogContext db, SignInManager<User> signInManager, UserManager<User> userManager)
+        {
+            _db = db;
+            _signInManager = signInManager;
+            _userManager = userManager;
+        }
 
         public IActionResult OnGet()
         {
@@ -46,7 +49,7 @@ namespace Blog.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var user = await _db.Users.FirstOrDefaultAsync(u => u.Nickname == Login);
+                var user = await _userManager.FindByNameAsync(Login);
                 if (user == null)
                 {
                     ModelState.AddModelError("", "This login is not registered");
@@ -55,10 +58,9 @@ namespace Blog.Pages.Account
                 }
                 else
                 {
-                    var isLoggedIn = await _autentification
-                        .TryAuthenticateAsync(HttpContext, user.Nickname, Password);
+                    var result = await _signInManager.PasswordSignInAsync(user, Password, true, false);
 
-                    if (isLoggedIn)
+                    if (result.Succeeded)
                     {
                         return RedirectToPage("/Index");
                     }

@@ -7,13 +7,13 @@
 
 <h3>Profile information</h3>
 
-<div>@("Name: " + Model.UserModel.Nickname)</div>
-<div>@("E-Mail: " + Model.UserModel.EMail)</div>
-<div>@("E-Mail confirmed: " + Model.UserModel.IsEmailConfirmed.Ternar("Yes", "No"))</div>
-<div>@("Role: " + Model.UserModel.Role.GetRoleName())</div>
+<div>@("Name: " + Model.UserModel.UserName)</div>
+<div>@("E-Mail: " + Model.UserModel.Email)</div>
+<div>@("E-Mail confirmed: " + Model.UserModel.EmailConfirmed.Ternar("Yes", "No"))</div>
+<div>@("Role: " + Model.Role)</div>
 <div>@("Registration date: " + Model.UserModel.RegistrationDate.ToString("dd.MM.yyyy"))</div>
 
-@if(!Model.UserModel.IsEmailConfirmed)
+@if(!Model.UserModel.EmailConfirmed)
 {
     <div><a asp-page="/Account/ConfirmEMail">Confirm email</a></div>
 }

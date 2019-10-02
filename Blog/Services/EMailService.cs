@@ -30,7 +30,7 @@ namespace Blog.Services
 
         public async Task<bool> TrySendMessageAsync(User target, string subject, string title, string body)
         {
-            var toAddress = new MailAddress(target.EMail, target.Nickname);
+            var toAddress = new MailAddress(target.Email, target.UserName);
             var message = new MailMessage(_fromAddress, toAddress)
             {
                 Subject = subject,

@@ -6,23 +6,18 @@ using System.Threading.Tasks;
 using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Pages
 {
-    [Authorize]
+    [Authorize(Roles = Roles.NOT_RESTRICTED)]
     public class PostCreateModel : PageModel
     {
-        readonly AutentificationService _autentification;
+        readonly UserManager<User> _userManager;
         readonly BlogContext _db;
-
-        public PostCreateModel(AutentificationService autentification, BlogContext db)
-        {
-            _autentification = autentification;
-            _db = db;
-        }
 
         [BindProperty]
         public string Title { get; set; }
@@ -32,6 +27,12 @@ namespace Blog.Pages
         public bool IsEditMode { get; set; }
         [BindProperty]
         public int EditingPostId { get; set; }
+
+        public PostCreateModel(UserManager<User> userManager, BlogContext db)
+        {
+            _userManager = userManager;
+            _db = db;
+        }
 
         public async Task OnGetAsync(int? editingPostId)
         {
@@ -63,7 +64,7 @@ namespace Blog.Pages
             {
                 var post = new Post()
                 {
-                    Author = await _autentification.GetCurrentUserAsync(HttpContext),
+                    Author = await _userManager.GetUserAsync(HttpContext.User),
                     Body = Body,
                     Date = DateTime.Now,
                     Title = Title

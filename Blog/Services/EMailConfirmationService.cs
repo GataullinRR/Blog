@@ -13,9 +13,9 @@ namespace Blog.Services
     {
         public string GetConfirmationToken(User user)
         {
-            var randomSeed = user.Nickname.Select(c => (int)c).Sum();
+            var randomSeed = user.UserName.Select(c => (int)c).Sum();
             var rnd = new Random(randomSeed);
-            var shaked = user.EMail.Shake(rnd).Aggregate();
+            var shaked = user.Email.Shake(rnd).Aggregate();
             using (SHA256 sha256Hash = SHA256.Create())
             {
                 return sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(shaked)).ToBase64();

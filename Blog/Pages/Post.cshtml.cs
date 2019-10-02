@@ -42,14 +42,14 @@ namespace Blog.Pages
             }
         }
 
-        [HttpPost(), Authorize(Roles.NOT_RESTRICTED)]
+        [HttpPost(), Authorize(Roles = Roles.NOT_RESTRICTED)]
         public async Task<IActionResult> OnPostAddCommentaryAsync(int postId, string commentBody)
         {
             if (commentBody != null)
             {
                 var comment = new Commentary()
                 {
-                    Author = await _db.Users.FirstAsync(u => u.Nickname == User.Identity.Name),
+                    Author = await _db.Users.FirstAsync(u => u.UserName == User.Identity.Name),
                     Body = commentBody,
                     Date = DateTime.Now,
                     Post = await _db.Posts.FindAsync(postId)

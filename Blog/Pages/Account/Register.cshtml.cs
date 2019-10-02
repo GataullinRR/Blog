@@ -11,22 +11,20 @@ using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Blog.Pages.Account
 {
     public class RegisterModel : PageModel
     {
         readonly BlogContext _db;
-        readonly AutentificationService _autentification;
-
-        public RegisterModel(BlogContext db, AutentificationService autentification)
-        {
-            _db = db;
-            _autentification = autentification;
-        }
+        readonly SignInManager<User> _signInManager;
+        readonly RoleManager<IdentityRole> _roleManager;
+        readonly UserManager<User> _userManager;
 
         [Required, MaxLength(16), BindProperty]
         public string Username { get; set; }
@@ -37,8 +35,17 @@ namespace Blog.Pages.Account
         [Required, DataType(DataType.Password), BindProperty]
         public string Password { get; set; }
 
-        [DataType(DataType.Password), Compare(nameof(Password)), BindProperty]
+        // Compare does not seem to work
+        [DataType(DataType.Password), BindProperty]
         public string ConfirmPassword { get; set; }
+
+        public RegisterModel(BlogContext db, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
+        {
+            _db = db;
+            _signInManager = signInManager;
+            _roleManager = roleManager;
+            _userManager = userManager;
+        }
 
         public IActionResult OnGet()
         {
@@ -54,23 +61,34 @@ namespace Blog.Pages.Account
 
         public async Task<IActionResult> OnPost()
         {
+            if (Password != ConfirmPassword)
+            {
+                ModelState.AddModelError("", "Passwords do not match.");
+            }
+
             if (ModelState.IsValid)
             {
-                var user = await _db.Users.FirstOrDefaultAsync(u => u.Nickname == Username);
+                var user = await _userManager.FindByNameAsync(Username);
                 if (user == null)
                 {
-                    _db.Users.Add(new User()
+                    var newUser = new User()
                     {
-                        Nickname = Username,
+                        UserName = Username,
                         RegistrationDate = DateTime.Now,
-                        PasswordHash = _autentification.GetHash(Password),
-                        Role = Role.UNCONFIRMED,
-                        EMail = EMail
-                    });
-                    await _db.SaveChangesAsync();
-                    await _autentification.TryAuthenticateAsync(HttpContext, Username, Password);
+                        Email = EMail
+                    };
+                    var result = await _userManager.CreateAsync(newUser, Password);
+                    if (result.Succeeded)
+                    {
+                        await _userManager.AddToRoleAsync(newUser, Roles.UNCONFIRMED);
+                        await _signInManager.SignInAsync(newUser, true);
 
-                    return RedirectToPage("/Account/ConfirmEmail");
+                        return RedirectToPage("/Account/ConfirmEmail");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Could not create the user. Unknown error.");
+                    }
                 }
                 else
                 {
