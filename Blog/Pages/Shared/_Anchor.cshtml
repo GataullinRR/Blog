@@ -1,0 +1,6 @@
+﻿@model Blog.Models.AnchorModel
+
+@if (Model.IsShown)
+{
+    <span>| <a asp-page="@Model.Page" asp-route-id="@Model.RouteId">@Model.Text</a></span>
+}

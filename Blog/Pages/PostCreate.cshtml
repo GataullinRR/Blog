@@ -8,14 +8,21 @@
 <h2>PostCreate</h2>
 
 <form method="post" asp-page-handler="Create">
-    <input type="hidden" asp-for="IsEditMode" value="@Model.IsEditMode"/>
-    <input type="hidden" asp-for="EditingPostId" value="@Model.EditingPostId"/>
+    <input type="hidden" asp-for="IsEditMode" value="@Model.IsEditMode" />
+    <input type="hidden" asp-for="EditingPostId" value="@Model.EditingPostId" />
+
     <div>
         <input type="text" asp-for="Title" placeholder="Title" />
+        <span asp-validation-for="Title"></span>
     </div>
+
     <div>
         <textarea rows="10" asp-for="Body" placeholder="Your post"></textarea>
+        <span asp-validation-for="Body"></span>
     </div>
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
     <div>
         <button type="submit">@Model.IsEditMode.Ternar("Update", "Create")</button>
     </div>

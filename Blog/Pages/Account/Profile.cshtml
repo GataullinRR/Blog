@@ -5,25 +5,65 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-<h3>Profile information</h3>
-
-<div>@("Name: " + Model.UserModel.UserName)</div>
-<div>@("E-Mail: " + Model.UserModel.Email)</div>
-<div>@("E-Mail confirmed: " + Model.UserModel.EmailConfirmed.Ternar("Yes", "No"))</div>
-<div>@("Role: " + Model.Role)</div>
-<div>@("Registration date: " + Model.UserModel.RegistrationDate.ToString("dd.MM.yyyy"))</div>
-
-@if(!Model.UserModel.EmailConfirmed)
-{
-    <div><a asp-page="/Account/ConfirmEMail">Confirm email</a></div>
+@{ 
+    var targetUser = Model.UserModel;
+    var canSeePrivateInformation = Model.IsCurrentUser
+        || User.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR);
+    var canEdit = (Model.IsCurrentUser && User.IsInOneOfTheRoles(Roles.NOT_RESTRICTED))
+        || User.IsInOneOfTheRoles(Roles.ADMIN);
 }
 
-@if (Model.UserModel.Posts.Any())
+<h3>Profile information @await generateEditButtonAsync(targetUser.Id, canEdit)</h3>
+
+@await Html.PartialAsync("_ProfileImage", targetUser)
+
+<div>@("Name: " + targetUser.UserName)</div>
+@if (canSeePrivateInformation)
+{
+    <div>@("E-Mail: " + targetUser.Email)</div>
+    <div>@("E-Mail confirmed: " + targetUser.EmailConfirmed.Ternar("Yes", "No"))</div>
+}
+<div>@("Role: " + Model.Role)</div>
+<div>@("Registration date: " + targetUser.RegistrationDate.ToString("dd.MM.yyyy"))</div>
+@if (targetUser.EmailConfirmed)
+{
+    if (canEdit)
+    {
+        <div><a asp-page="/Account/ProfileEdit" asp-route-id="@targetUser.Id">Edit profile</a></div>
+    }
+}
+else
+{
+    if (Model.IsCurrentUser)
+    {
+        <div><a asp-page="/Account/ConfirmEMail">Confirm email</a></div>
+    }
+}
+
+<h4>About @targetUser.UserName @await generateEditButtonAsync(targetUser.Id, canEdit)</h4>
+@if (targetUser.About == null)
+{
+    <div>No information provided</div>
+}
+else
+{
+    <div>@targetUser.About</div>
+}
+
+@if (targetUser.Posts.Any())
 {
     <h3>Posts</h3>
 
-    @foreach (var post in Model.UserModel.Posts)
+    @foreach (var post in targetUser.Posts)
     {
         <div><a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a></div>
+    }
+}
+
+@functions
+{
+    public async Task<object> generateEditButtonAsync(string userId, bool showLink)
+    {
+        return await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "\\Account\\ProfileEdit", userId, showLink));
     }
 }

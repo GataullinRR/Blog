@@ -20,8 +20,10 @@ namespace Blog.Pages
         readonly BlogContext _db;
 
         [BindProperty]
+        [MinLength(8), MaxLength(100)]
         public string Title { get; set; }
         [BindProperty]
+        [MinLength(500), MaxLength(100000)]
         public string Body { get; set; }
         [BindProperty]
         public bool IsEditMode { get; set; }

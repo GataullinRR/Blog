@@ -1,6 +1,7 @@
 ﻿@model DBModels.Commentary
 
 <div>
-    <h4>@($"{Model.Author.UserName} - {Model.Date.ToString("dd.MM.yyyy")}")</h4>
+    <h4><a asp-page="/Account/Profile" asp-route-id="@Model.Author.Id">@Model.Author.UserName</a> - @Model.Date.ToString("hh:mm dd.MM.yyyy")</h4>
+    @await Html.PartialAsync("_ProfileImage", Model.Author)
     @Model.Body
 </div>

@@ -43,22 +43,25 @@ namespace Blog.Pages
         }
 
         [HttpPost(), Authorize(Roles = Roles.NOT_RESTRICTED)]
-        public async Task<IActionResult> OnPostAddCommentaryAsync(int postId, string commentBody)
+        public async Task<IActionResult> OnPostAddCommentaryAsync(int postId, [Required(), MinLength(6), MaxLength(1000)]string commentBody)
         {
-            if (commentBody != null)
+            if (ModelState.IsValid)
             {
-                var comment = new Commentary()
+                if (commentBody != null)
                 {
-                    Author = await _db.Users.FirstAsync(u => u.UserName == User.Identity.Name),
-                    Body = commentBody,
-                    Date = DateTime.Now,
-                    Post = await _db.Posts.FindAsync(postId)
-                };
+                    var comment = new Commentary()
+                    {
+                        Author = await _db.Users.FirstAsync(u => u.UserName == User.Identity.Name),
+                        Body = commentBody,
+                        Date = DateTime.Now,
+                        Post = await _db.Posts.FindAsync(postId)
+                    };
 
-                _db.Commentaries.Add(comment);
-                await _db.SaveChangesAsync();
+                    _db.Commentaries.Add(comment);
+                    await _db.SaveChangesAsync();
+                }
             }
-
+         
             return RedirectToPage("/Post", new { id = postId });
         }
     }

@@ -27,8 +27,11 @@
 @if (User.Identity.IsAuthenticated)
 {
     <form method="post" asp-page-handler="AddCommentary">
-        <input type="hidden" name="postId" value="@Model.Post.Id"/>
+        <input type="hidden" name="postId" value="@Model.Post.Id" />
         <textarea name="commentBody" rows="3" placeholder="Your comment"></textarea>
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
         <button type="submit">Send</button>
     </form>
 }

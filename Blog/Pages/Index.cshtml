@@ -5,7 +5,7 @@
     ViewData["Title"] = "Home";
 }
 
-@if (Roles.NOT_RESTRICTED.Split(",").Any(User.IsInRole))
+@if (User.IsInOneOfTheRoles(Roles.NOT_RESTRICTED))
 {
     <span>You can <a asp-page="\PostCreate">create</a> your own post!</span>
     <hr />
@@ -18,7 +18,7 @@
     <table>
         <tr>
             <td>
-                <a asp-page="./Post" asp-route-id="@post.Id">@post.Title</a>
+                <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
             </td>
             <td>@post.Author.UserName</td>
             <td>@post.Date.ToString("dd.MM.yyyy")</td>

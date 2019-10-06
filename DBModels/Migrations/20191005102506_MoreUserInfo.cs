@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DBModels.Migrations
 {
-    public partial class ConnectingIdentityFramework : Migration
+    public partial class MoreUserInfo : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -41,7 +41,10 @@ namespace DBModels.Migrations
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
-                    RegistrationDate = table.Column<DateTime>(nullable: false)
+                    RegistrationDate = table.Column<DateTime>(nullable: false),
+                    Gender = table.Column<string>(nullable: true),
+                    ProfileImage = table.Column<string>(nullable: true),
+                    About = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {

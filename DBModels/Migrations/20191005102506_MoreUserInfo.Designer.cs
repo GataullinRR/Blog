@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DBModels.Migrations
 {
     [DbContext(typeof(BlogContext))]
-    [Migration("20191001161047_ConnectingIdentityFramework")]
-    partial class ConnectingIdentityFramework
+    [Migration("20191005102506_MoreUserInfo")]
+    partial class MoreUserInfo
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -79,6 +79,8 @@ namespace DBModels.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("About");
+
                     b.Property<int>("AccessFailedCount");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -88,6 +90,8 @@ namespace DBModels.Migrations
                         .HasMaxLength(256);
 
                     b.Property<bool>("EmailConfirmed");
+
+                    b.Property<string>("Gender");
 
                     b.Property<bool>("LockoutEnabled");
 
@@ -104,6 +108,8 @@ namespace DBModels.Migrations
                     b.Property<string>("PhoneNumber");
 
                     b.Property<bool>("PhoneNumberConfirmed");
+
+                    b.Property<string>("ProfileImage");
 
                     b.Property<DateTime>("RegistrationDate");
 
