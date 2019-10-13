@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,17 +16,22 @@ namespace Blog.Pages
     {
         readonly BlogContext _db;
 
+        public PermissionsService Permissions { get; }
         public Post Post { get; private set; }
         public IEnumerable<Commentary> Commentaries { get; private set; }
 
-        public PostModel(BlogContext db)
+        public PostModel(BlogContext db, PermissionsService permissions)
         {
             _db = db;
+            Permissions = permissions;
         }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            Post = await _db.Posts.Include(p => p.Author).FirstOrDefaultAsync(p => p.Id == id);
+            Post = await _db.Posts
+                .Include(p => p.Author)
+                .Include(p => p.Edits)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (Post == null)
             {

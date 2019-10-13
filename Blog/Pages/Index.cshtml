@@ -15,15 +15,12 @@
 
 @foreach (var post in Model.Posts)
 {
-    <table>
-        <tr>
-            <td>
-                <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
-            </td>
-            <td>@post.Author.UserName</td>
-            <td>@post.Date.ToString("dd.MM.yyyy")</td>
-        </tr>
-    </table>
+    <div>
+        <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
+        <a asp-page="/Account/Profile" asp-route-id="@post.Author.Id">@post.Author.UserName</a>
+        @post.Date.ToString("dd.MM.yyyy")
 
-    @post.Body.Take(200).Concat("...").AsString();
+        @{ var maxViewSize = 500; }
+        @post.Body.Take(maxViewSize).Concat(post.Body.Length > maxViewSize ? "..." : "").AsString()
+    </div>
 }

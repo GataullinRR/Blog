@@ -7,14 +7,21 @@
 }
 
 <h2>@Model.Post.Title 
-    @if ((User.Identity.Name == Model.Post.Author.UserName && Model.Post.Date - DateTime.Now < TimeSpan.FromDays(3))
-        || User.IsInRole(Roles.ADMIN))
+    @if (Model.Permissions.CanEditPost(User, Model.Post))
     { 
         <a asp-page="/PostCreate" asp-route-editingpostid="@Model.Post.Id">Edit</a> 
     }
 </h2>
 
 @Model.Post.Body
+
+@foreach (var edit in Model.Post.Edits.NullToEmpty())
+{
+    <div>
+        <span>Edited at @edit.EditTime.ToString("hh:mm dd.MM.yy") by <a asp-page="/Account/Profile" asp-route-id="@edit.Author.Id">@edit.Author.UserName</a></span>
+        <span>Reason: @edit.Reason</span>
+    </div>
+}
 
 <hr />
 <h3>Commentaries:</h3>

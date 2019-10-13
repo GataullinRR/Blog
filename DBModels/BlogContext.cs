@@ -11,6 +11,7 @@ namespace DBModels
     {
         public DbSet<Post> Posts { get; set; }
         public DbSet<Commentary> Commentaries { get; set; }
+        public DbSet<PostEditInfo> PostsEdits { get; set; }
 
         public BlogContext(DbContextOptions<BlogContext> options)
             : base(options)

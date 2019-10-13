@@ -12,14 +12,29 @@
     <input type="hidden" asp-for="EditingPostId" value="@Model.EditingPostId" />
 
     <div>
-        <input type="text" asp-for="Title" placeholder="Title" />
-        <span asp-validation-for="Title"></span>
+        @if (Model.IsEditMode)
+        {
+            @Model.Title
+        }
+        else
+        {
+            <input type="text" asp-for="Title" placeholder="Title" />
+            <span asp-validation-for="Title"></span>
+        }
     </div>
 
     <div>
         <textarea rows="10" asp-for="Body" placeholder="Your post"></textarea>
         <span asp-validation-for="Body"></span>
     </div>
+
+    @if (Model.IsEditMode)
+    {
+        <div>
+            <textarea rows="2" asp-for="EditReason" placeholder="Edit reason"></textarea>
+            <span asp-validation-for="EditReason"></span>
+        </div>
+    }
 
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
