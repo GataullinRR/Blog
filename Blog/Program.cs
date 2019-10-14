@@ -27,7 +27,8 @@ namespace Blog
                     var context = services.GetRequiredService<BlogContext>();
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
                     var userManager = services.GetRequiredService<UserManager<User>>();
-                    DbSampleData.Initialize(context, roleManager, userManager);
+                    var signInManager = services.GetRequiredService<SignInManager<User>>();
+                    DbSampleData.Initialize(context, roleManager, userManager, signInManager);
                 }
                 catch (Exception ex)
                 {

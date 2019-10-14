@@ -28,13 +28,10 @@ namespace Blog.Pages.Account
 
         [Required, MaxLength(16), BindProperty]
         public string Username { get; set; }
-
         [Required, DataType(DataType.EmailAddress), BindProperty]
         public string EMail { get; set; }
-
         [Required, DataType(DataType.Password), BindProperty]
         public string Password { get; set; }
-
         // Compare does not seem to work
         [DataType(DataType.Password), BindProperty]
         public string ConfirmPassword { get; set; }
