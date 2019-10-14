@@ -31,6 +31,7 @@ namespace Blog.Pages
             Post = await _db.Posts
                 .Include(p => p.Author)
                 .Include(p => p.Edits)
+                .ThenInclude(e => e.Author)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (Post == null)

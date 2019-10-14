@@ -29,7 +29,8 @@ namespace Blog
                 {
                     Email = "QTU100@yandex.ru",
                     UserName = "QTU100",
-                    RegistrationDate = new DateTime(2018, 1, 20)
+                    RegistrationDate = new DateTime(2018, 1, 20),
+                    EmailConfirmed = true
                 };
                 userManager.CreateAsync(radmir, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(radmir, Roles.ADMIN).Wait();
@@ -38,16 +39,18 @@ namespace Blog
                 {
                     Email = "Sasha@yandex.ru",
                     UserName = "SashaKeny",
-                    RegistrationDate = new DateTime(2010, 12, 9)
+                    RegistrationDate = new DateTime(2010, 12, 9),
+                    EmailConfirmed = true
                 };
                 userManager.CreateAsync(alex, "QTU100@yandex.ru").Wait();
-                userManager.AddToRoleAsync(alex, Roles.UNCONFIRMED).Wait();
+                userManager.AddToRoleAsync(alex, Roles.USER).Wait();
 
                 var ksenya = new User()
                 {
                     Email = "Ksy_chemist@mail.ru",
                     UserName = "_KSY_",
-                    RegistrationDate = new DateTime(2019, 3, 11)
+                    RegistrationDate = new DateTime(2019, 3, 11),
+                    EmailConfirmed = true
                 };
                 userManager.CreateAsync(ksenya, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(ksenya, Roles.USER).Wait();
@@ -56,7 +59,8 @@ namespace Blog
                 {
                     Email = "Oleg@yota.ru",
                     UserName = "Oleg",
-                    RegistrationDate = new DateTime(2012, 1, 5)
+                    RegistrationDate = new DateTime(2012, 1, 5),
+                    EmailConfirmed = true
                 };
                 userManager.CreateAsync(oleg, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(oleg, Roles.MODERATOR).Wait();
@@ -214,12 +218,15 @@ While Earth is sometimes referred to as the ‘blue marble’ because it’s mos
 
                 context.Posts.AddRange(radmirsPost1, post2, post3, post4, post5);
                 context.Commentaries.AddRange(commentary1, commentary2, commentary3);
-                context.PostsEdits.Add(new PostEditInfo()
+                post3.Edits = new List<PostEditInfo>()
                 {
-                    Author = radmir,
-                    EditTime = post3.Date.AddHours(4),
-                    Reason = "Removed typo"
-                });
+                    new PostEditInfo()
+                    {
+                        Author = radmir,
+                        EditTime = post3.Date.AddHours(4),
+                        Reason = "Removed typo"
+                    } 
+                };
 
                 context.SaveChanges();
             }

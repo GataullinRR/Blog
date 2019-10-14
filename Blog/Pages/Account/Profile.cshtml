@@ -64,6 +64,6 @@ else
 {
     public async Task<object> generateEditButtonAsync(string userId, bool showLink)
     {
-        return await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "\\Account\\ProfileEdit", userId, showLink));
+        return await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/Account/ProfileEdit", userId, showLink));
     }
 }

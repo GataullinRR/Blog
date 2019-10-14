@@ -34,7 +34,6 @@ namespace Blog.Pages.Account
         [BindProperty]
         public string EditUserId { get; set; }
 
-
         public ProfileEditModel(BlogContext db, SignInManager<User> signInManager, UserManager<User> userManager)
         {
             _db = db;
@@ -42,13 +41,15 @@ namespace Blog.Pages.Account
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> OnGetAsync(string id)
+        public async Task<IActionResult> OnGetAsync([Required]string id)
         {
             EditUserId = id;
-            var user = await _userManager.GetUserAsync(User);
-            if (user.Id == id || User.IsInOneOfTheRoles(Roles.ADMIN))
+            var currentUser = await _userManager.GetUserAsync(User);
+            var editUser = await _userManager.FindByIdAsync(EditUserId);
+            if ((currentUser.Id == EditUserId || User.IsInOneOfTheRoles(Roles.ADMIN))
+                && editUser != null)
             {
-                About = user.About;
+                About = editUser.About;
 
                 return Page();
             }
@@ -62,11 +63,10 @@ namespace Blog.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var user = await getUserIfAuthorizedAsync(EditUserId);
-
+                var editingUser = await getEditingUserIfAuthorizedAsync(EditUserId);
                 if (ProfileImage != null)
                 {
-                    var serverLocalPath = Path.Combine("images", "users", user.Id.ToString(), $"{Guid.NewGuid()}.{Path.GetExtension(ProfileImage.FileName)}");
+                    var serverLocalPath = Path.Combine("images", "users", editingUser.Id.ToString(), $"{Guid.NewGuid()}.{Path.GetExtension(ProfileImage.FileName)}");
                     var serverPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", serverLocalPath);
                     using (var toServerStream = IOUtils.CreateFile(serverPath))
                     using (var fromClientStream = ProfileImage.OpenReadStream())
@@ -74,24 +74,25 @@ namespace Blog.Pages.Account
                         await toServerStream.WriteAsync(await fromClientStream.ReadToEndAsync());
                     }
 
-                    user.ProfileImage = serverLocalPath;
+                    editingUser.ProfileImage = serverLocalPath;
                 }
-                user.About = About;
+                editingUser.About = About;
                 await _db.SaveChangesAsync();
 
-                return RedirectToPage("/Account/Profile", new { id = user.Id });
+                return RedirectToPage("/Account/Profile", new { id = editingUser.Id });
             }
             else
             {
                 return Page();
             }
 
-            async Task<User> getUserIfAuthorizedAsync(string userId)
+            async Task<User> getEditingUserIfAuthorizedAsync(string userId)
             {
-                var user = await _userManager.GetUserAsync(User);
-                var isAuthorized = user.Id == userId || User.IsInOneOfTheRoles(Roles.ADMIN);
+                var currentUser = await _userManager.GetUserAsync(User);
+                var isEditAuthorized = currentUser?.Id == userId || User.IsInOneOfTheRoles(Roles.ADMIN);
+                var editUser = await _userManager.FindByIdAsync(userId);
 
-                return isAuthorized ? user : null;
+                return isEditAuthorized ? editUser : null;
             }
         }
     }
