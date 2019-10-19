@@ -1,8 +1,11 @@
-﻿@model Commentary
+﻿@model CommentaryModel
 
 <h4>
-    <a asp-page="/Account/Profile" asp-route-id="@Model.Author.Id">@Model.Author.UserName</a> - @Model.Date.ToString("hh:mm dd.MM.yyyy")
-    <button class="commentary-edit-button">Edit</button>
+    <a asp-page="/Account/Profile" asp-route-id="@Model.Commentary.Author.Id">@Model.Commentary.Author.UserName</a> - @Model.Commentary.Date.ToString("hh:mm dd.MM.yyyy")
+    @if (Model.Permissions.CanEditCommentary(User, Model.Commentary))
+    {
+        <button class="commentary-edit-button">Edit</button>
+    }
 </h4>
-@await Html.PartialAsync("_ProfileImage", Model.Author)
-@Model.Body
+@await Html.PartialAsync("_ProfileImage", Model.Commentary.Author)
+@Model.Commentary.Body

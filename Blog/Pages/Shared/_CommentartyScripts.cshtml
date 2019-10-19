@@ -9,16 +9,11 @@
     });
 
     function loadCommentary(container, commentaryId) {
-        makeRequest("/Commentary/UpdateCommentaryAsync?id=1?body=2", "post", function () { alert("OK"); });
-
-
         loadView('/Commentary/GetCommentaryAsync?id=' + commentaryId, function () {
             container.getElementsByClassName("commentary-edit-button")[0].addEventListener('click', function () {
                 loadView('/Commentary/GetCommentaryEditAsync?id=' + commentaryId, function () {
-                    container.getElementsByClassName("commentary-edit-save-button")[0].addEventListener('click', function () {
-                        // I tried to reload only commentary, not entire page
-                        //doPost(container.getElementsByClassName("form")[0]);
-                        //loadCommentary(container, commentaryId);
+                    container.getElementsByClassName("commentary-edit-exit-button")[0].addEventListener('click', function () {
+                        loadCommentary(container, commentaryId);
                     })
 
                     //container.getElementsByClassName("form")[0].submit(function (e) {

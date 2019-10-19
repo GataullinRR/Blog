@@ -35,6 +35,7 @@ namespace Blog.Services
                 throw new UnauthorizedAccessException($"The post \"{comment.Id}\" can not be edited by the user \"{user.Identity.Name}\"");
             }
         }
+
         public bool CanEditCommentary(ClaimsPrincipal user, Commentary comment)
         {
             return (user.Identity.Name == comment.Author.UserName &&
