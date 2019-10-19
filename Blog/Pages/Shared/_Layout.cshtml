@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@*@model ILayoutModelProvider*@
+
+@{ 
+    var model = (Model as ILayoutModelProvider)?.LayoutModel ?? new LayoutModel();
+}
+
+<!DOCTYPE html>
 
 <html>
 <head>
@@ -23,6 +29,14 @@
     }
     <hr />
 
+    @foreach (var message in model.Messages)
+    {
+        <div>
+            <span>@message</span>
+            <button onclick="removeParent(this)">Close</button>
+        </div>
+    }
+
     @RenderBody()
 
     <hr />
@@ -34,6 +48,15 @@
     <script src="~/lib/jquery-ajax-unobtrusive/dist/jquery.unobtrusive-ajax.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.js" type="text/javascript"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js" type="text/javascript"></script>
+
+    <script>
+        function removeParent(element) {
+            var container = element.parentElement;
+            container.parentElement.removeChild(container);
+
+            return true;
+        }
+    </script>
 
     @RenderSection("Scripts", required: false)
 </body>

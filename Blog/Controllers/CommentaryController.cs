@@ -42,7 +42,7 @@ namespace Blog.Controllers
             }
         }
 
-        [HttpGet()]
+        [HttpGet(), AllowAnonymous()]
         public async Task<IActionResult> GetCommentaryAsync([Required]int id)
         {
             if (ModelState.IsValid)

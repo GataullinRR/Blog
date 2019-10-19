@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Utilities.Extensions;
 
 namespace Blog.Services
 {
@@ -35,12 +36,24 @@ namespace Blog.Services
                 throw new UnauthorizedAccessException($"The post \"{comment.Id}\" can not be edited by the user \"{user.Identity.Name}\"");
             }
         }
-
         public bool CanEditCommentary(ClaimsPrincipal user, Commentary comment)
         {
             return (user.Identity.Name == comment.Author.UserName &&
                     comment.Date - DateTime.Now < TimeSpan.FromDays(1))
                     || user.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR);
+        }
+
+        public void ValidateResetPassword(ClaimsPrincipal currentUser, User user)
+        {
+            if (!CanRestorePassword(currentUser, user))
+            {
+                throw new UnauthorizedAccessException($"Can not restore password for user \"{user.UserName}\"");
+            }
+        }
+        public bool CanRestorePassword(ClaimsPrincipal currentUser, User user)
+        {
+            return (user.LastPasswordRestoreAttempt - DateTime.UtcNow).TotalMinutes.Abs() > 30
+                && (!currentUser?.Identity?.IsAuthenticated ?? true);
         }
     }
 }

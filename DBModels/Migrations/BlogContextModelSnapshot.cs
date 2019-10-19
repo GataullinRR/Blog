@@ -116,6 +116,8 @@ namespace DBModels.Migrations
 
                     b.Property<string>("Gender");
 
+                    b.Property<DateTime>("LastPasswordRestoreAttempt");
+
                     b.Property<bool>("LockoutEnabled");
 
                     b.Property<DateTimeOffset?>("LockoutEnd");

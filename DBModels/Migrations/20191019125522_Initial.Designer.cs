@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DBModels.Migrations
 {
     [DbContext(typeof(BlogContext))]
-    [Migration("20191014160151_Initial")]
+    [Migration("20191019125522_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -117,6 +117,8 @@ namespace DBModels.Migrations
                     b.Property<bool>("EmailConfirmed");
 
                     b.Property<string>("Gender");
+
+                    b.Property<DateTime>("LastPasswordRestoreAttempt");
 
                     b.Property<bool>("LockoutEnabled");
 

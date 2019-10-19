@@ -17,6 +17,7 @@ namespace DBModels
     {
         [Required]
         public DateTime RegistrationDate { get; set; }
+        public DateTime LastPasswordRestoreAttempt { get; set; }
         public string Gender { get; set; }
         public string ProfileImage { get; set; }
         public string About { get; set; }

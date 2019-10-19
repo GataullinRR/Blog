@@ -5,22 +5,26 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-<h6>Login</h6>
+<h2>Login</h2>
 
 <form method="post">
     <div>
-        <label><b>Login</b></label>
+        <label>Login</label>
         <input placeholder="Enter login" asp-for="Login">
         <span asp-validation-for="Login"></span>
     </div>
 
     <div>
-        <label><b>Password</b></label>
+        <label>Password</label>
         <input placeholder="Enter password" asp-for="Password">
         <span asp-validation-for="Password"></span>
     </div>
 
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div>
+        <a asp-page="/Account/PasswordRestore">Forgot password?</a>
+    </div>
 
     <button type="submit">Login</button>
 </form>

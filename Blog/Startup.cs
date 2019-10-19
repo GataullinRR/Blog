@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNetCore.IServiceCollection.AddIUrlHelper;
 using Blog.Pages.Account;
 using Blog.Services;
 using DBModels;
@@ -65,8 +66,11 @@ namespace Blog
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            services.AddSession();
+            services.AddMemoryCache();
+            services.AddUrlHelper();
             services.AddTransient<EMailService>();
-            services.AddTransient<EMailConfirmationService>();
+            services.AddTransient<ConfirmationTokenService>();
             services.AddTransient<PermissionsService>();
         }
 
@@ -85,6 +89,7 @@ namespace Blog
 
             app.UseAuthentication();
             app.UseStaticFiles();
+            app.UseSession();
             app.UseMvc(routes =>
             {
                 routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");

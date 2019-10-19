@@ -17,16 +17,16 @@ namespace Blog.Pages.Account
     public class ConfirmEMailModel : PageModel
     {
         readonly EMailService _eMailService;
-        readonly EMailConfirmationService _eMailConformation;
+        readonly ConfirmationTokenService _conformation;
         readonly UserManager<User>  _userManager;
         
         public User UserModel { get; private set; }
         public bool IsConfirmationLinkSent { get; private set; }
 
-        public ConfirmEMailModel(EMailService eMailService, EMailConfirmationService eMailConformation, UserManager<User> userManager)
+        public ConfirmEMailModel(EMailService eMailService, ConfirmationTokenService eMailConformation, UserManager<User> userManager)
         {
             _eMailService = eMailService;
-            _eMailConformation = eMailConformation;
+            _conformation = eMailConformation;
             _userManager = userManager;
         }
 
@@ -40,7 +40,7 @@ namespace Blog.Pages.Account
             }
             else
             {
-                var confirmationUrl = Url.Action(nameof(AccountController.ConfirmEMailByTokenAsync), nameof(AccountController).SkipLast(10).Aggregate(), new { confirmationToken = _eMailConformation.GetConfirmationToken(UserModel) }, Url.ActionContext.HttpContext.Request.Scheme);
+                var confirmationUrl = Url.Action(nameof(AccountController.ConfirmEMailByTokenAsync), nameof(AccountController).SkipLast(10).Aggregate(), new { confirmationToken = _conformation.GetToken(UserModel, AccountOperation.EMAIL_CONFIRMATION) }, Url.ActionContext.HttpContext.Request.Scheme);
                 var message = $@"Hi {UserModel.UserName}!
 
 Please follow this link to complete the registration: {confirmationUrl}";

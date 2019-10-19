@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Models;
 using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Identity;
@@ -12,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Pages.Account
 {
-    public class LoginModel : PageModel
+    public class LoginModel : ExtendedPageModel
     {
         readonly BlogContext _db;
         readonly SignInManager<User> _signInManager;
