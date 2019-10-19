@@ -1,7 +1,8 @@
-﻿@model DBModels.Commentary
+﻿@model Commentary
 
-<div>
-    <h4><a asp-page="/Account/Profile" asp-route-id="@Model.Author.Id">@Model.Author.UserName</a> - @Model.Date.ToString("hh:mm dd.MM.yyyy")</h4>
-    @await Html.PartialAsync("_ProfileImage", Model.Author)
-    @Model.Body
-</div>
+<h4>
+    <a asp-page="/Account/Profile" asp-route-id="@Model.Author.Id">@Model.Author.UserName</a> - @Model.Date.ToString("hh:mm dd.MM.yyyy")
+    <button class="commentary-edit-button">Edit</button>
+</h4>
+@await Html.PartialAsync("_ProfileImage", Model.Author)
+@Model.Body

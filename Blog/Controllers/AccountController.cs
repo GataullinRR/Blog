@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 using Blog.Pages.Account;
 using Blog.Services;
 using DBModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Controllers
 {
+    [Authorize()]
     public class AccountController : Controller
     {
         readonly BlogContext _db;

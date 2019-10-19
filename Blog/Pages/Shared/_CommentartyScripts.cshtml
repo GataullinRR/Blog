@@ -1,0 +1,99 @@
+﻿<script>
+    $(document).ready(function () {
+        var commentaries = document.getElementsByClassName("commentary-container");
+        for (var i = 0; i < commentaries.length; i++) {
+            var container = commentaries[i];
+            var id = container.getAttribute("commentary-id");
+            loadCommentary(container, id);
+        }
+    });
+
+    function loadCommentary(container, commentaryId) {
+        makeRequest("/Commentary/UpdateCommentaryAsync?id=1?body=2", "post", function () { alert("OK"); });
+
+
+        loadView('/Commentary/GetCommentaryAsync?id=' + commentaryId, function () {
+            container.getElementsByClassName("commentary-edit-button")[0].addEventListener('click', function () {
+                loadView('/Commentary/GetCommentaryEditAsync?id=' + commentaryId, function () {
+                    container.getElementsByClassName("commentary-edit-save-button")[0].addEventListener('click', function () {
+                        // I tried to reload only commentary, not entire page
+                        //doPost(container.getElementsByClassName("form")[0]);
+                        //loadCommentary(container, commentaryId);
+                    })
+
+                    //container.getElementsByClassName("form")[0].submit(function (e) {
+                    //    alert("prevented");
+                    //    e.preventDefault();
+                    //});
+                });
+            })
+        });
+
+
+        function loadView(route, onLoaded) {
+            makeRequest(route, "get", function (response) {
+                container.innerHTML = response;
+                onLoaded();
+            });
+        }
+
+        function makeRequest(route, requestType, onLoaded) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    onLoaded(this.responseText);
+                }
+            };
+            xhr.open(requestType, route);
+            xhr.send();
+        }
+
+        function doPost(form) {
+            //var xhr = new XMLHttpRequest();
+            //xhr.open("POST", form.attr('action'));
+            //xhr.onload=function()
+            //{
+            //  if(xhr.status==200)
+            //    resolve(xhr.response);
+            //  else
+            //    reject("error:"+xhr.status);
+            //}
+            //var data=JSON.stringify({some_data});
+            //xhr.send(data);
+
+            $.ajax({
+                type: "POST",
+                url: "/Commentary/UpdateCommentaryAsync",
+                data: form.serialize(),
+                error: function (xhr, status, error) {
+                    //do something about the error
+                },
+                success: function (response) {
+                    //do something with response
+                }
+            });
+
+            return false;// if it's a link to prevent post
+
+            //$.ajax({
+            //    type: "POST",
+            //    url: form.attr('action'),
+            //    data: form.serialize(),
+            //    contentType: "application/json; charset=utf-8",
+            //    beforeSend: function (xhr) {
+            //        xhr.setRequestHeader("XSRF-TOKEN",
+            //            $('input:hidden[name="__RequestVerificationToken"]').val());
+            //    },
+            //    success: function () {
+            //        alert("success");
+            //    },
+            //    complete: function () {
+            //        alert("complete")
+            //    },
+            //    failure: function () {
+            //        alert("failure");
+            //    }
+            //});
+        }
+    }
+</script>

@@ -1,0 +1,20 @@
+﻿@model Commentary
+
+<form method="post" asp-controller="Commentary" asp-action="UpdateCommentaryAsync" class="form">
+    <input type="hidden" asp-for="Id" />
+
+    <h4>
+        <a asp-page="/Account/Profile" asp-route-id="@Model.Author.Id">@Model.Author.UserName</a> - @Model.Date.ToString("hh:mm dd.MM.yyyy")
+        <button class="commentary-edit-save-button">Save</button>
+    </h4>
+    @await Html.PartialAsync("_ProfileImage", Model.Author)
+
+    <textarea asp-for="Body"></textarea>
+</form>
+
+@*h4>
+        <a asp-page="/Account/Profile" asp-route-id="@Model.Author.Id">@Model.Author.UserName</a> - @Model.Date.ToString("hh:mm dd.MM.yyyy")
+        <button class="commentary-edit-save-button">Save</button>
+    </h4>
+    @await Html.PartialAsync("_ProfileImage", Model.Author)
+    <textarea class="commentary-body">@Model.Body</textarea>*@

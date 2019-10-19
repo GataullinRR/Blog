@@ -28,7 +28,7 @@
 
 @foreach (var commentary in Model.Commentaries)
 {
-    @await Html.PartialAsync("_Commentary", commentary);
+    @await Html.PartialAsync("_CommentaryContainer", commentary);
 }
 
 @if (User.Identity.IsAuthenticated)
@@ -48,4 +48,8 @@ else
     <span> or </span>
     <a asp-page="/Account/Register">register</a>
     <span> to comment</span>
+}
+
+@section Scripts {
+    <partial name="_CommentartyScripts" />
 }
