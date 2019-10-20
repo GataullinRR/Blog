@@ -15,26 +15,19 @@ namespace Blog.Pages.Account
 {
     public class LoginModel : ExtendedPageModel
     {
-        readonly BlogContext _db;
-        readonly SignInManager<User> _signInManager;
-        readonly UserManager<User> _userManager;
-
         [BindProperty]
         [Required(ErrorMessage = "Login is required")]
         public string Login { get; set; }
-
         [BindProperty]
         [Required(ErrorMessage = "Password is required"), DataType(DataType.Password)]
         public string Password { get; set; }
 
-        public LoginModel(BlogContext db, SignInManager<User> signInManager, UserManager<User> userManager)
+        public LoginModel(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _db = db;
-            _signInManager = signInManager;
-            _userManager = userManager;
+
         }
 
-        public IActionResult OnGet()
+        public IActionResult OnGet(string userName)
         {
             if (User.Identity.IsAuthenticated)
             {
@@ -42,6 +35,8 @@ namespace Blog.Pages.Account
             }
             else
             {
+                Login = userName;
+
                 return Page();
             }
         }
@@ -50,7 +45,7 @@ namespace Blog.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByNameAsync(Login);
+                var user = await UserManager.FindByNameAsync(Login);
                 if (user == null)
                 {
                     ModelState.AddModelError("", "This login is not registered");
@@ -59,7 +54,7 @@ namespace Blog.Pages.Account
                 }
                 else
                 {
-                    var result = await _signInManager.PasswordSignInAsync(user, Password, true, false);
+                    var result = await SignInManager.PasswordSignInAsync(user, Password, true, false);
 
                     if (result.Succeeded)
                     {

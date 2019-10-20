@@ -14,15 +14,11 @@ namespace Blog.Pages
 {
     public class IndexModel : ExtendedPageModel
     {
-        readonly BlogContext _db;
+        public IEnumerable<Post> Posts => DB.Posts.Include(p => p.Author);
 
-        public UserManager<User> UserManager { get; }
-        public IEnumerable<Post> Posts => _db.Posts.Include(p => p.Author);
-
-        public IndexModel(BlogContext db, UserManager<User> userManager)
+        public IndexModel(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _db = db;
-            UserManager = userManager;
+
         }
 
         public void OnGet()

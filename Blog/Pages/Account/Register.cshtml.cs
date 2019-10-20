@@ -32,7 +32,7 @@ namespace Blog.Pages.Account
         public string EMail { get; set; }
         [Required, DataType(DataType.Password), BindProperty]
         public string Password { get; set; }
-        // Compare does not seem to work
+        // Compare does not seem to work with BindPropertyAttr
         [DataType(DataType.Password), BindProperty]
         public string ConfirmPassword { get; set; }
 

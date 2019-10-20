@@ -1,5 +1,6 @@
 ﻿using DBModels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,13 @@ namespace Blog.Services
     {
         public const int MAX_POST_EDITS_FOR_STANDARD_USER = 3;
         public const int MAX_COMMENTARY_EDITS_FOR_STANDARD_USER = 1;
+
+        readonly UserManager<User> _userManager;
+
+        public PermissionsService(UserManager<User> userManager)
+        {
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        }
 
         public bool CanEditPost(ClaimsPrincipal user, Post post)
         {
@@ -43,17 +51,33 @@ namespace Blog.Services
                     || user.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR);
         }
 
-        public void ValidateResetPassword(ClaimsPrincipal currentUser, User user)
+        public async Task ValidateResetPasswordAsync(ClaimsPrincipal currentUser, User user)
         {
-            if (!CanRestorePassword(currentUser, user))
+            if (!await CanRestorePasswordAsync(currentUser, user))
             {
                 throw new UnauthorizedAccessException($"Can not restore password for user \"{user.UserName}\"");
             }
         }
-        public bool CanRestorePassword(ClaimsPrincipal currentUser, User user)
+        public async Task<bool> CanRestorePasswordAsync(ClaimsPrincipal currentUser, User user)
         {
             return (user.LastPasswordRestoreAttempt - DateTime.UtcNow).TotalMinutes.Abs() > 30
+                && await _userManager.IsInOneOfTheRolesAsync(user, Roles.NOT_RESTRICTED)
                 && (!currentUser?.Identity?.IsAuthenticated ?? true);
+        }
+
+
+        public void ValidateChangePassword(ClaimsPrincipal user, User userModel)
+        {
+            if (!CanChangePassword(user, userModel))
+            {
+                throw new UnauthorizedAccessException();
+            }
+        }
+        public bool CanChangePassword(ClaimsPrincipal user, User userModel)
+        {
+            return user.Identity.IsAuthenticated 
+                && user.Identity.Name == userModel.UserName 
+                && user.IsInOneOfTheRoles(Roles.NOT_RESTRICTED);
         }
     }
 }

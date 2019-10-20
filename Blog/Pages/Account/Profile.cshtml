@@ -5,7 +5,7 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-@{ 
+@{
     var targetUser = Model.UserModel;
     var canSeePrivateInformation = Model.IsCurrentUser
         || User.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR);
@@ -30,6 +30,10 @@
     if (canEdit)
     {
         <div><a asp-page="/Account/ProfileEdit" asp-route-id="@targetUser.Id">Edit profile</a></div>
+    }
+    if (Model.Permissions.CanChangePassword(User, targetUser))
+    {
+        <div><a asp-page="/Account/PasswordChange" asp-route-id="@targetUser.Id">Change password</a></div>
     }
 }
 else

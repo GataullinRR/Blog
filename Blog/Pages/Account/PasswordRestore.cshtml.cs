@@ -18,18 +18,12 @@ namespace Blog.Pages.Account
 {
     public class PasswordRestoreModel : ExtendedPageModel
     {
-        readonly BlogContext _db;
-        readonly UserManager<User> _userManager;
         readonly EMailService _email;
-        readonly PermissionsService _permissions;
         readonly ConfirmationTokenService _confirmation;
 
-        public PasswordRestoreModel(BlogContext db, UserManager<User> userManager, EMailService email, PermissionsService permissions, ConfirmationTokenService confirmation)
+        public PasswordRestoreModel(EMailService email, ConfirmationTokenService confirmation, IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _db = db ?? throw new ArgumentNullException(nameof(db));
-            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _email = email ?? throw new ArgumentNullException(nameof(email));
-            _permissions = permissions ?? throw new ArgumentNullException(nameof(permissions));
             _confirmation = confirmation ?? throw new ArgumentNullException(nameof(confirmation));
 
             PersistLayoutModel = true;
@@ -42,7 +36,7 @@ namespace Blog.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByNameAsync(UserName);
+                var user = await UserManager.FindByNameAsync(UserName);
                 if (user == null)
                 {
                     ModelState.AddModelError("", $"Profile \"{UserName}\" does not exist");
@@ -51,7 +45,7 @@ namespace Blog.Pages.Account
                 }
                 else
                 {
-                    _permissions.ValidateResetPassword(User, user);
+                    await Permissions.ValidateResetPasswordAsync(User, user);
 
                     var token = _confirmation.GetToken(user, AccountOperation.PASSWORD_RESET);
                     var link = _confirmation.GenerateLink(HttpContext, token, nameof(AccountController), nameof(AccountController.ConfirmPasswordResetAsync), new { userId = user.Id });
@@ -61,7 +55,7 @@ After openning the link, new password will be sent to this E-Mail");
                     if (isSent)
                     {
                         user.LastPasswordRestoreAttempt = DateTime.UtcNow;
-                        await _userManager.UpdateAsync(user);
+                        await UserManager.UpdateAsync(user);
 
                         LayoutModel.Messages.Add("Password reset confirmation link has been sent");
 

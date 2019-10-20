@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Blog.Models;
 using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Authorization;
@@ -13,11 +14,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Pages.Account
 {
-    public class ProfileModel : PageModel
+    public class ProfileModel : ExtendedPageModel
     {
-        readonly BlogContext _db;
-        readonly UserManager<User> _userManager;
-
         public User UserModel { get; private set; }
         public string Role { get; private set; }
         /// <summary>
@@ -25,15 +23,14 @@ namespace Blog.Pages.Account
         /// </summary>
         public bool IsCurrentUser { get; private set; }
 
-        public ProfileModel(BlogContext db, UserManager<User> userManager)
+        public ProfileModel(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _db = db;
-            _userManager = userManager;
+
         }
 
         public async Task<IActionResult> OnGetAsync(string id)
         {
-            var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+            var currentUser = await UserManager.GetUserAsync(HttpContext.User);
             if (id == null)
             {
                 if (currentUser == null)
@@ -47,12 +44,12 @@ namespace Blog.Pages.Account
             }
             else
             {
-                UserModel = await _userManager.FindByIdAsync(id);
+                UserModel = await UserManager.FindByIdAsync(id);
             }
 
             IsCurrentUser = currentUser?.Id == UserModel.Id;
-            UserModel.Posts = await _db.Posts.Where(p => p.Author == UserModel).ToListAsync();
-            Role = (await _userManager.GetRolesAsync(UserModel)).Single();
+            UserModel.Posts = await DB.Posts.Where(p => p.Author == UserModel).ToListAsync();
+            Role = (await UserManager.GetRolesAsync(UserModel)).Single();
             return Page();
         }
     }

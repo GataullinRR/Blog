@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using DBModels;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -23,6 +25,20 @@ namespace Blog
                 .Select(rs => rs.Split(","))
                 .Flatten()
                 .Any(r => user.IsInRole(r));
+        }
+
+        public static async Task<bool> IsInOneOfTheRolesAsync(this UserManager<User> userManager, User user, params string[] roles)
+        {
+            foreach (var role in roles.Select(rs => rs.Split(",")).Flatten())
+            {
+                var isIn = await userManager.IsInRoleAsync(user, role);
+                if (isIn)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

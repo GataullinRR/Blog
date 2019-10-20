@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Blog.Services;
+using DBModels;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -17,8 +20,29 @@ namespace Blog.Models
 
     public class ExtendedPageModel : PageModel, ILayoutModelProvider
     {
+        readonly IServiceProvider _serviceProvider;
+        readonly Lazy<BlogContext> _db;
+        readonly Lazy<PermissionsService> _permissions;
+        readonly Lazy<UserManager<User>> _userManager;
+        readonly Lazy<SignInManager<User>> _signInManager;
+
+        protected BlogContext DB => _db.Value;
+        protected UserManager<User> UserManager => _userManager.Value;
+        protected SignInManager<User> SignInManager => _signInManager.Value;
+        public PermissionsService Permissions => _permissions.Value;
+
         public LayoutModel LayoutModel { get; private set; } = new LayoutModel();
         public bool PersistLayoutModel { get; set; } = false;
+
+        public ExtendedPageModel(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+
+            _db = new Lazy<BlogContext>(() => (BlogContext)_serviceProvider.GetService(typeof(BlogContext)));
+            _permissions = new Lazy<PermissionsService>(() => (PermissionsService)_serviceProvider.GetService(typeof(PermissionsService)));
+            _userManager = new Lazy<UserManager<User>>(() => (UserManager<User>)_serviceProvider.GetService(typeof(UserManager<User>)));
+            _signInManager = new Lazy<SignInManager<User>>(() => (SignInManager<User>)_serviceProvider.GetService(typeof(SignInManager<User>)));
+        }
 
         public override void OnPageHandlerSelected(PageHandlerSelectedContext context)
         {
