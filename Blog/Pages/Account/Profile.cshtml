@@ -64,6 +64,42 @@ else
     }
 }
 
+@if (User.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR))
+{
+    <h4>Violations</h4>
+
+    <ul>
+        @foreach (var violation in targetUser.Violations)
+        {
+        <li>
+            <span>Got from <a asp-page="/Account/Profile" asp-route-id="@violation.Reporter.Id">@violation.Reporter.UserName</a></span>
+            <div>
+                <span>violation.Description</span>
+            </div>
+            <div>
+                <span>Object: </span>
+                @switch (violation.ObjectType)
+                {
+                    case ViolationObjectType.UNSPECIFIED:
+                        <span>is not specified</span>
+                        break;
+                    case ViolationObjectType.COMMENTARY:
+                        <a asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.GetCommentaryAsync)" asp-route-id="@violation.ObjectId">commentary</a>
+                        break;
+                    case ViolationObjectType.POST:
+                        <a asp-page="/Post" asp-route-id="@violation.ObjectId">post</a>
+                        break;
+
+                    default:
+                        <span>unknown</span>
+                        break;
+                }
+            </div>
+        </li>
+        }
+    </ul>
+}
+
 @functions
 {
     public async Task<object> generateEditButtonAsync(string userId, bool showLink)
