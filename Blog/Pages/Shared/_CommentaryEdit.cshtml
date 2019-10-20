@@ -10,12 +10,11 @@
     </h4>
     @await Html.PartialAsync("_ProfileImage", Model.Author)
 
-    <textarea asp-for="Body"></textarea>
+    <div>
+        <textarea id="" asp-for="Body" style="width: 100%"></textarea>
+    </div>
+    <div>
+        <span>Edit reason: </span>
+        <input type="text" name="editReason" placeholder="Edit reason" />
+    </div>
 </form>
-
-@*h4>
-        <a asp-page="/Account/Profile" asp-route-id="@Model.Author.Id">@Model.Author.UserName</a> - @Model.Date.ToString("hh:mm dd.MM.yyyy")
-        <button class="commentary-edit-save-button">Save</button>
-    </h4>
-    @await Html.PartialAsync("_ProfileImage", Model.Author)
-    <textarea class="commentary-body">@Model.Body</textarea>*@

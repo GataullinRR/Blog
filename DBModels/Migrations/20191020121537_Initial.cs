@@ -319,7 +319,7 @@ namespace DBModels.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     EditAuthorId = table.Column<string>(nullable: false),
-                    Reason = table.Column<string>(nullable: false),
+                    Reason = table.Column<string>(nullable: true),
                     EditTime = table.Column<DateTime>(nullable: false),
                     CommentaryId = table.Column<int>(nullable: true)
                 },

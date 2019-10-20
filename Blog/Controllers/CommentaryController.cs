@@ -7,6 +7,7 @@ using Blog.Models;
 using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -18,11 +19,13 @@ namespace Blog.Controllers
     {
         readonly BlogContext _db;
         readonly PermissionsService _permissions;
+        readonly UserManager<User> _userManager;
 
-        public CommentaryController(BlogContext db, PermissionsService permissions)
+        public CommentaryController(BlogContext db, PermissionsService permissions, UserManager<User> userManager)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db));
             _permissions = permissions ?? throw new ArgumentNullException(nameof(permissions));
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
         [HttpGet()]
@@ -31,8 +34,8 @@ namespace Blog.Controllers
             if (ModelState.IsValid)
             {
                 var commentary = await _db.Commentaries
-                .Include(c => c.Author)
-                .FirstAsync(c => c.Id == id);
+                    .Include(c => c.Author)
+                    .FirstAsync(c => c.Id == id);
                 await _permissions.ValidateEditCommentaryAsync(User, commentary);
 
                 return PartialView("_CommentaryEdit", commentary);
@@ -51,7 +54,9 @@ namespace Blog.Controllers
                 var commentary = await _db.Commentaries
                     .IncludeAuthor()
                     .FirstAsync(c => c.Id == id);
-                return PartialView("_Commentary", new CommentaryModel(commentary, _permissions));
+                var user = await _userManager.GetUserAsync(User);
+
+                return PartialView("_Commentary", new CommentaryModel(user, commentary, _permissions));
             }
             else
             {
@@ -59,10 +64,8 @@ namespace Blog.Controllers
             }
         }
 
-
-
         [HttpPost()]
-        public async Task<IActionResult> UpdateCommentaryAsync([Required]int id, [Required]string body)
+        public async Task<IActionResult> UpdateCommentaryAsync([Required]int id, [Required]string body, string editReason)
         {
             if (ModelState.IsValid)
             {
@@ -72,7 +75,9 @@ namespace Blog.Controllers
                     .FirstAsync(c => c.Id == id);
                 await _permissions.ValidateEditCommentaryAsync(User, commentary);
 
+                var user = await _userManager.GetUserAsync(User);
                 commentary.Body = body;
+                commentary.Edits.Add(new CommentaryEdit(user, editReason, DateTime.UtcNow));
                 await _db.SaveChangesAsync();
 
                 return RedirectToPage("/Post", new { id = commentary.Post.Id });

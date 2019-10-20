@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DBModels.Migrations
 {
     [DbContext(typeof(BlogContext))]
-    [Migration("20191020094814_Initial")]
+    [Migration("20191020121537_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,8 +63,7 @@ namespace DBModels.Migrations
 
                     b.Property<DateTime>("EditTime");
 
-                    b.Property<string>("Reason")
-                        .IsRequired();
+                    b.Property<string>("Reason");
 
                     b.HasKey("Id");
 

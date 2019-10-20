@@ -47,10 +47,19 @@ namespace Blog.Services
         }
         public async Task<bool> CanEditCommentaryAsync(ClaimsPrincipal user, Commentary comment)
         {
-            return (user.Identity.Name == comment.Author.UserName
-                    && (await _userManager.GetUserAsync(user)).Status.State == ProfileState.ACTIVE
-                    && comment.CreationTime - DateTime.Now < TimeSpan.FromDays(1))
-                    || user.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR);
+            var thisUser = await _userManager.GetUserAsync(user);
+            if (thisUser == null)
+            {
+                return false;
+            }
+            else
+            {
+                return (user.Identity.Name == comment.Author.UserName
+                    && thisUser.Status.State == ProfileState.ACTIVE
+                    && comment.CreationTime - DateTime.Now < TimeSpan.FromDays(1)
+                    && comment.Edits.Count(e => e.EditAuthor == thisUser) < 1)
+                    || user.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR);  
+            }
         }
 
         public async Task ValidateResetPasswordAsync(ClaimsPrincipal currentUser, User user)

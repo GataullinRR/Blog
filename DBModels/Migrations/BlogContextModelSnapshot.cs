@@ -61,8 +61,7 @@ namespace DBModels.Migrations
 
                     b.Property<DateTime>("EditTime");
 
-                    b.Property<string>("Reason")
-                        .IsRequired();
+                    b.Property<string>("Reason");
 
                     b.HasKey("Id");
 

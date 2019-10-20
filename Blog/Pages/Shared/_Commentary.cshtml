@@ -9,3 +9,13 @@
 </h4>
 @await Html.PartialAsync("_ProfileImage", Model.Commentary.Author)
 @Model.Commentary.Body
+@foreach (var edit in Model.Commentary.Edits)
+{
+    <div>
+        <span>Edited at @edit.EditTime.ToString("hh:mm dd.MM.yy") by <a asp-page="/Account/Profile" asp-route-id="@edit.EditAuthor.Id">@edit.EditAuthor.UserName</a></span>
+        @if (edit.Reason.IsNotNullOrWhiteSpace())
+        {
+            <span>Reason: @edit.Reason</span>
+        }
+    </div>
+}
