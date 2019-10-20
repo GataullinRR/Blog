@@ -15,7 +15,6 @@ using Utilities.Extensions;
 
 namespace Blog.Controllers
 {
-    
     public class AccountController : ExtendedController
     {
         readonly BlogContext _db;
@@ -43,6 +42,31 @@ namespace Blog.Controllers
             await _signInManager.SignOutAsync();
 
             return RedirectToPage("/Index");
+        }
+
+        [HttpGet(), Authorize()]
+        public async Task<IActionResult> UnbanAsync([Required]string userId)
+        {
+            if (ModelState.IsValid)
+            {
+                var targetUser = await _userManager.FindByIdAsync(userId);
+                await _permissions.ValidateUnbanUserAsync(User, targetUser);
+
+                targetUser.Status.State = targetUser.EmailConfirmed
+                    ? ProfileState.ACTIVE
+                    : ProfileState.RESTRICTED;
+                targetUser.Status.StateReason = null;
+                targetUser.Status.BannedTill = null;
+                await _db.SaveChangesAsync();
+
+                LayoutModel.Messages.Add($"User \"{targetUser.UserName}\" has been unbanned");
+
+                return RedirectToPage("/Account/Profile", new { id = userId });
+            }
+            else
+            {
+                throw new Exception();
+            }
         }
 
         [HttpGet(), Authorize()]

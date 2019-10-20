@@ -55,5 +55,33 @@ namespace Blog.Pages.Account
             Role = (await UserManager.GetRolesAsync(UserModel)).Single();
             return Page();
         }
+
+        public async Task<IActionResult> OnPostBanAsync(string id)
+        {
+            var currentUser = await UserManager.GetUserAsync(HttpContext.User);
+            if (id == null)
+            {
+                if (currentUser == null)
+                {
+                    throw new ArgumentOutOfRangeException("Can't determine target user");
+                }
+                else
+                {
+                    UserModel = currentUser;
+                }
+            }
+            else
+            {
+                UserModel = await UserManager.FindByIdAsync(id);
+            }
+
+            IsCurrentUser = currentUser?.Id == UserModel.Id;
+            UserModel.Posts = await DB.Posts
+                .IncludeAuthor()
+                .Where(p => p.Author == UserModel)
+                .ToListAsync();
+            Role = (await UserManager.GetRolesAsync(UserModel)).Single();
+            return Page();
+        }
     }
 }

@@ -11,19 +11,28 @@
         || User.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR);
     var canEdit = (Model.IsCurrentUser && User.IsInOneOfTheRoles(Roles.NOT_RESTRICTED))
         || User.IsInOneOfTheRoles(Roles.ADMIN);
+    var banButton = await Html.PartialAsync("_Anchor", new AnchorModel("Ban", "/Account/BanConfirmation", targetUser.Id, await Model.Permissions.CanBanUserAsync(User, targetUser)));
 }
 
-<h3>Profile information @await generateEditButtonAsync(targetUser.Id, canEdit)</h3>
+    <h3>
+        Profile information @await generateEditButtonAsync(targetUser.Id, canEdit) @banButton 
+        @if (await Model.Permissions.CanUnbanUserAsync(User, targetUser))
+        {
+            <span>| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
+        }
+    </h3>
 
 @await Html.PartialAsync("_ProfileImage", targetUser)
 
 <div>@("Name: " + targetUser.UserName)</div>
+<div>@("Gender: " + targetUser.Profile.Gender.GetEnumValueDescription())</div>
 @if (canSeePrivateInformation)
 {
     <div>@("E-Mail: " + targetUser.Email)</div>
     <div>@("E-Mail confirmed: " + targetUser.EmailConfirmed.Ternar("Yes", "No"))</div>
 }
 <div>@("Role: " + Model.Role)</div>
+<div>@("State: " + targetUser.Status.State.GetEnumValueDescription())</div>
 <div>@("Registration date: " + targetUser.Profile.RegistrationDate.ToString("dd.MM.yyyy"))</div>
 @if (targetUser.EmailConfirmed)
 {
@@ -64,9 +73,14 @@ else
     }
 }
 
-@if (User.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR))
+@if (User.IsInOneOfTheRoles(Roles.OWNER, Roles.ADMIN, Roles.MODERATOR))
 {
     <h4>Violations</h4>
+
+    if(targetUser.Violations.Count == 0)
+    {
+        <span>None we know about ;)</span>
+    }
 
     <ul>
         @foreach (var violation in targetUser.Violations)

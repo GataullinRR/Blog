@@ -9,7 +9,7 @@ namespace ASPCoreUtilities
     {
         public static string GetController(this string controllerNameOf)
         {
-            return controllerNameOf.Remove("Controller")
+            return controllerNameOf.Remove("Controller");
         }
     }
 }

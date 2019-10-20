@@ -28,8 +28,11 @@ namespace DBModels
 
     public enum ProfileState
     {
+        [Description("Restricted")]
         RESTRICTED = 0,
+        [Description("Active")]
         ACTIVE = 100,
+        [Description("Banned")]
         BANNED = 1000,
     }
 

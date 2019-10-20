@@ -25,10 +25,12 @@ namespace Blog.Models
         readonly Lazy<PermissionsService> _permissions;
         readonly Lazy<UserManager<User>> _userManager;
         readonly Lazy<SignInManager<User>> _signInManager;
+        readonly Lazy<EMailService> _eMail;
 
         protected BlogContext DB => _db.Value;
         protected UserManager<User> UserManager => _userManager.Value;
         protected SignInManager<User> SignInManager => _signInManager.Value;
+        protected EMailService EMail => _eMail.Value;
         public PermissionsService Permissions => _permissions.Value;
 
         public LayoutModel LayoutModel { get; private set; } = new LayoutModel();
@@ -42,6 +44,7 @@ namespace Blog.Models
             _permissions = new Lazy<PermissionsService>(() => (PermissionsService)_serviceProvider.GetService(typeof(PermissionsService)));
             _userManager = new Lazy<UserManager<User>>(() => (UserManager<User>)_serviceProvider.GetService(typeof(UserManager<User>)));
             _signInManager = new Lazy<SignInManager<User>>(() => (SignInManager<User>)_serviceProvider.GetService(typeof(SignInManager<User>)));
+            _eMail = new Lazy<EMailService>(() => (EMailService)_serviceProvider.GetService(typeof(EMailService)));
         }
 
         public override void OnPageHandlerSelected(PageHandlerSelectedContext context)

@@ -45,6 +45,7 @@ namespace DBModels.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     State = table.Column<int>(nullable: false),
+                    StateReason = table.Column<string>(nullable: true),
                     BannedTill = table.Column<DateTime>(nullable: true),
                     LastPasswordRestoreAttempt = table.Column<DateTime>(nullable: true)
                 },

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DBModels.Migrations
 {
     [DbContext(typeof(BlogContext))]
-    [Migration("20191020121537_Initial")]
+    [Migration("20191020143833_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -153,6 +153,8 @@ namespace DBModels.Migrations
                     b.Property<DateTime?>("LastPasswordRestoreAttempt");
 
                     b.Property<int>("State");
+
+                    b.Property<string>("StateReason");
 
                     b.HasKey("Id");
 

@@ -16,10 +16,12 @@ namespace Blog.Services
         public const int MAX_COMMENTARY_EDITS_FOR_STANDARD_USER = 1;
 
         readonly UserManager<User> _userManager;
+        readonly IHttpContextAccessor _httpContext;
 
-        public PermissionsService(UserManager<User> userManager)
+        public PermissionsService(UserManager<User> userManager, IHttpContextAccessor httpContext)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _httpContext = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
         }
 
         public async Task ValidateEditPostAsync(ClaimsPrincipal user, Post post)
@@ -93,6 +95,52 @@ namespace Blog.Services
                 && userModel.EmailConfirmed
                 && userModel.Status.State == ProfileState.ACTIVE
                 && user.IsInOneOfTheRoles(Roles.NOT_RESTRICTED);
+        }
+
+        public async Task ValidateBanUserAsync(ClaimsPrincipal user, User targetUser)
+        {
+            if (!await CanBanUserAsync(user, targetUser))
+            {
+                throw new UnauthorizedAccessException();
+            }
+        }
+        public async Task<bool> CanBanUserAsync(ClaimsPrincipal user, User targetUser)
+        {
+            var currentUser = await _userManager.GetUserAsync(_httpContext.HttpContext.User);
+            return currentUser != null 
+                && targetUser.Status.State.IsOneOf(ProfileState.ACTIVE, ProfileState.RESTRICTED)
+                && await _userManager.IsInOneOfTheRolesAsync(currentUser, Roles.ADMIN, Roles.OWNER) 
+                && (await _userManager.GetRolesAsync(targetUser)).Single().IsLess((await _userManager.GetRolesAsync(currentUser)).Single());
+        }
+
+        public async Task ValidateUnbanUserAsync(ClaimsPrincipal user, User targetUser)
+        {
+            if (!await CanUnbanUserAsync(user, targetUser))
+            {
+                throw new UnauthorizedAccessException();
+            }
+        }
+        public async Task<bool> CanUnbanUserAsync(ClaimsPrincipal user, User targetUser)
+        {
+            var currentUser = await _userManager.GetUserAsync(_httpContext.HttpContext.User);
+            return currentUser != null
+                && targetUser.Status.State.IsOneOf(ProfileState.BANNED)
+                && await _userManager.IsInOneOfTheRolesAsync(currentUser, Roles.ADMIN, Roles.OWNER)
+                && (await _userManager.GetRolesAsync(targetUser)).Single().IsLess((await _userManager.GetRolesAsync(currentUser)).Single());
+        }
+
+        public async Task ValidateCanSignInAsync(User targetUser)
+        {
+            if (!await CanSignInAsync(targetUser))
+            {
+                throw new UnauthorizedAccessException();
+            }
+        }
+        public async Task<bool> CanSignInAsync(User targetUser)
+        {
+            return targetUser != null
+                && (targetUser.Status.State.IsOneOf(ProfileState.ACTIVE, ProfileState.RESTRICTED) 
+                || (targetUser.Status.State.IsOneOf(ProfileState.BANNED) && targetUser.Status.BannedTill < DateTime.UtcNow));
         }
     }
 }

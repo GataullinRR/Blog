@@ -55,7 +55,6 @@ namespace Blog.Pages.Account
                 else
                 {
                     var result = await SignInManager.PasswordSignInAsync(user, Password, true, false);
-
                     if (result.Succeeded)
                     {
                         return RedirectToPage("/Index");

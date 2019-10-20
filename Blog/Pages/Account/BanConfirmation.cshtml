@@ -1,0 +1,28 @@
+﻿@page
+@model Blog.Pages.Account.BanConfirmationModel
+@{
+    ViewData["Title"] = "Ban confirmation";
+}
+
+<h2>Ban confirmation</h2>
+
+<form method="post" asp-page-handler="Ban">
+    <input type="hidden" asp-for="UserId"/>
+
+    <div>
+        <span>Duration: </span>
+        <input asp-for="BannedTill" />
+        <span asp-validation-for="BannedTill"></span>
+    </div>
+    <div>
+        <span>Reason: </span>
+        <input asp-for="Reason" />
+        <span asp-validation-for="Reason"></span>
+    </div>
+
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div>
+        <button type="submit">Apply</button>
+    </div>
+</form>

@@ -152,6 +152,8 @@ namespace DBModels.Migrations
 
                     b.Property<int>("State");
 
+                    b.Property<string>("StateReason");
+
                     b.HasKey("Id");
 
                     b.ToTable("ProfilesStatuses");
