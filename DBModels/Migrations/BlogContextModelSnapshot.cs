@@ -31,7 +31,7 @@ namespace DBModels.Migrations
                     b.Property<string>("Body")
                         .IsRequired();
 
-                    b.Property<DateTime>("Date");
+                    b.Property<DateTime>("CreationTime");
 
                     b.Property<int>("PostId");
 
@@ -48,6 +48,31 @@ namespace DBModels.Migrations
                     b.ToTable("Commentaries");
                 });
 
+            modelBuilder.Entity("DBModels.CommentaryEdit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("CommentaryId");
+
+                    b.Property<string>("EditAuthorId")
+                        .IsRequired();
+
+                    b.Property<DateTime>("EditTime");
+
+                    b.Property<string>("Reason")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentaryId");
+
+                    b.HasIndex("EditAuthorId");
+
+                    b.ToTable("CommentaryEdits");
+                });
+
             modelBuilder.Entity("DBModels.Post", b =>
                 {
                     b.Property<int>("Id")
@@ -60,7 +85,7 @@ namespace DBModels.Migrations
                     b.Property<string>("Body")
                         .IsRequired();
 
-                    b.Property<DateTime>("Date");
+                    b.Property<DateTime>("CreationTime");
 
                     b.Property<string>("Title")
                         .IsRequired();
@@ -72,13 +97,13 @@ namespace DBModels.Migrations
                     b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("DBModels.PostEditInfo", b =>
+            modelBuilder.Entity("DBModels.PostEdit", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("AuthorId")
+                    b.Property<string>("EditAuthorId")
                         .IsRequired();
 
                     b.Property<DateTime>("EditTime");
@@ -90,19 +115,53 @@ namespace DBModels.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuthorId");
+                    b.HasIndex("EditAuthorId");
 
                     b.HasIndex("PostId");
 
                     b.ToTable("PostsEdits");
                 });
 
+            modelBuilder.Entity("DBModels.ProfileInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("About");
+
+                    b.Property<int>("Gender");
+
+                    b.Property<string>("Image");
+
+                    b.Property<DateTime>("RegistrationDate");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProfilesInfos");
+                });
+
+            modelBuilder.Entity("DBModels.ProfileStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime?>("BannedTill");
+
+                    b.Property<DateTime?>("LastPasswordRestoreAttempt");
+
+                    b.Property<int>("State");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProfilesStatuses");
+                });
+
             modelBuilder.Entity("DBModels.User", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
-
-                    b.Property<string>("About");
 
                     b.Property<int>("AccessFailedCount");
 
@@ -113,10 +172,6 @@ namespace DBModels.Migrations
                         .HasMaxLength(256);
 
                     b.Property<bool>("EmailConfirmed");
-
-                    b.Property<string>("Gender");
-
-                    b.Property<DateTime>("LastPasswordRestoreAttempt");
 
                     b.Property<bool>("LockoutEnabled");
 
@@ -134,11 +189,11 @@ namespace DBModels.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed");
 
-                    b.Property<string>("ProfileImage");
-
-                    b.Property<DateTime>("RegistrationDate");
+                    b.Property<int>("ProfileId");
 
                     b.Property<string>("SecurityStamp");
+
+                    b.Property<int>("StatusId");
 
                     b.Property<bool>("TwoFactorEnabled");
 
@@ -155,7 +210,38 @@ namespace DBModels.Migrations
                         .HasName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
+                    b.HasIndex("ProfileId");
+
+                    b.HasIndex("StatusId");
+
                     b.ToTable("AspNetUsers");
+                });
+
+            modelBuilder.Entity("DBModels.UserRuleViolation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Description")
+                        .IsRequired();
+
+                    b.Property<string>("ObjectId");
+
+                    b.Property<int>("ObjectType");
+
+                    b.Property<string>("ReporterId");
+
+                    b.Property<string>("UserId")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReporterId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserRuleViolations");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -285,6 +371,18 @@ namespace DBModels.Migrations
                         .HasForeignKey("UserId");
                 });
 
+            modelBuilder.Entity("DBModels.CommentaryEdit", b =>
+                {
+                    b.HasOne("DBModels.Commentary")
+                        .WithMany("Edits")
+                        .HasForeignKey("CommentaryId");
+
+                    b.HasOne("DBModels.User", "EditAuthor")
+                        .WithMany()
+                        .HasForeignKey("EditAuthorId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("DBModels.Post", b =>
                 {
                     b.HasOne("DBModels.User", "Author")
@@ -293,16 +391,41 @@ namespace DBModels.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("DBModels.PostEditInfo", b =>
+            modelBuilder.Entity("DBModels.PostEdit", b =>
                 {
-                    b.HasOne("DBModels.User", "Author")
+                    b.HasOne("DBModels.User", "EditAuthor")
                         .WithMany()
-                        .HasForeignKey("AuthorId")
+                        .HasForeignKey("EditAuthorId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("DBModels.Post")
                         .WithMany("Edits")
                         .HasForeignKey("PostId");
+                });
+
+            modelBuilder.Entity("DBModels.User", b =>
+                {
+                    b.HasOne("DBModels.ProfileInfo", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("DBModels.ProfileStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("DBModels.UserRuleViolation", b =>
+                {
+                    b.HasOne("DBModels.User", "Reporter")
+                        .WithMany("ReportedViolations")
+                        .HasForeignKey("ReporterId");
+
+                    b.HasOne("DBModels.User", "User")
+                        .WithMany("Violations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

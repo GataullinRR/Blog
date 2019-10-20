@@ -61,7 +61,6 @@ namespace Blog.Controllers
                     else
                     {
                         user.EmailConfirmed = true;
-                        await _userManager.RemoveFromRoleAsync(user, Roles.UNCONFIRMED);
                         await _userManager.AddToRoleAsync(user, Roles.USER);
                         await _db.SaveChangesAsync();
 

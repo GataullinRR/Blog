@@ -9,6 +9,7 @@ using DBModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Blog.Controllers
 {
@@ -32,7 +33,7 @@ namespace Blog.Controllers
                 var commentary = await _db.Commentaries
                 .Include(c => c.Author)
                 .FirstAsync(c => c.Id == id);
-                _permissions.ValidateEditCommentary(User, commentary);
+                await _permissions.ValidateEditCommentaryAsync(User, commentary);
 
                 return PartialView("_CommentaryEdit", commentary);
             }
@@ -48,9 +49,8 @@ namespace Blog.Controllers
             if (ModelState.IsValid)
             {
                 var commentary = await _db.Commentaries
-                    .Include(c => c.Author)
+                    .IncludeAuthor()
                     .FirstAsync(c => c.Id == id);
-
                 return PartialView("_Commentary", new CommentaryModel(commentary, _permissions));
             }
             else
@@ -58,6 +58,8 @@ namespace Blog.Controllers
                 throw new Exception();
             }
         }
+
+
 
         [HttpPost()]
         public async Task<IActionResult> UpdateCommentaryAsync([Required]int id, [Required]string body)
@@ -68,7 +70,7 @@ namespace Blog.Controllers
                     .Include(c => c.Author)
                     .Include(c => c.Post)
                     .FirstAsync(c => c.Id == id);
-                _permissions.ValidateEditCommentary(User, commentary);
+                await _permissions.ValidateEditCommentaryAsync(User, commentary);
 
                 commentary.Body = body;
                 await _db.SaveChangesAsync();

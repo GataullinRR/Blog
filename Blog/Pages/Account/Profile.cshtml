@@ -24,7 +24,7 @@
     <div>@("E-Mail confirmed: " + targetUser.EmailConfirmed.Ternar("Yes", "No"))</div>
 }
 <div>@("Role: " + Model.Role)</div>
-<div>@("Registration date: " + targetUser.RegistrationDate.ToString("dd.MM.yyyy"))</div>
+<div>@("Registration date: " + targetUser.Profile.RegistrationDate.ToString("dd.MM.yyyy"))</div>
 @if (targetUser.EmailConfirmed)
 {
     if (canEdit)
@@ -45,13 +45,13 @@ else
 }
 
 <h4>About @targetUser.UserName @await generateEditButtonAsync(targetUser.Id, canEdit)</h4>
-@if (targetUser.About == null)
+@if (string.IsNullOrEmpty(targetUser.Profile.About))
 {
     <div>No information provided</div>
 }
 else
 {
-    <div>@targetUser.About</div>
+    <div>@targetUser.Profile.About</div>
 }
 
 @if (targetUser.Posts.Any())

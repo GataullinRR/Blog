@@ -23,7 +23,7 @@ namespace Blog.Pages.Account
 
         public PasswordChangeModel(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-
+            PersistLayoutModel = true;
         }
 
         public async Task OnGetAsync()

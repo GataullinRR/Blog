@@ -50,7 +50,7 @@ namespace Blog.Pages
                     .FirstOrDefaultAsync(p => p.Id == EditingPostId);
                 if (editingPost != null)
                 {
-                    _permissions.ValidateEditPost(User, editingPost);
+                    _permissions.ValidateEditPostAsync(User, editingPost);
                     Title = editingPost.Title;
                     Body = editingPost.Body;
                 }
@@ -73,13 +73,8 @@ namespace Blog.Pages
                     .FirstOrDefaultAsync(p => p.Id == EditingPostId);
                 editingPost.Body = Body;
                 postId = EditingPostId;
-                editingPost.Edits = editingPost.Edits ?? new List<PostEditInfo>();
-                editingPost.Edits.Add(new PostEditInfo()
-                {
-                    Author = await _userManager.GetUserAsync(User),
-                    EditTime = DateTime.UtcNow,
-                    Reason = EditReason
-                });
+                //editingPost.Edits = editingPost.Edits ?? new List<PostEdit>();
+                editingPost.Edits.Add(new PostEdit(await _userManager.GetUserAsync(User), EditReason, DateTime.UtcNow));
 
                 await _db.SaveChangesAsync();
             }
@@ -90,14 +85,7 @@ namespace Blog.Pages
                     throw new ArgumentOutOfRangeException("The post with this name already exists");
                 }
 
-                var post = new Post()
-                {
-                    Author = await _userManager.GetUserAsync(HttpContext.User),
-                    Body = Body,
-                    Date = DateTime.Now,
-                    Title = Title
-                };
-
+                var post = new Post(DateTime.UtcNow, await _userManager.GetUserAsync(HttpContext.User), Title, Body);
                 _db.Posts.Add(post);
                 await _db.SaveChangesAsync();
 

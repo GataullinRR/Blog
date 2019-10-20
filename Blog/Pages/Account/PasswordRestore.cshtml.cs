@@ -54,7 +54,7 @@ namespace Blog.Pages.Account
 After openning the link, new password will be sent to this E-Mail");
                     if (isSent)
                     {
-                        user.LastPasswordRestoreAttempt = DateTime.UtcNow;
+                        user.Status.LastPasswordRestoreAttempt = DateTime.UtcNow;
                         await UserManager.UpdateAsync(user);
 
                         LayoutModel.Messages.Add("Password reset confirmation link has been sent");

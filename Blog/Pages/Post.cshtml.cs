@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Models;
 using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Authorization;
@@ -12,26 +13,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Pages
 {
-    public class PostModel : PageModel
+    public class PostModel : ExtendedPageModel
     {
-        readonly BlogContext _db;
-
-        public PermissionsService Permissions { get; }
         public Post Post { get; private set; }
         public IEnumerable<Commentary> Commentaries { get; private set; }
 
-        public PostModel(BlogContext db, PermissionsService permissions)
+        public PostModel(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _db = db;
-            Permissions = permissions;
+
         }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            Post = await _db.Posts
+            Post = await DB.Posts
                 .Include(p => p.Author)
                 .Include(p => p.Edits)
-                .ThenInclude(e => e.Author)
+                .ThenInclude(e => e.EditAuthor)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (Post == null)
@@ -40,7 +37,7 @@ namespace Blog.Pages
             }
             else
             {
-                Commentaries = _db.Commentaries
+                Commentaries = DB.Commentaries
                     .Include(c => c.Post)
                     .Where(c => c.Post == Post)
                     .Include(c => c.Author);
@@ -56,16 +53,13 @@ namespace Blog.Pages
             {
                 if (commentBody != null)
                 {
-                    var comment = new Commentary()
-                    {
-                        Author = await _db.Users.FirstAsync(u => u.UserName == User.Identity.Name),
-                        Body = commentBody,
-                        Date = DateTime.Now,
-                        Post = await _db.Posts.FindAsync(postId)
-                    };
-
-                    _db.Commentaries.Add(comment);
-                    await _db.SaveChangesAsync();
+                    var comment = new Commentary(
+                        await DB.Users.FirstAsync(u => u.UserName == User.Identity.Name), 
+                        DateTime.UtcNow, 
+                        await DB.Posts.FindAsync(postId), 
+                        commentBody);
+                    DB.Commentaries.Add(comment);
+                    await DB.SaveChangesAsync();
                 }
             }
          

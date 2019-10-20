@@ -68,16 +68,14 @@ namespace Blog.Pages.Account
                 var user = await _userManager.FindByNameAsync(Username);
                 if (user == null)
                 {
-                    var newUser = new User()
+                    var newUser = new User(new ProfileInfo(DateTime.UtcNow), new ProfileStatus(default))
                     {
                         UserName = Username,
-                        RegistrationDate = DateTime.Now,
                         Email = EMail
                     };
                     var result = await _userManager.CreateAsync(newUser, Password);
                     if (result.Succeeded)
                     {
-                        await _userManager.AddToRoleAsync(newUser, Roles.UNCONFIRMED);
                         await _signInManager.SignInAsync(newUser, true);
 
                         return RedirectToPage("/Account/ConfirmEmail");

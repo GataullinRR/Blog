@@ -7,16 +7,27 @@ namespace DBModels
 {
     public class Post
     {
+        [Key]
         public int Id { get; set; }
         [Required]
-        public DateTime Date { get; set; }
+        public DateTime CreationTime { get; set; }
         [Required]
-        public User Author { get; set; }
+        public virtual User Author { get; set; }
         [Required]
         public string Title { get; set; }
         [Required]
         public string Body { get; set; }
+        [Required]
+        public virtual List<PostEdit> Edits { get; set; } = new List<PostEdit>();
 
-        public List<PostEditInfo> Edits { get; set; }
+        public Post() { }
+
+        public Post(DateTime creationTime, User author, string title, string body)
+        {
+            CreationTime = creationTime;
+            Author = author ?? throw new ArgumentNullException(nameof(author));
+            Title = title ?? throw new ArgumentNullException(nameof(title));
+            Body = body ?? throw new ArgumentNullException(nameof(body));
+        }
     }
 }

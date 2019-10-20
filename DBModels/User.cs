@@ -1,28 +1,56 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Policy;
 
 namespace DBModels
 {
-    public static class Genders
+    public enum Gender
     {
-        public const string MALE = "Male";
-        public const string FEMALE = "Female";
-        public const string ANOTHER = "Another";
+        [Description("Unspecified")]
+        UNSPECIFIED = 0,
+        [Description("Male")]
+        MALE = 100,
+        [Description("Female")]
+        FEMALE = 1000,
+        [Description("Another")]
+        ANOTHER = 10000,
+    }
+
+    public enum ViolationObjectType
+    {
+        UNSPECIFIED = 0,
+        COMMENTARY = 100,
+        POST = 1000,
+    }
+
+    public enum ProfileState
+    {
+        RESTRICTED = 0,
+        ACTIVE = 100,
+        BANNED = 1000,
     }
 
     public class User : IdentityUser
     {
         [Required]
-        public DateTime RegistrationDate { get; set; }
-        public DateTime LastPasswordRestoreAttempt { get; set; }
-        public string Gender { get; set; }
-        public string ProfileImage { get; set; }
-        public string About { get; set; }
+        public virtual ProfileInfo Profile { get; set; }
+        [Required]
+        public virtual ProfileStatus Status { get; set; }
 
-        public List<Post> Posts { get; set; }
-        public List<Commentary> Commentaries { get; set; }
+        public virtual List<Post> Posts { get; set; }
+        public virtual List<Commentary> Commentaries { get; set; }
+        public virtual List<UserRuleViolation> Violations { get; set; } = new List<UserRuleViolation>();
+        public virtual List<UserRuleViolation> ReportedViolations { get; set; } = new List<UserRuleViolation>();
+
+        public User() { }
+
+        public User(ProfileInfo info, ProfileStatus status)
+        {
+            Profile = info ?? throw new ArgumentNullException(nameof(info));
+            Status = status ?? throw new ArgumentNullException(nameof(status));
+        }
     }
 }

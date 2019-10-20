@@ -23,33 +23,34 @@ namespace DBModels.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUsers",
+                name: "ProfilesInfos",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
-                    UserName = table.Column<string>(maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
-                    Email = table.Column<string>(maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(nullable: false),
-                    PasswordHash = table.Column<string>(nullable: true),
-                    SecurityStamp = table.Column<string>(nullable: true),
-                    ConcurrencyStamp = table.Column<string>(nullable: true),
-                    PhoneNumber = table.Column<string>(nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
-                    LockoutEnabled = table.Column<bool>(nullable: false),
-                    AccessFailedCount = table.Column<int>(nullable: false),
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     RegistrationDate = table.Column<DateTime>(nullable: false),
-                    LastPasswordRestoreAttempt = table.Column<DateTime>(nullable: false),
-                    Gender = table.Column<string>(nullable: true),
-                    ProfileImage = table.Column<string>(nullable: true),
+                    Gender = table.Column<int>(nullable: false),
+                    Image = table.Column<string>(nullable: true),
                     About = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.PrimaryKey("PK_ProfilesInfos", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProfilesStatuses",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    State = table.Column<int>(nullable: false),
+                    BannedTill = table.Column<DateTime>(nullable: true),
+                    LastPasswordRestoreAttempt = table.Column<DateTime>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProfilesStatuses", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -69,6 +70,45 @@ namespace DBModels.Migrations
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    UserName = table.Column<string>(maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
+                    Email = table.Column<string>(maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(nullable: false),
+                    PasswordHash = table.Column<string>(nullable: true),
+                    SecurityStamp = table.Column<string>(nullable: true),
+                    ConcurrencyStamp = table.Column<string>(nullable: true),
+                    PhoneNumber = table.Column<string>(nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
+                    LockoutEnabled = table.Column<bool>(nullable: false),
+                    AccessFailedCount = table.Column<int>(nullable: false),
+                    ProfileId = table.Column<int>(nullable: false),
+                    StatusId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_ProfilesInfos_ProfileId",
+                        column: x => x.ProfileId,
+                        principalTable: "ProfilesInfos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_ProfilesStatuses_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "ProfilesStatuses",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -164,7 +204,7 @@ namespace DBModels.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Date = table.Column<DateTime>(nullable: false),
+                    CreationTime = table.Column<DateTime>(nullable: false),
                     AuthorId = table.Column<string>(nullable: false),
                     Title = table.Column<string>(nullable: false),
                     Body = table.Column<string>(nullable: false)
@@ -181,13 +221,42 @@ namespace DBModels.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserRuleViolations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<string>(nullable: false),
+                    ReporterId = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: false),
+                    ObjectType = table.Column<int>(nullable: false),
+                    ObjectId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserRuleViolations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserRuleViolations_AspNetUsers_ReporterId",
+                        column: x => x.ReporterId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UserRuleViolations_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Commentaries",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     AuthorId = table.Column<string>(nullable: false),
-                    Date = table.Column<DateTime>(nullable: false),
+                    CreationTime = table.Column<DateTime>(nullable: false),
                     PostId = table.Column<int>(nullable: false),
                     Body = table.Column<string>(nullable: false),
                     UserId = table.Column<string>(nullable: true)
@@ -221,7 +290,7 @@ namespace DBModels.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    AuthorId = table.Column<string>(nullable: false),
+                    EditAuthorId = table.Column<string>(nullable: false),
                     Reason = table.Column<string>(nullable: false),
                     EditTime = table.Column<DateTime>(nullable: false),
                     PostId = table.Column<int>(nullable: true)
@@ -230,8 +299,8 @@ namespace DBModels.Migrations
                 {
                     table.PrimaryKey("PK_PostsEdits", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PostsEdits_AspNetUsers_AuthorId",
-                        column: x => x.AuthorId,
+                        name: "FK_PostsEdits_AspNetUsers_EditAuthorId",
+                        column: x => x.EditAuthorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -241,6 +310,34 @@ namespace DBModels.Migrations
                         principalTable: "Posts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CommentaryEdits",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    EditAuthorId = table.Column<string>(nullable: false),
+                    Reason = table.Column<string>(nullable: false),
+                    EditTime = table.Column<DateTime>(nullable: false),
+                    CommentaryId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CommentaryEdits", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CommentaryEdits_Commentaries_CommentaryId",
+                        column: x => x.CommentaryId,
+                        principalTable: "Commentaries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CommentaryEdits_AspNetUsers_EditAuthorId",
+                        column: x => x.EditAuthorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -283,6 +380,16 @@ namespace DBModels.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_ProfileId",
+                table: "AspNetUsers",
+                column: "ProfileId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_StatusId",
+                table: "AspNetUsers",
+                column: "StatusId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Commentaries_AuthorId",
                 table: "Commentaries",
                 column: "AuthorId");
@@ -298,19 +405,39 @@ namespace DBModels.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CommentaryEdits_CommentaryId",
+                table: "CommentaryEdits",
+                column: "CommentaryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CommentaryEdits_EditAuthorId",
+                table: "CommentaryEdits",
+                column: "EditAuthorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Posts_AuthorId",
                 table: "Posts",
                 column: "AuthorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PostsEdits_AuthorId",
+                name: "IX_PostsEdits_EditAuthorId",
                 table: "PostsEdits",
-                column: "AuthorId");
+                column: "EditAuthorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PostsEdits_PostId",
                 table: "PostsEdits",
                 column: "PostId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserRuleViolations_ReporterId",
+                table: "UserRuleViolations",
+                column: "ReporterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserRuleViolations_UserId",
+                table: "UserRuleViolations",
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -331,19 +458,31 @@ namespace DBModels.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Commentaries");
+                name: "CommentaryEdits");
 
             migrationBuilder.DropTable(
                 name: "PostsEdits");
 
             migrationBuilder.DropTable(
+                name: "UserRuleViolations");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Commentaries");
 
             migrationBuilder.DropTable(
                 name: "Posts");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "ProfilesInfos");
+
+            migrationBuilder.DropTable(
+                name: "ProfilesStatuses");
         }
     }
 }

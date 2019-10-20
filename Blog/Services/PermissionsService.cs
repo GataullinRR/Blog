@@ -22,32 +22,34 @@ namespace Blog.Services
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
-        public bool CanEditPost(ClaimsPrincipal user, Post post)
+        public async Task ValidateEditPostAsync(ClaimsPrincipal user, Post post)
         {
-            return (user.Identity.Name == post.Author.UserName && 
-                    post.Date - DateTime.Now < TimeSpan.FromDays(3) && 
-                    post.Edits.Where(e => e.Author == post.Author).Count() < MAX_POST_EDITS_FOR_STANDARD_USER)
-                    || user.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR);
-        }
-        public void ValidateEditPost(ClaimsPrincipal user, Post post)
-        {
-            if (!CanEditPost(user, post))
+            if (!await CanEditPostAsync(user, post))
             {
                 throw new UnauthorizedAccessException($"The post \"{post.Title}\" can not be edited by the user \"{user.Identity.Name}\"");
             }
         }
-
-        public void ValidateEditCommentary(ClaimsPrincipal user, Commentary comment)
+        public async Task<bool> CanEditPostAsync(ClaimsPrincipal user, Post post)
         {
-            if (!CanEditCommentary(user, comment))
+            return (user.Identity.Name == post.Author.UserName 
+                    && (await _userManager.GetUserAsync(user)).Status.State == ProfileState.ACTIVE
+                    && post.CreationTime - DateTime.Now < TimeSpan.FromDays(3)
+                    &&  post.Edits.Where(e => e.EditAuthor == post.Author).Count() < MAX_POST_EDITS_FOR_STANDARD_USER)
+                    || user.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR);
+        }
+
+        public async Task ValidateEditCommentaryAsync(ClaimsPrincipal user, Commentary comment)
+        {
+            if (!await CanEditCommentaryAsync(user, comment))
             {
                 throw new UnauthorizedAccessException($"The post \"{comment.Id}\" can not be edited by the user \"{user.Identity.Name}\"");
             }
         }
-        public bool CanEditCommentary(ClaimsPrincipal user, Commentary comment)
+        public async Task<bool> CanEditCommentaryAsync(ClaimsPrincipal user, Commentary comment)
         {
-            return (user.Identity.Name == comment.Author.UserName &&
-                    comment.Date - DateTime.Now < TimeSpan.FromDays(1))
+            return (user.Identity.Name == comment.Author.UserName
+                    && (await _userManager.GetUserAsync(user)).Status.State == ProfileState.ACTIVE
+                    && comment.CreationTime - DateTime.Now < TimeSpan.FromDays(1))
                     || user.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR);
         }
 
@@ -60,7 +62,9 @@ namespace Blog.Services
         }
         public async Task<bool> CanRestorePasswordAsync(ClaimsPrincipal currentUser, User user)
         {
-            return (user.LastPasswordRestoreAttempt - DateTime.UtcNow).TotalMinutes.Abs() > 30
+            return ((user.Status.LastPasswordRestoreAttempt ?? DateTime.UtcNow) - DateTime.UtcNow).TotalMinutes.Abs() > 30
+                && user.EmailConfirmed 
+                && user.Status.State == ProfileState.ACTIVE
                 && await _userManager.IsInOneOfTheRolesAsync(user, Roles.NOT_RESTRICTED)
                 && (!currentUser?.Identity?.IsAuthenticated ?? true);
         }
@@ -76,7 +80,9 @@ namespace Blog.Services
         public bool CanChangePassword(ClaimsPrincipal user, User userModel)
         {
             return user.Identity.IsAuthenticated 
-                && user.Identity.Name == userModel.UserName 
+                && user.Identity.Name == userModel.UserName
+                && userModel.EmailConfirmed
+                && userModel.Status.State == ProfileState.ACTIVE
                 && user.IsInOneOfTheRoles(Roles.NOT_RESTRICTED);
         }
     }

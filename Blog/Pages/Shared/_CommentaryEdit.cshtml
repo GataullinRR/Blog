@@ -4,7 +4,7 @@
     <input type="hidden" asp-for="Id" />
 
     <h4>
-        <a asp-page="/Account/Profile" asp-route-id="@Model.Author.Id">@Model.Author.UserName</a> - @Model.Date.ToString("hh:mm dd.MM.yyyy")
+        <a asp-page="/Account/Profile" asp-route-id="@Model.Author.Id">@Model.Author.UserName</a> - @Model.CreationTime.ToString("hh:mm dd.MM.yyyy")
         <button type="submit" class="commentary-edit-save-button">Save</button>
         <button type="button" class="commentary-edit-exit-button">Cancel</button>
     </h4>

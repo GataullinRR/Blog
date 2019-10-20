@@ -18,7 +18,7 @@
     <div>
         <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
         <a asp-page="/Account/Profile" asp-route-id="@post.Author.Id">@post.Author.UserName</a>
-        @post.Date.ToString("dd.MM.yyyy")
+        @post.CreationTime.ToString("dd.MM.yyyy")
 
         @{ var maxViewSize = 500; }
         @post.Body.Take(maxViewSize).Concat(post.Body.Length > maxViewSize ? "..." : "").AsString()

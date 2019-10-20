@@ -11,7 +11,11 @@ namespace DBModels
     {
         public DbSet<Post> Posts { get; set; }
         public DbSet<Commentary> Commentaries { get; set; }
-        public DbSet<PostEditInfo> PostsEdits { get; set; }
+        public DbSet<PostEdit> PostsEdits { get; set; }
+        public DbSet<CommentaryEdit> CommentaryEdits { get; set; }
+        public DbSet<UserRuleViolation> UserRuleViolations { get; set; }
+        public DbSet<ProfileStatus> ProfilesStatuses { get; set; }
+        public DbSet<ProfileInfo> ProfilesInfos { get; set; }
 
         public BlogContext(DbContextOptions<BlogContext> options)
             : base(options)
@@ -23,24 +27,10 @@ namespace DBModels
         {
             base.OnModelCreating(modelBuilder);
 
-            //modelBuilder.Entity<Commentary>()
-            //    .HasOne(c => c.Author)
-            //    .WithMany()
-            //    .HasForeignKey(c => c.Author)
-            //    .OnDelete(DeleteBehavior.Restrict);
-            //modelBuilder.Entity<User>()
-            //    .HasOne(u => u.Commentaries)
-            //    .WithMany()
-            //    .HasForeignKey(u => u.Commentaries)
-            //    .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Commentary>()
                 .HasOne(c => c.Author)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
-            //modelBuilder.Entity<User>()
-            //    .HasOne(u => u.Commentaries)
-            //    .WithMany()
-            //    .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

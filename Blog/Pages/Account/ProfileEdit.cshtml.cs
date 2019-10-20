@@ -49,7 +49,7 @@ namespace Blog.Pages.Account
             if ((currentUser.Id == EditUserId || User.IsInOneOfTheRoles(Roles.ADMIN))
                 && editUser != null)
             {
-                About = editUser.About;
+                About = editUser.Profile.About;
 
                 return Page();
             }
@@ -74,9 +74,9 @@ namespace Blog.Pages.Account
                         await toServerStream.WriteAsync(await fromClientStream.ReadToEndAsync());
                     }
 
-                    editingUser.ProfileImage = serverLocalPath;
+                    editingUser.Profile.Image = serverLocalPath;
                 }
-                editingUser.About = About;
+                editingUser.Profile.About = About;
                 await _db.SaveChangesAsync();
 
                 return RedirectToPage("/Account/Profile", new { id = editingUser.Id });

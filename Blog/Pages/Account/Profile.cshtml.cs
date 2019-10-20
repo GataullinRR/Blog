@@ -48,7 +48,10 @@ namespace Blog.Pages.Account
             }
 
             IsCurrentUser = currentUser?.Id == UserModel.Id;
-            UserModel.Posts = await DB.Posts.Where(p => p.Author == UserModel).ToListAsync();
+            UserModel.Posts = await DB.Posts
+                .IncludeAuthor()
+                .Where(p => p.Author == UserModel)
+                .ToListAsync();
             Role = (await UserManager.GetRolesAsync(UserModel)).Single();
             return Page();
         }

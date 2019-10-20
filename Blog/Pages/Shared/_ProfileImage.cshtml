@@ -1,6 +1,6 @@
 ﻿@model User
 
 @{
-    var profileImage = Url.AbsoluteContent(Model.ProfileImage ?? "~/images/ProfileDefaultImage.jpg");
+    var profileImage = Url.AbsoluteContent(Model.Profile.Image ?? "~/images/ProfileDefaultImage.jpg");
     <img src="@profileImage" height="100" width="100" />
 }
