@@ -74,11 +74,14 @@ namespace Blog
             services.AddTransient<EMailService>();
             services.AddTransient<ConfirmationTokenService>();
             services.AddTransient<PermissionsService>();
+            services.AddSingleton<AutounbanService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.ApplicationServices.GetService<AutounbanService>();
+
             if (env.IsDevelopment())
             {
                 app.UseBrowserLink();
