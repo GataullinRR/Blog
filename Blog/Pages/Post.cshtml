@@ -7,10 +7,7 @@
 }
 
 <h2>@Model.Post.Title 
-    @if (await Model.Permissions.CanEditPostAsync(User, Model.Post))
-    {
-        <a asp-page="/PostCreate" asp-route-editingpostid="@Model.Post.Id">Edit</a> 
-    }
+    @await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/PostCreate", "editingpostid", Model.Post.Id, await Model.Permissions.CanEditPostAsync(User, Model.Post)))
 </h2>
 
 @Model.Post.Body
