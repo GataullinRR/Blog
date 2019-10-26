@@ -74,6 +74,7 @@ namespace Blog
             services.AddTransient<EMailService>();
             services.AddTransient<ConfirmationTokenService>();
             services.AddTransient<PermissionsService>();
+            services.AddTransient<HistoryService>();
             services.AddSingleton<AutounbanService>();
         }
 

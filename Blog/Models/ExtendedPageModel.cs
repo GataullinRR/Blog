@@ -30,6 +30,7 @@ namespace Blog.Models
         protected UserManager<User> UserManager => _userManager.Value;
         protected SignInManager<User> SignInManager => _signInManager.Value;
         protected EMailService EMail => _eMail.Value;
+        protected HistoryService History { get; }
         public PermissionsService Permissions => _permissions.Value;
 
         public LayoutModel LayoutModel { get; private set; } = new LayoutModel();
@@ -39,11 +40,12 @@ namespace Blog.Models
         {
             _serviceProvider = serviceProvider;
 
-            _db = new Lazy<BlogContext>(() => (BlogContext)_serviceProvider.GetService(typeof(BlogContext)));
-            _permissions = new Lazy<PermissionsService>(() => (PermissionsService)_serviceProvider.GetService(typeof(PermissionsService)));
-            _userManager = new Lazy<UserManager<User>>(() => (UserManager<User>)_serviceProvider.GetService(typeof(UserManager<User>)));
-            _signInManager = new Lazy<SignInManager<User>>(() => (SignInManager<User>)_serviceProvider.GetService(typeof(SignInManager<User>)));
-            _eMail = new Lazy<EMailService>(() => (EMailService)_serviceProvider.GetService(typeof(EMailService)));
+            _db = _serviceProvider.GetLazyService<BlogContext>();
+            _permissions = _serviceProvider.GetLazyService<PermissionsService>();
+            _userManager = _serviceProvider.GetLazyService<UserManager<User>>();
+            _signInManager = _serviceProvider.GetLazyService<SignInManager<User>>();
+            _eMail = _serviceProvider.GetLazyService<EMailService>();
+            History = _serviceProvider.GetService<HistoryService>();
         }
 
         public override void OnPageHandlerSelected(PageHandlerSelectedContext context)
@@ -65,6 +67,8 @@ namespace Blog.Models
             {
                 HttpContext.Session.Remove(nameof(LayoutModel));
             }
+
+            History.SaveCurrentURL();
 
             base.OnPageHandlerExecuted(context);
         }

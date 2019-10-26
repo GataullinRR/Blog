@@ -21,6 +21,7 @@ namespace Blog.Controllers
         readonly Lazy<SignInManager<User>> _signInManager;
         readonly Lazy<EMailService> _eMail;
         readonly Lazy<ConfirmationTokenService> _confirmationToken;
+        readonly Lazy<HistoryService> _history;
 
         protected BlogContext DB => _db.Value;
         protected UserManager<User> UserManager => _userManager.Value;
@@ -28,6 +29,7 @@ namespace Blog.Controllers
         protected SignInManager<User> SignInManager => _signInManager.Value;
         protected EMailService EMail => _eMail.Value;
         protected ConfirmationTokenService ConfirmationTokens => _confirmationToken.Value;
+        protected HistoryService History => _history.Value;
         public PermissionsService Permissions => _permissions.Value;
 
         public LayoutModel LayoutModel { get; private set; } = new LayoutModel();
@@ -37,13 +39,14 @@ namespace Blog.Controllers
         {
             _serviceProvider = serviceProvider;
 
-            _db = new Lazy<BlogContext>(() => (BlogContext)_serviceProvider.GetService(typeof(BlogContext)));
-            _permissions = new Lazy<PermissionsService>(() => (PermissionsService)_serviceProvider.GetService(typeof(PermissionsService)));
-            _userManager = new Lazy<UserManager<User>>(() => (UserManager<User>)_serviceProvider.GetService(typeof(UserManager<User>)));
-            _roleManager = new Lazy<RoleManager<User>>(() => (RoleManager<User>)_serviceProvider.GetService(typeof(RoleManager<User>)));
-            _signInManager = new Lazy<SignInManager<User>>(() => (SignInManager<User>)_serviceProvider.GetService(typeof(SignInManager<User>)));
-            _eMail = new Lazy<EMailService>(() => (EMailService)_serviceProvider.GetService(typeof(EMailService)));
-            _confirmationToken = new Lazy<ConfirmationTokenService>(() => (ConfirmationTokenService)_serviceProvider.GetService(typeof(ConfirmationTokenService)));
+            _db = _serviceProvider.GetLazyService<BlogContext>();
+            _permissions = _serviceProvider.GetLazyService<PermissionsService>();
+            _userManager = _serviceProvider.GetLazyService<UserManager<User>>();
+            _roleManager = _serviceProvider.GetLazyService<RoleManager<User>>();
+            _signInManager = _serviceProvider.GetLazyService<SignInManager<User>>();
+            _eMail = _serviceProvider.GetLazyService<EMailService>();
+            _confirmationToken = _serviceProvider.GetLazyService<ConfirmationTokenService>();
+            _history = _serviceProvider.GetLazyService<HistoryService>();
         }
 
         public override void OnActionExecuted(ActionExecutedContext context)
@@ -56,6 +59,8 @@ namespace Blog.Controllers
             {
                 HttpContext.Session.Remove(nameof(LayoutModel));
             }
+
+            History.SaveCurrentURL();
 
             base.OnActionExecuted(context);
         }

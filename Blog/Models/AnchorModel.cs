@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ASPCoreUtilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,7 +47,7 @@ namespace Blog.Models
             return new AnchorModel()
             {
                 Text = text,
-                Controller = controller,
+                Controller = controller.GetController(),
                 Action = action,
                 RouteIdParameterName = routeIdParameterName,
                 RouteId = routeId,

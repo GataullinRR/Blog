@@ -6,7 +6,9 @@
     {
         <button class="commentary-edit-button">Edit</button>
     }
+    @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportCommentaryAsync), "id", Model.Commentary.Id, await Model.Permissions.CanReportAsync(Model.Commentary)))
 </h4>
+
 @await Html.PartialAsync("_ProfileImage", Model.Commentary.Author)
 @Model.Commentary.Body
 @foreach (var edit in Model.Commentary.Edits)

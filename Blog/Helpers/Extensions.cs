@@ -64,5 +64,15 @@ namespace Blog
             return users.Include(a => a.Profile)
                     .Include(a => a.Status);
         }
+
+        public static T GetService<T>(this IServiceProvider serviceProvider)
+        {
+            return (T)serviceProvider.GetService(typeof(T));
+        }
+
+        public static Lazy<T> GetLazyService<T>(this IServiceProvider serviceProvider)
+        {
+            return new Lazy<T>(() => (T)serviceProvider.GetService(typeof(T)));
+        }
     }
 }

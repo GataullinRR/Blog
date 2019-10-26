@@ -19,13 +19,6 @@ namespace DBModels
         ANOTHER = 10000,
     }
 
-    public enum ViolationObjectType
-    {
-        UNSPECIFIED = 0,
-        COMMENTARY = 100,
-        POST = 1000,
-    }
-
     public enum ProfileState
     {
         [Description("Restricted")]
@@ -47,6 +40,8 @@ namespace DBModels
         public virtual List<Commentary> Commentaries { get; set; }
         public virtual List<UserRuleViolation> Violations { get; set; } = new List<UserRuleViolation>();
         public virtual List<UserRuleViolation> ReportedViolations { get; set; } = new List<UserRuleViolation>();
+
+        [Required] public virtual List<Report> ReportedReports { get; set; } = new List<Report>();
 
         public User() { }
 

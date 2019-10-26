@@ -4,6 +4,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DBModels
 {
+    public enum ViolationObjectType
+    {
+        UNSPECIFIED = 0,
+        COMMENTARY = 100,
+        POST = 1000,
+    }
+
     // I wanted this row to be deleted when the user gets deleted, but not the reporter...
     public class UserRuleViolation
     {

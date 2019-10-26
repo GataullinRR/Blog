@@ -1,12 +1,18 @@
 ﻿@model Blog.Models.AnchorModel
 
-@{ 
+@{
     var routeData = new Dictionary<string, string>();
     routeData.Add(Model.RouteIdParameterName, Model.RouteId?.ToString());
 }
 
 @if (Model.IsShown)
 {
-
-    <span>| <a asp-page="@Model.Page" asp-all-route-data=routeData>@Model.Text</a></span>
+    @if (Model.Controller != null)
+    {
+        <span>| <a asp-controller="@Model.Controller" asp-action="@Model.Action" asp-all-route-data=routeData>@Model.Text</a></span>
+    }
+    else
+    {
+        <span>| <a asp-page="@Model.Page" asp-all-route-data=routeData>@Model.Text</a></span>
+    }
 }

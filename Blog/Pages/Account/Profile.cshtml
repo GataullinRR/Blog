@@ -1,7 +1,7 @@
 ﻿@page
 @model Blog.Pages.Account.ProfileModel
 @{
-    ViewData["Title"] = User.Identity.Name;
+    ViewData["Title"] = Model.UserModel.UserName;
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
@@ -12,13 +12,14 @@
     var banButton = await Html.PartialAsync("_Anchor", new AnchorModel("Ban", "/Account/BanConfirmation", targetUser.Id, await Model.Permissions.CanBanUserAsync(targetUser)));
 }
 
-<h3>
-    Profile information @await generateEditButtonAsync(targetUser.Id, canEdit) @banButton 
-    @if (await Model.Permissions.CanUnbanUserAsync(targetUser))
-    {
-        <span>| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
-    }
-</h3>
+    <h3>
+        Profile information @await generateEditButtonAsync(targetUser.Id, canEdit) @banButton
+        @if (await Model.Permissions.CanUnbanUserAsync(targetUser))
+        {
+            <span>| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
+        }
+        @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportProfileAsync), "id", targetUser.Profile.Id, await Model.Permissions.CanReportAsync(targetUser.Profile)))
+    </h3>
 
 @await Html.PartialAsync("_ProfileImage", targetUser)
 

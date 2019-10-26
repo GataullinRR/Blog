@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace DBModels
@@ -11,6 +12,8 @@ namespace DBModels
         public Gender Gender { get; set; }
         public string Image { get; set; }
         public string About { get; set; } = "";
+
+        [Required] public virtual List<ProfileReport> Reports { get; set; } = new List<ProfileReport>();
 
         public ProfileInfo(DateTime registrationDate)
         {

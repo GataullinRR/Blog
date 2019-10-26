@@ -10,20 +10,19 @@ using Utilities.Extensions;
 
 namespace Blog.Services
 {
-    public class PermissionsService
+    public class PermissionsService : ServiceBase
     {
         public const int MAX_POST_EDITS_FOR_STANDARD_USER = 3;
         public const int MAX_COMMENTARY_EDITS_FOR_STANDARD_USER = 1;
 
         readonly UserManager<User> _userManager;
         readonly SignInManager<User> _signInManager;
-        readonly IHttpContextAccessor _httpContext;
 
-        public PermissionsService(UserManager<User> userManager, SignInManager<User> signInManager, IHttpContextAccessor httpContext)
+        public PermissionsService(UserManager<User> userManager, SignInManager<User> signInManager, IServiceProvider serviceProvider) 
+            : base(serviceProvider)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
-            _httpContext = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
         }
 
         public async Task ValidateEditPostAsync(Post post)
@@ -195,41 +194,47 @@ namespace Blog.Services
             }
         }
 
-        //public async Task ValidateReportAsync(object reportObject)
-        //{
-        //    if (!await CanReportAsync(targetUser))
-        //    {
-        //        throw new UnauthorizedAccessException();
-        //    }
-        //}
-        //public async Task<bool> CanReportAsync(object reportObject)
-        //{
-        //    var dd = new []
-        //    {
-        //        (typeof(Commentary))
-        //    }
+        public async Task ValidateReportAsync(object reportObject)
+        {
+            if (!await CanReportAsync(reportObject))
+            {
+                throw new UnauthorizedAccessException();
+            }
+        }
+        public async Task<bool> CanReportAsync(object reportObject)
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null)
+            {
+                return false;
+            }
+            else
+            {
+                return await canReportAsync(currentUser, (dynamic)reportObject);
+            }
+        }
+        async Task<bool> canReportAsync(User currentUser, Commentary reportObject)
+        {
+            var alreadyReported = db.CommentariesReports.Any(cr => cr.Object.Id == reportObject.Id && cr.Reporter.Id == currentUser.Id);
 
-        //    string id;
-        //    if (reportObject.GetType().IsOneOf(typeof(Commentary), typeof(Commentary))
-        //    {
-        //        id = re
-        //    }
-        //    var currentUser = await getCurrentUserOrNullAsync();
-        //    if (currentUser == null)
-        //    {
-        //        return false;
-        //    }
-        //    else
-        //    {
-        //        return targetUser.Status.State.IsOneOf(ProfileState.BANNED)
-        //            && await _userManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
-        //            && (await _userManager.GetRolesAsync(targetUser)).Single().IsLess((await _userManager.GetRolesAsync(currentUser)).Single());
-        //    }
-        //}
+            return !alreadyReported;
+        }
+        async Task<bool> canReportAsync(User currentUser, Post reportObject)
+        {
+            var alreadyReported = db.PostsReports.Any(cr => cr.Object.Id == reportObject.Id && cr.Reporter.Id == currentUser.Id);
+
+            return !alreadyReported;
+        }
+        async Task<bool> canReportAsync(User currentUser, ProfileInfo reportObject)
+        {
+            var alreadyReported = db.ProfilesReports.Any(cr => cr.Object.Id == reportObject.Id && cr.Reporter.Id == currentUser.Id);
+
+            return !alreadyReported;
+        }
 
         async Task<User> getCurrentUserOrNullAsync()
         {
-            return await _userManager.GetUserAsync(_httpContext.HttpContext.User);
+            return await _userManager.GetUserAsync(httpContext.User);
         }
     }
 }
