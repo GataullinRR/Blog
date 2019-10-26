@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DBModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Controllers
 {
@@ -59,15 +60,16 @@ namespace Blog.Controllers
             var reportingUser = await UserManager.GetUserAsync(User);
             if (reportObject is Post post)
             {
-                DB.PostsReports.Add(new PostReport(reportingUser, post));
+                DB.Reports.Add(new Report(reportingUser, post.Author, ReportObjectType.POST, post.Id, DateTime.UtcNow));
             }
             else if (reportObject is ProfileInfo profile)
             {
-                DB.ProfilesReports.Add(new ProfileReport(reportingUser, profile));
+                var owner = await DB.Users.FirstOrDefaultAsync(u => u.Profile.Id == profile.Id);
+                DB.Reports.Add(new Report(reportingUser, owner, ReportObjectType.PROFILE, profile.Id, DateTime.UtcNow));
             }
             else if (reportObject is Commentary commentary)
             {
-                DB.CommentariesReports.Add(new CommentaryReport(reportingUser, commentary));
+                DB.Reports.Add(new Report(reportingUser, commentary.Author, ReportObjectType.COMMENTARY, commentary.Id, DateTime.UtcNow));
             }
             else
             {

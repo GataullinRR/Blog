@@ -12,7 +12,7 @@ namespace DBModels
         [Required] public virtual Post Post { get; set; }
         [Required] public string Body { get; set; }
         [Required] public virtual List<CommentaryEdit> Edits { get; set; } = new List<CommentaryEdit>();
-        [Required] public virtual List<CommentaryReport> Reports { get; set; } = new List<CommentaryReport>();
+        [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
 
         public Commentary() { }
 

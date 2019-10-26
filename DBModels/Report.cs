@@ -4,66 +4,34 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DBModels
 {
-    public abstract class Report
+    public enum ReportObjectType
+    {
+        PROFILE = 0,
+        POST = 100,
+        COMMENTARY = 1000,
+    }
+
+    public class Report
     {
         [Key]
         public int Id { get; set; }
-        [Required]
+        [Required, InverseProperty(nameof(User.ReportedReports))]
         public virtual User Reporter { get; set; }
+        [InverseProperty(nameof(User.Reports))]
+        public virtual User ReportObjectOwner { get; set; }
+        public virtual DateTime CreationDate { get; set; }
+        public int ReportObjectId { get; set; }
+        public ReportObjectType ReportObjectType { get; set; }
 
         public Report() { }
 
-        public Report(User reporter)
+        public Report(User reporter, User reportObjectOwner, ReportObjectType reportObjectType, int reportObjectId, DateTime creationDate)
         {
             Reporter = reporter ?? throw new ArgumentNullException(nameof(reporter));
-        }
-    }
-
-    public abstract class Report<T> : Report 
-        where T : class
-    {
-        //todo make required
-        public virtual T Object { get; set; }
-
-        public Report() { }
-
-        public Report(User reporter, T @object) : base(reporter)
-        {
-            Object = @object ?? throw new ArgumentNullException(nameof(@object));
-        }
-    }
-
-    public class CommentaryReport : Report<Commentary>
-    {
-        public CommentaryReport()
-        {
-        }
-
-        public CommentaryReport(User reporter, Commentary @object) : base(reporter, @object)
-        {
-
-        }
-    }
-
-    public class ProfileReport : Report<ProfileInfo>
-    {
-        public ProfileReport()
-        {
-        }
-
-        public ProfileReport(User reporter, ProfileInfo @object) : base(reporter, @object)
-        {
-        }
-    }
-
-    public class PostReport : Report<Post>
-    {
-        public PostReport()
-        {
-        }
-
-        public PostReport(User reporter, Post @object) : base(reporter, @object)
-        {
+            ReportObjectOwner = reportObjectOwner ?? throw new ArgumentNullException(nameof(reportObjectOwner));
+            ReportObjectType = reportObjectType;
+            ReportObjectId = reportObjectId;
+            CreationDate = creationDate;
         }
     }
 }

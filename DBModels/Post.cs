@@ -19,7 +19,7 @@ namespace DBModels
         public string Body { get; set; }
         [Required]
         public virtual List<PostEdit> Edits { get; set; } = new List<PostEdit>();
-        [Required] public virtual List<PostReport> Reports { get; set; } = new List<PostReport>();
+        [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
 
         public Post() { }
 

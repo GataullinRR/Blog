@@ -12,14 +12,14 @@
     var banButton = await Html.PartialAsync("_Anchor", new AnchorModel("Ban", "/Account/BanConfirmation", targetUser.Id, await Model.Permissions.CanBanUserAsync(targetUser)));
 }
 
-    <h3>
-        Profile information @await generateEditButtonAsync(targetUser.Id, canEdit) @banButton
-        @if (await Model.Permissions.CanUnbanUserAsync(targetUser))
-        {
-            <span>| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
-        }
-        @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportProfileAsync), "id", targetUser.Profile.Id, await Model.Permissions.CanReportAsync(targetUser.Profile)))
-    </h3>
+<h3>
+    Profile information @await generateEditButtonAsync(targetUser.Id, canEdit) @banButton
+    @if (await Model.Permissions.CanUnbanUserAsync(targetUser))
+    {
+        <span>| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
+    }
+    @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportProfileAsync), "id", targetUser.Profile.Id, await Model.Permissions.CanReportAsync(targetUser.Profile)))
+</h3>
 
 @await Html.PartialAsync("_ProfileImage", targetUser)
 
@@ -76,7 +76,7 @@ else
 {
     <h4>Violations</h4>
 
-    if(targetUser.Violations.Count == 0)
+    if (targetUser.Violations.Count == 0)
     {
         <span>None we know about ;)</span>
     }
@@ -84,31 +84,65 @@ else
     <ul>
         @foreach (var violation in targetUser.Violations)
         {
-        <li>
-            <span>Got from <a asp-page="/Account/Profile" asp-route-id="@violation.Reporter.Id">@violation.Reporter.UserName</a></span>
-            <div>
-                <span>violation.Description</span>
-            </div>
-            <div>
-                <span>Object: </span>
-                @switch (violation.ObjectType)
-                {
-                    case ViolationObjectType.UNSPECIFIED:
-                        <span>is not specified</span>
-                        break;
-                    case ViolationObjectType.COMMENTARY:
-                        <a asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.GetCommentaryAsync)" asp-route-id="@violation.ObjectId">commentary</a>
-                        break;
-                    case ViolationObjectType.POST:
-                        <a asp-page="/Post" asp-route-id="@violation.ObjectId">post</a>
-                        break;
+            <li>
+                <span>Got from <a asp-page="/Account/Profile" asp-route-id="@violation.Reporter.Id">@violation.Reporter.UserName</a></span>
+                <div>
+                    <span>@violation.Description</span>
+                </div>
+                <div>
+                    <span>Object: </span>
+                    @switch (violation.ObjectType)
+                    {
+                        case ViolationObjectType.UNSPECIFIED:
+                            <span>is not specified</span>
+                            break;
+                        case ViolationObjectType.COMMENTARY:
+                            <a asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.GetCommentaryAsync)" asp-route-id="@violation.ObjectId">commentary</a>
+                            break;
+                        case ViolationObjectType.POST:
+                            <a asp-page="/Post" asp-route-id="@violation.ObjectId">post</a>
+                            break;
 
+                        default:
+                            <span>unknown</span>
+                            break;
+                    }
+                </div>
+            </li>
+        }
+    </ul>
+}
+
+@if (User.IsInOneOfTheRoles(Roles.GetAllNotLess(Roles.MODERATOR)))
+{
+    <h4>Reports</h4>
+
+    if (targetUser.Reports.Count == 0)
+    {
+        <span>None we know about ;)</span>
+    }
+
+    <ul>
+        @foreach (var report in targetUser.Reports.OrderByDescending(r => r.CreationDate))
+        {
+            <li>
+                <span>Reported by <a asp-page="/Account/Profile" asp-route-id="@report.Reporter.Id">@report.Reporter.UserName</a> at @report.CreationDate.ToString("hh:mm dd.MM.yyyy"). Report object: </span>
+                @switch (report.ReportObjectType)
+                {
+                    case ReportObjectType.PROFILE:
+                        <a asp-page="/Account/Profile" asp-route-id="@targetUser.Id">profile</a>
+                        break;
+                    case ReportObjectType.POST:
+                        <a asp-page="/Post" asp-route-id="@report.ReportObjectId">post</a>
+                        break;
+                    case ReportObjectType.COMMENTARY:
+                        <span>commentary</span>
+                        break;
                     default:
                         <span>unknown</span>
                         break;
                 }
-            </div>
-        </li>
+            </li>
         }
     </ul>
 }

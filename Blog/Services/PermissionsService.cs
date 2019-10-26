@@ -215,19 +215,25 @@ namespace Blog.Services
         }
         async Task<bool> canReportAsync(User currentUser, Commentary reportObject)
         {
-            var alreadyReported = db.CommentariesReports.Any(cr => cr.Object.Id == reportObject.Id && cr.Reporter.Id == currentUser.Id);
+            var alreadyReported = db.Reports.Any(cr => cr.ReportObjectType == ReportObjectType.COMMENTARY
+                && cr.ReportObjectId == reportObject.Id
+                && cr.Reporter.Id == currentUser.Id);
 
             return !alreadyReported;
         }
         async Task<bool> canReportAsync(User currentUser, Post reportObject)
         {
-            var alreadyReported = db.PostsReports.Any(cr => cr.Object.Id == reportObject.Id && cr.Reporter.Id == currentUser.Id);
+            var alreadyReported = db.Reports.Any(cr => cr.ReportObjectType == ReportObjectType.POST 
+                && cr.ReportObjectId == reportObject.Id 
+                && cr.Reporter.Id == currentUser.Id);
 
             return !alreadyReported;
         }
         async Task<bool> canReportAsync(User currentUser, ProfileInfo reportObject)
         {
-            var alreadyReported = db.ProfilesReports.Any(cr => cr.Object.Id == reportObject.Id && cr.Reporter.Id == currentUser.Id);
+            var alreadyReported = db.Reports.Any(cr => cr.ReportObjectType == ReportObjectType.PROFILE
+                && cr.ReportObjectId == reportObject.Id
+                && cr.Reporter.Id == currentUser.Id);
 
             return !alreadyReported;
         }

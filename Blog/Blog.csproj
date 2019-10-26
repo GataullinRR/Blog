@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyVersion>2019.8.1.2269</AssemblyVersion>
-    <FileVersion>2019.8.1.2269</FileVersion>
+    <AssemblyVersion>2019.8.1.2283</AssemblyVersion>
+    <FileVersion>2019.8.1.2283</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,5 +29,4 @@
     <ProjectReference Include="..\ASPCoreUtilities\ASPCoreUtilities.csproj" />
     <ProjectReference Include="..\DBModels\DBModels.csproj" />
   </ItemGroup>
-
 </Project>

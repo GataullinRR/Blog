@@ -41,6 +41,7 @@ namespace DBModels
         public virtual List<UserRuleViolation> Violations { get; set; } = new List<UserRuleViolation>();
         public virtual List<UserRuleViolation> ReportedViolations { get; set; } = new List<UserRuleViolation>();
 
+        [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
         [Required] public virtual List<Report> ReportedReports { get; set; } = new List<Report>();
 
         public User() { }
