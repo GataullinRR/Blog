@@ -7,20 +7,18 @@
 
 @{
     var targetUser = Model.UserModel;
-    var canSeePrivateInformation = Model.IsCurrentUser
-        || User.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR);
-    var canEdit = (Model.IsCurrentUser && User.IsInOneOfTheRoles(Roles.NOT_RESTRICTED))
-        || User.IsInOneOfTheRoles(Roles.ADMIN);
-    var banButton = await Html.PartialAsync("_Anchor", new AnchorModel("Ban", "/Account/BanConfirmation", targetUser.Id, await Model.Permissions.CanBanUserAsync(User, targetUser)));
+    var canSeePrivateInformation = await Model.Permissions.CanSeePrivateInformationAsync(targetUser);
+    var canEdit = await Model.Permissions.CanEditProfileAsync(targetUser);
+    var banButton = await Html.PartialAsync("_Anchor", new AnchorModel("Ban", "/Account/BanConfirmation", targetUser.Id, await Model.Permissions.CanBanUserAsync(targetUser)));
 }
 
-    <h3>
-        Profile information @await generateEditButtonAsync(targetUser.Id, canEdit) @banButton 
-        @if (await Model.Permissions.CanUnbanUserAsync(User, targetUser))
-        {
-            <span>| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
-        }
-    </h3>
+<h3>
+    Profile information @await generateEditButtonAsync(targetUser.Id, canEdit) @banButton 
+    @if (await Model.Permissions.CanUnbanUserAsync(targetUser))
+    {
+        <span>| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
+    }
+</h3>
 
 @await Html.PartialAsync("_ProfileImage", targetUser)
 
@@ -40,7 +38,7 @@
     {
         <div><a asp-page="/Account/ProfileEdit" asp-route-id="@targetUser.Id">Edit profile</a></div>
     }
-    if (Model.Permissions.CanChangePassword(User, targetUser))
+    if (await Model.Permissions.CanChangePasswordAsync(targetUser))
     {
         <div><a asp-page="/Account/PasswordChange" asp-route-id="@targetUser.Id">Change password</a></div>
     }
@@ -73,7 +71,7 @@ else
     }
 }
 
-@if (User.IsInOneOfTheRoles(Roles.OWNER, Roles.ADMIN, Roles.MODERATOR))
+@if (User.IsInOneOfTheRoles(Roles.GetAllNotLess(Roles.MODERATOR)))
 {
     <h4>Violations</h4>
 

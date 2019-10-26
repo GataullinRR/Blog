@@ -7,7 +7,7 @@
 }
 
 <h2>@Model.Post.Title 
-    @await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/PostCreate", "editingpostid", Model.Post.Id, await Model.Permissions.CanEditPostAsync(User, Model.Post)))
+    @await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/PostCreate", "editingpostid", Model.Post.Id, await Model.Permissions.CanEditPostAsync(Model.Post)))
 </h2>
 
 @Model.Post.Body

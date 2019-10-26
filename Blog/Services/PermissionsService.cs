@@ -16,131 +16,220 @@ namespace Blog.Services
         public const int MAX_COMMENTARY_EDITS_FOR_STANDARD_USER = 1;
 
         readonly UserManager<User> _userManager;
+        readonly SignInManager<User> _signInManager;
         readonly IHttpContextAccessor _httpContext;
 
-        public PermissionsService(UserManager<User> userManager, IHttpContextAccessor httpContext)
+        public PermissionsService(UserManager<User> userManager, SignInManager<User> signInManager, IHttpContextAccessor httpContext)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             _httpContext = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
         }
 
-        public async Task ValidateEditPostAsync(ClaimsPrincipal user, Post post)
+        public async Task ValidateEditPostAsync(Post post)
         {
-            if (!await CanEditPostAsync(user, post))
+            if (!await CanEditPostAsync(post))
             {
-                throw new UnauthorizedAccessException($"The post \"{post.Title}\" can not be edited by the user \"{user.Identity.Name}\"");
+                throw new UnauthorizedAccessException($"The post \"{post.Title}\" can not be edited by current user");
             }
         }
-        public async Task<bool> CanEditPostAsync(ClaimsPrincipal user, Post post)
+        public async Task<bool> CanEditPostAsync(Post post)
         {
-            return (user.Identity.Name == post.Author.UserName 
-                    && (await _userManager.GetUserAsync(user)).Status.State == ProfileState.ACTIVE
-                    && post.CreationTime - DateTime.Now < TimeSpan.FromDays(3)
-                    &&  post.Edits.Where(e => e.EditAuthor == post.Author).Count() < MAX_POST_EDITS_FOR_STANDARD_USER)
-                    || user.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR);
-        }
-
-        public async Task ValidateEditCommentaryAsync(ClaimsPrincipal user, Commentary comment)
-        {
-            if (!await CanEditCommentaryAsync(user, comment))
-            {
-                throw new UnauthorizedAccessException($"The post \"{comment.Id}\" can not be edited by the user \"{user.Identity.Name}\"");
-            }
-        }
-        public async Task<bool> CanEditCommentaryAsync(ClaimsPrincipal user, Commentary comment)
-        {
-            var thisUser = await _userManager.GetUserAsync(user);
-            if (thisUser == null)
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null)
             {
                 return false;
             }
             else
             {
-                return (user.Identity.Name == comment.Author.UserName
-                    && thisUser.Status.State == ProfileState.ACTIVE
-                    && comment.CreationTime - DateTime.Now < TimeSpan.FromDays(1)
-                    && comment.Edits.Count(e => e.EditAuthor == thisUser) < 1)
-                    || user.IsInOneOfTheRoles(Roles.ADMIN, Roles.MODERATOR);  
+                return (user.UserName == post.Author.UserName
+                            && user.Status.State == ProfileState.ACTIVE
+                            && post.CreationTime - DateTime.Now < TimeSpan.FromDays(3)
+                            && post.Edits.Where(e => e.EditAuthor == post.Author).Count() < MAX_POST_EDITS_FOR_STANDARD_USER)
+                       || await _userManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
             }
         }
 
-        public async Task ValidateResetPasswordAsync(ClaimsPrincipal currentUser, User user)
+        public async Task ValidateEditCommentaryAsync(Commentary comment)
         {
-            if (!await CanRestorePasswordAsync(currentUser, user))
+            if (!await CanEditCommentaryAsync(comment))
             {
-                throw new UnauthorizedAccessException($"Can not restore password for user \"{user.UserName}\"");
+                throw new UnauthorizedAccessException($"The post \"{comment.Id}\" can not be edited by current user");
             }
         }
-        public async Task<bool> CanRestorePasswordAsync(ClaimsPrincipal currentUser, User user)
+        public async Task<bool> CanEditCommentaryAsync(Commentary comment)
         {
-            return ((user.Status.LastPasswordRestoreAttempt ?? DateTime.UtcNow) - DateTime.UtcNow).TotalMinutes.Abs() > 30
-                && user.EmailConfirmed 
-                && user.Status.State == ProfileState.ACTIVE
-                && await _userManager.IsInOneOfTheRolesAsync(user, Roles.NOT_RESTRICTED)
-                && (!currentUser?.Identity?.IsAuthenticated ?? true);
-        }
-
-
-        public void ValidateChangePassword(ClaimsPrincipal user, User userModel)
-        {
-            if (!CanChangePassword(user, userModel))
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null)
             {
-                throw new UnauthorizedAccessException();
+                return false;
             }
-        }
-        public bool CanChangePassword(ClaimsPrincipal user, User userModel)
-        {
-            return user.Identity.IsAuthenticated 
-                && user.Identity.Name == userModel.UserName
-                && userModel.EmailConfirmed
-                && userModel.Status.State == ProfileState.ACTIVE
-                && user.IsInOneOfTheRoles(Roles.NOT_RESTRICTED);
-        }
-
-        public async Task ValidateBanUserAsync(ClaimsPrincipal user, User targetUser)
-        {
-            if (!await CanBanUserAsync(user, targetUser))
+            else
             {
-                throw new UnauthorizedAccessException();
+                return (user.UserName == comment.Author.UserName
+                        && user.Status.State == ProfileState.ACTIVE
+                        && comment.CreationTime - DateTime.Now < TimeSpan.FromDays(1)
+                        && comment.Edits.Count(e => e.EditAuthor == user) < 1)
+                    || await _userManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));  
             }
         }
-        public async Task<bool> CanBanUserAsync(ClaimsPrincipal user, User targetUser)
-        {
-            var currentUser = await _userManager.GetUserAsync(_httpContext.HttpContext.User);
-            return currentUser != null 
-                && targetUser.Status.State.IsOneOf(ProfileState.ACTIVE, ProfileState.RESTRICTED)
-                && await _userManager.IsInOneOfTheRolesAsync(currentUser, Roles.ADMIN, Roles.OWNER) 
-                && (await _userManager.GetRolesAsync(targetUser)).Single().IsLess((await _userManager.GetRolesAsync(currentUser)).Single());
-        }
 
-        public async Task ValidateUnbanUserAsync(ClaimsPrincipal user, User targetUser)
+        public async Task ValidateResetPasswordAsync(User targetUser)
         {
-            if (!await CanUnbanUserAsync(user, targetUser))
+            if (!await CanRestorePasswordAsync(targetUser))
             {
-                throw new UnauthorizedAccessException();
+                throw new UnauthorizedAccessException($"Can not restore password for user \"{targetUser.UserName}\"");
             }
         }
-        public async Task<bool> CanUnbanUserAsync(ClaimsPrincipal user, User targetUser)
+        public async Task<bool> CanRestorePasswordAsync(User targetUser)
         {
-            var currentUser = await _userManager.GetUserAsync(_httpContext.HttpContext.User);
-            return currentUser != null
-                && targetUser.Status.State.IsOneOf(ProfileState.BANNED)
-                && await _userManager.IsInOneOfTheRolesAsync(currentUser, Roles.ADMIN, Roles.OWNER)
-                && (await _userManager.GetRolesAsync(targetUser)).Single().IsLess((await _userManager.GetRolesAsync(currentUser)).Single());
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null)
+            {
+                return false;
+            }
+            else
+            {
+                return ((targetUser.Status.LastPasswordRestoreAttempt ?? DateTime.UtcNow.AddDays(-999)) - DateTime.UtcNow).TotalMinutes.Abs() > 30
+                            && targetUser.EmailConfirmed
+                            && targetUser.Status.State == ProfileState.ACTIVE
+                            && await _userManager.IsInOneOfTheRolesAsync(targetUser, Roles.NOT_RESTRICTED)
+                        && currentUser.Id == targetUser.Id;
+            }
         }
 
-        public async Task ValidateCanSignInAsync(User targetUser)
+        public async Task ValidateChangePasswordAsync(User targetUser)
         {
-            if (!await CanSignInAsync(targetUser))
+            if (!await CanChangePasswordAsync(targetUser))
             {
                 throw new UnauthorizedAccessException();
             }
         }
-        public async Task<bool> CanSignInAsync(User targetUser)
+        public async Task<bool> CanChangePasswordAsync(User targetUser)
         {
-            return targetUser != null
-                && (targetUser.Status.State.IsOneOf(ProfileState.ACTIVE, ProfileState.RESTRICTED) 
-                || (targetUser.Status.State.IsOneOf(ProfileState.BANNED) && targetUser.Status.BannedTill < DateTime.UtcNow));
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null)
+            {
+                return false;
+            }
+            else
+            {
+                return targetUser.Id == currentUser.Id
+                    && targetUser.EmailConfirmed
+                    && targetUser.Status.State == ProfileState.ACTIVE
+                    && await _userManager.IsInOneOfTheRolesAsync(targetUser, Roles.NOT_RESTRICTED);
+            }
+        }
+
+        public async Task ValidateBanUserAsync(User targetUser)
+        {
+            if (!await CanBanUserAsync(targetUser))
+            {
+                throw new UnauthorizedAccessException();
+            }
+        }
+        public async Task<bool> CanBanUserAsync(User targetUser)
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null)
+            {
+                return false;
+            }
+            else
+            {
+                return targetUser.Status.State.IsOneOf(ProfileState.ACTIVE, ProfileState.RESTRICTED)
+                    && await _userManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
+                    && (await _userManager.GetRolesAsync(targetUser)).Single().IsLess((await _userManager.GetRolesAsync(currentUser)).Single());
+            }
+        }
+
+        public async Task ValidateUnbanUserAsync(User targetUser)
+        {
+            if (!await CanUnbanUserAsync(targetUser))
+            {
+                throw new UnauthorizedAccessException();
+            }
+        }
+        public async Task<bool> CanUnbanUserAsync(User targetUser)
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null)
+            {
+                return false;
+            }
+            else
+            {
+                return targetUser.Status.State.IsOneOf(ProfileState.BANNED)
+                    && await _userManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
+                    && (await _userManager.GetRolesAsync(targetUser)).Single().IsLess((await _userManager.GetRolesAsync(currentUser)).Single());
+            }
+        }
+
+        public async Task<bool> CanSeePrivateInformationAsync(User targetUser)
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null)
+            {
+                return false;
+            }
+            else
+            {
+                return currentUser.Id == targetUser.Id
+                    || await _userManager.IsInOneOfTheRolesAsync(targetUser, Roles.MODERATOR, Roles.OWNER)
+                    || await _userManager.IsInOneOfTheRolesAsync(currentUser, Roles.NOT_RESTRICTED);
+            }
+        }
+
+        public async Task<bool> CanEditProfileAsync(User targetUser)
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null)
+            {
+                return false;
+            }
+            else
+            {
+                return await CanSeePrivateInformationAsync(targetUser)
+                    && ((await _userManager.GetRolesAsync(targetUser)).Single().IsLess((await _userManager.GetRolesAsync(currentUser)).Single())
+                        || currentUser.Id == targetUser.Id);
+            }
+        }
+
+        //public async Task ValidateReportAsync(object reportObject)
+        //{
+        //    if (!await CanReportAsync(targetUser))
+        //    {
+        //        throw new UnauthorizedAccessException();
+        //    }
+        //}
+        //public async Task<bool> CanReportAsync(object reportObject)
+        //{
+        //    var dd = new []
+        //    {
+        //        (typeof(Commentary))
+        //    }
+
+        //    string id;
+        //    if (reportObject.GetType().IsOneOf(typeof(Commentary), typeof(Commentary))
+        //    {
+        //        id = re
+        //    }
+        //    var currentUser = await getCurrentUserOrNullAsync();
+        //    if (currentUser == null)
+        //    {
+        //        return false;
+        //    }
+        //    else
+        //    {
+        //        return targetUser.Status.State.IsOneOf(ProfileState.BANNED)
+        //            && await _userManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
+        //            && (await _userManager.GetRolesAsync(targetUser)).Single().IsLess((await _userManager.GetRolesAsync(currentUser)).Single());
+        //    }
+        //}
+
+        async Task<User> getCurrentUserOrNullAsync()
+        {
+            return await _userManager.GetUserAsync(_httpContext.HttpContext.User);
         }
     }
 }

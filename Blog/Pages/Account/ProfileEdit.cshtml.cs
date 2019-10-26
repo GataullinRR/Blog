@@ -46,8 +46,8 @@ namespace Blog.Pages.Account
             EditUserId = id;
             var currentUser = await _userManager.GetUserAsync(User);
             var editUser = await _userManager.FindByIdAsync(EditUserId);
-            if ((currentUser.Id == EditUserId || User.IsInOneOfTheRoles(Roles.ADMIN))
-                && editUser != null)
+            if (editUser != null &&
+               (currentUser.Id == EditUserId || User.IsInOneOfTheRoles(Roles.GetAllNotLess(Roles.MODERATOR))))
             {
                 About = editUser.Profile.About;
 
@@ -89,7 +89,7 @@ namespace Blog.Pages.Account
             async Task<User> getEditingUserIfAuthorizedAsync(string userId)
             {
                 var currentUser = await _userManager.GetUserAsync(User);
-                var isEditAuthorized = currentUser?.Id == userId || User.IsInOneOfTheRoles(Roles.ADMIN);
+                var isEditAuthorized = currentUser?.Id == userId || User.IsInOneOfTheRoles(Roles.GetAllNotLess(Roles.MODERATOR));
                 var editUser = await _userManager.FindByIdAsync(userId);
 
                 return isEditAuthorized ? editUser : null;

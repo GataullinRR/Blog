@@ -28,7 +28,7 @@ namespace Blog.Pages.Account
         {
             UserId = id;
             var targetUser = await UserManager.FindByIdAsync(id);
-            await Permissions.ValidateBanUserAsync(User, targetUser);
+            await Permissions.ValidateBanUserAsync(targetUser);
         }
 
         public async Task<IActionResult> OnPostBanAsync()
@@ -44,7 +44,7 @@ namespace Blog.Pages.Account
                 else
                 {
                     var targetUser = await UserManager.FindByIdAsync(UserId);
-                    await Permissions.ValidateBanUserAsync(User, targetUser);
+                    await Permissions.ValidateBanUserAsync(targetUser);
 
                     targetUser.Status.State = DBModels.ProfileState.BANNED;
                     targetUser.Status.BannedTill = BannedTill.ToUniversalTime();

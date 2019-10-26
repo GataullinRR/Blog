@@ -36,7 +36,7 @@ namespace Blog.Controllers
                 var commentary = await _db.Commentaries
                     .Include(c => c.Author)
                     .FirstAsync(c => c.Id == id);
-                await _permissions.ValidateEditCommentaryAsync(User, commentary);
+                await _permissions.ValidateEditCommentaryAsync(commentary);
 
                 return PartialView("_CommentaryEdit", commentary);
             }
@@ -73,7 +73,7 @@ namespace Blog.Controllers
                     .Include(c => c.Author)
                     .Include(c => c.Post)
                     .FirstAsync(c => c.Id == id);
-                await _permissions.ValidateEditCommentaryAsync(User, commentary);
+                await _permissions.ValidateEditCommentaryAsync(commentary);
 
                 var user = await _userManager.GetUserAsync(User);
                 commentary.Body = body;

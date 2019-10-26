@@ -45,7 +45,7 @@ namespace Blog.Pages.Account
                 }
                 else
                 {
-                    await Permissions.ValidateResetPasswordAsync(User, user);
+                    await Permissions.ValidateResetPasswordAsync(user);
 
                     var token = _confirmation.GetToken(user, AccountOperation.PASSWORD_RESET);
                     var link = _confirmation.GenerateLink(HttpContext, token, nameof(AccountController), nameof(AccountController.ConfirmPasswordResetAsync), new { userId = user.Id });

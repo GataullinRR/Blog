@@ -50,7 +50,7 @@ namespace Blog.Pages
                     .FirstOrDefaultAsync(p => p.Id == EditingPostId);
                 if (editingPost != null)
                 {
-                    _permissions.ValidateEditPostAsync(User, editingPost);
+                    await _permissions.ValidateEditPostAsync(editingPost);
                     Title = editingPost.Title;
                     Body = editingPost.Body;
                 }

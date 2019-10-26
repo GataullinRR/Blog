@@ -28,7 +28,7 @@ namespace Blog.Pages.Account
 
         public async Task OnGetAsync()
         {
-            Permissions.ValidateChangePassword(User, await UserManager.GetUserAsync(User));
+            await Permissions.ValidateChangePasswordAsync(await UserManager.GetUserAsync(User));
         }
 
         public async Task<IActionResult> OnPostAsync()

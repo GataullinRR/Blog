@@ -34,7 +34,7 @@ namespace Blog
                     EmailConfirmed = true
                 };
                 userManager.CreateAsync(radmir, "QTU100@yandex.ru").Wait();
-                userManager.AddToRoleAsync(radmir, Roles.ADMIN).Wait();
+                userManager.AddToRoleAsync(radmir, Roles.OWNER).Wait();
 
                 var alex = new User(
                     new ProfileInfo(new DateTime(2010, 12, 9)),

@@ -36,7 +36,7 @@ namespace Blog.Controllers
             if (ModelState.IsValid)
             {
                 var targetUser = await UserManager.FindByIdAsync(userId);
-                await Permissions.ValidateUnbanUserAsync(User, targetUser);
+                await Permissions.ValidateUnbanUserAsync(targetUser);
 
                 targetUser.Status.State = targetUser.EmailConfirmed
                     ? ProfileState.ACTIVE
