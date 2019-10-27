@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DBModels
 {
-    public class CommentaryEdit
+    public class CommentaryEdit : IDbEntity
     {
         [Key]
         public int Id { get; set; }

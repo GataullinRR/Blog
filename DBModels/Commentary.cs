@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DBModels
 {
-    public class Commentary
+    public class Commentary : IDbEntity
     {
         [Key] public int Id { get; set; }
         [Required] public virtual User Author { get; set; }

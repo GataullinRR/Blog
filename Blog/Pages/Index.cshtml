@@ -5,9 +5,9 @@
     ViewData["Title"] = "Home";
 }
 
-@if (User.IsInOneOfTheRoles(Roles.NOT_RESTRICTED))
+@if (await Model.Permissions.CanCreatePostAsync())
 {
-    <span>You can <a asp-page="\PostCreate">create</a> your own post!</span>
+    <span>You can <a asp-page="/PostCreate">create</a> your own post!</span>
     <hr />
 }
 
@@ -15,7 +15,7 @@
 
 @foreach (var post in Model.Posts)
 {
-    <div>
+    <div style="margin: 5px 0 5px 0">
         <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
         <a asp-page="/Account/Profile" asp-route-id="@post.Author.Id">@post.Author.UserName</a>
         @post.CreationTime.ToString("dd.MM.yyyy")

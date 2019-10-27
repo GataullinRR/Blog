@@ -83,5 +83,11 @@ namespace Blog
             }
             viewStatistic.TotalViews++;
         }
+
+        public static async Task<T> FirstOrDefaultByIdAsync<T>(this DbSet<T> entities, int id)
+            where T : class, IDbEntity
+        {
+            return await entities.FirstOrDefaultAsync(e => e.Id == id);
+        }
     }
 }

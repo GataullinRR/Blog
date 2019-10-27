@@ -49,6 +49,41 @@ namespace Blog.Services
             }
         }
 
+        public async Task<bool> CanEditPostTitleAsync(Post post)
+        {
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null)
+            {
+                return false;
+            }
+            else
+            {
+                return await CanEditPostAsync(post)
+                       && await _userManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
+            }
+        }
+
+        public async Task ValidateCreatePostAsync()
+        {
+            if (!await CanCreatePostAsync())
+            {
+                throw new UnauthorizedAccessException();
+            }
+        }
+        public async Task<bool> CanCreatePostAsync()
+        {
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null)
+            {
+                return false;
+            }
+            else
+            {
+                return await _userManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.USER))
+                    && user.Status.State == ProfileState.ACTIVE;
+            }
+        }
+
         public async Task ValidateEditCommentaryAsync(Commentary comment)
         {
             if (!await CanEditCommentaryAsync(comment))

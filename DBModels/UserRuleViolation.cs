@@ -12,7 +12,7 @@ namespace DBModels
     }
 
     // I wanted this row to be deleted when the user gets deleted, but not the reporter...
-    public class UserRuleViolation
+    public class UserRuleViolation : IDbEntity
     {
         [Key]
         public int Id { get; set; }

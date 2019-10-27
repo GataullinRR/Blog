@@ -11,7 +11,7 @@ namespace DBModels
         COMMENTARY = 1000,
     }
 
-    public class Report
+    public class Report : IDbEntity
     {
         [Key]
         public int Id { get; set; }

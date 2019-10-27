@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DBModels
 {
-    public class Profile
+    public class Profile : IDbEntity
     {
         [Key]
         public int Id { get; set; }

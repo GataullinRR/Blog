@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DBModels
 {
-    public class Post
+    public class Post : IDbEntity
     {
         [Key]
         public int Id { get; set; }

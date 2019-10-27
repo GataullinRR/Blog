@@ -28,7 +28,7 @@ namespace DBModels
         SIGN_IN_FAIL = 1300
     }
 
-    public class UserAction
+    public class UserAction : IDbEntity
     {
         [Key]
         public int Id { get; set; }

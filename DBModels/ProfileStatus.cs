@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DBModels
 {
-    public class ProfileStatus
+    public class ProfileStatus : IDbEntity
     {
         [Key]
         public int Id { get; set; }

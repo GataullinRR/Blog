@@ -5,22 +5,14 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-<h2>PostCreate</h2>
+<h2>Post create</h2>
 
-<form method="post" asp-page-handler="Create">
-    <input type="hidden" asp-for="IsEditMode" value="@Model.IsEditMode" />
-    <input type="hidden" asp-for="EditingPostId" value="@Model.EditingPostId" />
+<form method="post">
+    <input type="hidden" asp-for="PostId" value="@Model.PostId" />
 
     <div>
-        @if (Model.IsEditMode)
-        {
-            @Model.Title
-        }
-        else
-        {
-            <input type="text" asp-for="Title" placeholder="Title" />
-            <span asp-validation-for="Title"></span>
-        }
+        <input type="text" asp-for="Title" placeholder="Title" />
+        <span asp-validation-for="Title"></span>
     </div>
 
     <div>
@@ -28,17 +20,9 @@
         <span asp-validation-for="Body"></span>
     </div>
 
-    @if (Model.IsEditMode)
-    {
-        <div>
-            <textarea rows="2" asp-for="EditReason" placeholder="Edit reason"></textarea>
-            <span asp-validation-for="EditReason"></span>
-        </div>
-    }
-
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div>
-        <button type="submit">@Model.IsEditMode.Ternar("Update", "Create")</button>
+        <button type="submit">Create</button>
     </div>
 </form>

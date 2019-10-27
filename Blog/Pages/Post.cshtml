@@ -8,7 +8,7 @@
 
     <h2>
         @Model.Post.Title
-        @await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/PostCreate", "editingpostid", Model.Post.Id, await Model.Permissions.CanEditPostAsync(Model.Post)))
+        @await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/PostEdit", "id", Model.Post.Id, await Model.Permissions.CanEditPostAsync(Model.Post)))
         @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportPostAsync), "id", Model.Post.Id, await Model.Permissions.CanReportAsync(Model.Post)))
     </h2>
 

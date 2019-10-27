@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DBModels
 {
-    public class ViewStatistic
+    public class ViewStatistic : IDbEntity
     {
         [Key]
         public int Id { get; set; }
