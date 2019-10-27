@@ -60,8 +60,6 @@ namespace Blog.Controllers
                 HttpContext.Session.Remove(nameof(LayoutModel));
             }
 
-            History.SaveCurrentURL();
-
             base.OnActionExecuted(context);
         }
 
