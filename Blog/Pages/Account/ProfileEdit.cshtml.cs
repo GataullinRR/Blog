@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using ASPCoreUtilities;
+using Blog.Models;
 using DBModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -18,12 +19,8 @@ using Utilities.Extensions;
 namespace Blog.Pages.Account
 {
     [Authorize(Roles = Roles.NOT_RESTRICTED)]
-    public class ProfileEditModel : PageModel
+    public class ProfileEditModel : ExtendedPageModel
     {
-        readonly BlogContext _db;
-        readonly SignInManager<User> _signInManager;
-        readonly UserManager<User> _userManager;
-
         [BindProperty]
         [MaxLength(5000)]
         public string About { get; set; }
@@ -34,18 +31,16 @@ namespace Blog.Pages.Account
         [BindProperty]
         public string EditUserId { get; set; }
 
-        public ProfileEditModel(BlogContext db, SignInManager<User> signInManager, UserManager<User> userManager)
+        public ProfileEditModel(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _db = db;
-            _signInManager = signInManager;
-            _userManager = userManager;
+            
         }
 
         public async Task<IActionResult> OnGetAsync([Required]string id)
         {
             EditUserId = id;
-            var currentUser = await _userManager.GetUserAsync(User);
-            var editUser = await _userManager.FindByIdAsync(EditUserId);
+            var currentUser = await UserManager.GetUserAsync(User);
+            var editUser = await UserManager.FindByIdAsync(EditUserId);
             if (editUser != null &&
                (currentUser.Id == EditUserId || User.IsInOneOfTheRoles(Roles.GetAllNotLess(Roles.MODERATOR))))
             {
@@ -63,6 +58,7 @@ namespace Blog.Pages.Account
         {
             if (ModelState.IsValid)
             {
+                var currentUser = await GetCurrentUserModelOrThrowAsync();
                 var editingUser = await getEditingUserIfAuthorizedAsync(EditUserId);
                 if (ProfileImage != null)
                 {
@@ -77,7 +73,8 @@ namespace Blog.Pages.Account
                     editingUser.Profile.Image = serverLocalPath;
                 }
                 editingUser.Profile.About = About;
-                await _db.SaveChangesAsync();
+                currentUser.Actions.Add(new UserAction(ActionType.PROFILE_EDIT, editingUser.Id));
+                await DB.SaveChangesAsync();
 
                 return RedirectToPage("/Account/Profile", new { id = editingUser.Id });
             }
@@ -88,9 +85,9 @@ namespace Blog.Pages.Account
 
             async Task<User> getEditingUserIfAuthorizedAsync(string userId)
             {
-                var currentUser = await _userManager.GetUserAsync(User);
+                var currentUser = await UserManager.GetUserAsync(User);
                 var isEditAuthorized = currentUser?.Id == userId || User.IsInOneOfTheRoles(Roles.GetAllNotLess(Roles.MODERATOR));
-                var editUser = await _userManager.FindByIdAsync(userId);
+                var editUser = await UserManager.FindByIdAsync(userId);
 
                 return isEditAuthorized ? editUser : null;
             }

@@ -42,6 +42,9 @@ namespace Blog.Pages.Account
                     if (result.Succeeded)
                     {
                         await SignInManager.SignOutAsync();
+                        user.Actions.Add(new DBModels.UserAction(ActionType.PASSWORD_CHANGED, null));
+                        await DB.SaveChangesAsync();
+
                         LayoutModel.Messages.Add("Password has been changed");
 
                         return RedirectToPage("/Account/Login", new { userName = user.UserName });

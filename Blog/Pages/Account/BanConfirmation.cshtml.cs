@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Blog.Models;
+using DBModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Utilities.Extensions;
@@ -49,6 +50,7 @@ namespace Blog.Pages.Account
                     targetUser.Status.State = DBModels.ProfileState.BANNED;
                     targetUser.Status.BannedTill = BannedTill.ToUniversalTime();
                     targetUser.Status.StateReason = Reason;
+                    targetUser.Actions.Add(new UserAction(ActionType.BAN, targetUser.Id));
                     await DB.SaveChangesAsync();
 
                     await EMail.TrySendMessageAsync(targetUser, "Administration", "Profile has been banned", $@"Profile name: {targetUser.UserName}

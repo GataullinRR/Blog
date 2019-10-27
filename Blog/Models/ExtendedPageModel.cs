@@ -73,7 +73,7 @@ namespace Blog.Models
             base.OnPageHandlerExecuted(context);
         }
 
-        public async Task<User> GetCurrentUserModelOrThrow()
+        public async Task<User> GetCurrentUserModelOrThrowAsync()
         {
             var user = await UserManager.GetUserAsync(User);
             if (user == null)

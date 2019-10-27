@@ -55,12 +55,13 @@ namespace Blog.Pages
             }
         }
 
+#warning no model state check
         [HttpPost]
         public async Task<IActionResult> OnPostCreateAsync()
         {
             int postId = 0;
 
-            var author = await GetCurrentUserModelOrThrow();
+            var author = await GetCurrentUserModelOrThrowAsync();
             if (IsEditMode)
             {
                 var editingPost = await DB.Posts
@@ -69,6 +70,7 @@ namespace Blog.Pages
                 editingPost.Body = Body;
                 postId = EditingPostId;
                 editingPost.Edits.Add(new PostEdit(author, EditReason, DateTime.UtcNow));
+                author.Actions.Add(new UserAction(ActionType.POST_EDIT, postId.ToString()));
 
                 await DB.SaveChangesAsync();
             }
@@ -81,6 +83,7 @@ namespace Blog.Pages
 
                 var post = new Post(DateTime.UtcNow, author, Title, Body);
                 DB.Posts.Add(post);
+                author.Actions.Add(new UserAction(ActionType.POST_CREATE, post.Id.ToString()));
                 await DB.SaveChangesAsync();
 
                 postId = post.Id;

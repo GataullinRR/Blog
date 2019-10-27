@@ -147,6 +147,33 @@ else
     </ul>
 }
 
+@if (User.IsInOneOfTheRoles(Roles.GetAllNotLess(Roles.MODERATOR)))
+{
+    <h4>Actions</h4>
+
+    if (targetUser.Actions.Count == 0)
+    {
+        <span>Nothing at the moment</span>
+    }
+
+    <ul>
+        @foreach (var action in targetUser.Actions.OrderByDescending(r => r.ActionDate))
+        {
+            <li>
+                <span>@action.ActionType.ToString() at @action.ActionDate.ToString("hh:mm dd.MM.yyyy"). Object id: </span>
+                @if (action.ObjectId != null)
+                {
+                    <span>@action.ObjectId</span>
+                }
+                else
+                {
+                    <span>not set</span>
+                }
+            </li>
+        }
+    </ul>
+}
+
 <div>
     Seen @Model.UserModel.Profile.ViewStatistic.TotalViews times
 </div>

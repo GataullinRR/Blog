@@ -25,7 +25,10 @@ namespace Blog.Controllers
         [HttpGet(), Authorize()]
         public async Task<IActionResult> Logout()
         {
+            var currenUser = await UserManager.GetUserAsync(User);
             await SignInManager.SignOutAsync();
+            currenUser.Actions.Add(new DBModels.UserAction(ActionType.SIGNED_OUT, null));
+            await DB.SaveChangesAsync();
 
             return RedirectToPage("/Index");
         }
@@ -43,6 +46,7 @@ namespace Blog.Controllers
                     : ProfileState.RESTRICTED;
                 targetUser.Status.StateReason = null;
                 targetUser.Status.BannedTill = null;
+                targetUser.Actions.Add(new DBModels.UserAction(ActionType.UNBAN, DateTime.UtcNow, targetUser.Id));
                 await DB.SaveChangesAsync();
 
                 LayoutModel.Messages.Add($"User \"{targetUser.UserName}\" has been unbanned");
@@ -72,6 +76,7 @@ namespace Blog.Controllers
                     {
                         user.EmailConfirmed = true;
                         await UserManager.AddToRoleAsync(user, Roles.USER);
+                        user.Actions.Add(new DBModels.UserAction(ActionType.EMAIL_CONFIRMATION, DateTime.UtcNow, null));
                         await DB.SaveChangesAsync();
 
                         return RedirectToPage("/Account/ConfirmEMail"); // Will show greeting
@@ -108,6 +113,8 @@ Please delete this message so that nobody can see it");
                         user.PasswordHash = UserManager.PasswordHasher.HashPassword(user, newPassword);
                         var result = await UserManager.UpdateAsync(user);
                         await SignInManager.SignOutAsync();
+                        user.Actions.Add(new DBModels.UserAction(ActionType.PASSWORD_RESET, DateTime.UtcNow, null));
+                        await DB.SaveChangesAsync();
 
                         LayoutModel.Messages.Add("New password has been sent to your E-Mail");
 

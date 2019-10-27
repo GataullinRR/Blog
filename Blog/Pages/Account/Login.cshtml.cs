@@ -57,10 +57,16 @@ namespace Blog.Pages.Account
                     var result = await SignInManager.PasswordSignInAsync(user, Password, true, false);
                     if (result.Succeeded)
                     {
+                        user.Actions.Add(new DBModels.UserAction(ActionType.SIGNED_IN, DateTime.UtcNow, null));
+                        await DB.SaveChangesAsync();
+
                         return RedirectToPage("/Index");
                     }
                     else
                     {
+                        user.Actions.Add(new DBModels.UserAction(ActionType.SIGN_IN_FAIL, DateTime.UtcNow, null));
+                        await DB.SaveChangesAsync();
+
                         ModelState.AddModelError("", "Login or password is not valid");
 
                         return Page();

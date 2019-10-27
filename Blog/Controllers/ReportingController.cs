@@ -57,26 +57,30 @@ namespace Blog.Controllers
         {
             await Permissions.ValidateReportAsync(reportObject);
 
+            Report report;
             var reportingUser = await UserManager.GetUserAsync(User);
             if (reportObject is Post post)
             {
-                DB.Reports.Add(new Report(reportingUser, post.Author, ReportObjectType.POST, post.Id, DateTime.UtcNow));
+                report = new Report(reportingUser, post.Author, ReportObjectType.POST, post.Id, DateTime.UtcNow);
             }
             else if (reportObject is Profile profile)
             {
                 var owner = await DB.Users.FirstOrDefaultAsync(u => u.Profile.Id == profile.Id);
-                DB.Reports.Add(new Report(reportingUser, owner, ReportObjectType.PROFILE, profile.Id, DateTime.UtcNow));
+                report = new Report(reportingUser, owner, ReportObjectType.PROFILE, profile.Id, DateTime.UtcNow);
             }
             else if (reportObject is Commentary commentary)
             {
-                DB.Reports.Add(new Report(reportingUser, commentary.Author, ReportObjectType.COMMENTARY, commentary.Id, DateTime.UtcNow));
+                report = new Report(reportingUser, commentary.Author, ReportObjectType.COMMENTARY, commentary.Id, DateTime.UtcNow);
             }
             else
             {
                 throw new InvalidOperationException("Can't create report for object of such type");
             }
 
+            DB.Reports.Add(report);
+            reportingUser.Actions.Add(new UserAction(ActionType.REPORT, report.Id.ToString()));
             await DB.SaveChangesAsync();
+
             LayoutModel.Messages.Add("Report has been submitted");
 
             return Redirect(History.GetLastURL());

@@ -53,6 +53,7 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
+                var currentUser = await GetCurrentUserModelOrThrowAsync();
                 if (commentBody != null)
                 {
                     var comment = new Commentary(
@@ -61,6 +62,7 @@ namespace Blog.Pages
                         await DB.Posts.FindAsync(postId), 
                         commentBody);
                     DB.Commentaries.Add(comment);
+                    currentUser.Actions.Add(new UserAction(ActionType.ADD_COMMENTARY, comment.Id.ToString()));
                     await DB.SaveChangesAsync();
                 }
             }
