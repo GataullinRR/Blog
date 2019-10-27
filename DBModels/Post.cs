@@ -17,11 +17,14 @@ namespace DBModels
         public string Title { get; set; }
         [Required]
         public string Body { get; set; }
-        [Required]
-        public virtual List<PostEdit> Edits { get; set; } = new List<PostEdit>();
+        [Required] public virtual List<PostEdit> Edits { get; set; } = new List<PostEdit>();
+        [Required] public virtual ViewStatistic ViewStatistic { get; set; }
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
 
-        public Post() { }
+        public Post() 
+        { 
+
+        }
 
         public Post(DateTime creationTime, User author, string title, string body)
         {
@@ -29,6 +32,7 @@ namespace DBModels
             Author = author ?? throw new ArgumentNullException(nameof(author));
             Title = title ?? throw new ArgumentNullException(nameof(title));
             Body = body ?? throw new ArgumentNullException(nameof(body));
+            ViewStatistic = new ViewStatistic();
         }
     }
 }

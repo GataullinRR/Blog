@@ -68,7 +68,7 @@ namespace Blog.Pages.Account
                 var user = await _userManager.FindByNameAsync(Username);
                 if (user == null)
                 {
-                    var newUser = new User(new ProfileInfo(DateTime.UtcNow), new ProfileStatus(default))
+                    var newUser = new User(new Profile(DateTime.UtcNow), new ProfileStatus(default))
                     {
                         UserName = Username,
                         Email = EMail

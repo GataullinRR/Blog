@@ -72,5 +72,18 @@ namespace Blog.Models
 
             base.OnPageHandlerExecuted(context);
         }
+
+        public async Task<User> GetCurrentUserModelOrThrow()
+        {
+            var user = await UserManager.GetUserAsync(User);
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException();
+            }
+            else
+            {
+                return user;
+            }
+        }
     }
 }

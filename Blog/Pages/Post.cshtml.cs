@@ -25,22 +25,24 @@ namespace Blog.Pages
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            Post = await DB.Posts
-                .Include(p => p.Author)
-                .Include(p => p.Edits)
-                .ThenInclude(e => e.EditAuthor)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
+            Post = await DB.Posts.FirstOrDefaultAsync(p => p.Id == id);
+            
             if (Post == null)
             {
                 return RedirectToPage("/Index");
             }
             else
             {
-                Commentaries = DB.Commentaries
-                    .Include(c => c.Post)
-                    .Where(c => c.Post == Post)
-                    .Include(c => c.Author);
+                var currentUser = await UserManager.GetUserAsync(User);
+
+                Commentaries = DB.Commentaries.Where(c => c.Post == Post);
+                foreach (var commentary in Commentaries)
+                {
+                    commentary.ViewStatistic.UpdateStatistic(currentUser);
+                }
+                Post.ViewStatistic.UpdateStatistic(currentUser);
+
+                var x = await DB.SaveChangesAsync();
 
                 return Page();
             }

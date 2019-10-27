@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DBModels
 {
-    public class ProfileInfo
+    public class Profile
     {
         [Key]
         public int Id { get; set; }
@@ -12,12 +12,16 @@ namespace DBModels
         public Gender Gender { get; set; }
         public string Image { get; set; }
         public string About { get; set; } = "";
+        [Required] public virtual ViewStatistic ViewStatistic { get; set; }
 
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
 
-        public ProfileInfo(DateTime registrationDate)
+        public Profile() { }
+
+        public Profile(DateTime registrationDate)
         {
             RegistrationDate = registrationDate;
+            ViewStatistic = new ViewStatistic();
         }
     }
 }

@@ -74,5 +74,14 @@ namespace Blog
         {
             return new Lazy<T>(() => (T)serviceProvider.GetService(typeof(T)));
         }
+
+        public static void UpdateStatistic(this ViewStatistic viewStatistic, User currentUser)
+        {
+            if (currentUser != null && currentUser.Status.State == ProfileState.ACTIVE)
+            {
+                viewStatistic.RegistredUserViews++;
+            }
+            viewStatistic.TotalViews++;
+        }
     }
 }

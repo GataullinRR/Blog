@@ -62,7 +62,7 @@ namespace Blog.Controllers
             {
                 DB.Reports.Add(new Report(reportingUser, post.Author, ReportObjectType.POST, post.Id, DateTime.UtcNow));
             }
-            else if (reportObject is ProfileInfo profile)
+            else if (reportObject is Profile profile)
             {
                 var owner = await DB.Users.FirstOrDefaultAsync(u => u.Profile.Id == profile.Id);
                 DB.Reports.Add(new Report(reportingUser, owner, ReportObjectType.PROFILE, profile.Id, DateTime.UtcNow));

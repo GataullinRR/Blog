@@ -32,7 +32,7 @@ namespace DBModels
     public class User : IdentityUser
     {
         [Required]
-        public virtual ProfileInfo Profile { get; set; }
+        public virtual Profile Profile { get; set; }
         [Required]
         public virtual ProfileStatus Status { get; set; }
 
@@ -46,7 +46,7 @@ namespace DBModels
 
         public User() { }
 
-        public User(ProfileInfo info, ProfileStatus status)
+        public User(Profile info, ProfileStatus status)
         {
             Profile = info ?? throw new ArgumentNullException(nameof(info));
             Status = status ?? throw new ArgumentNullException(nameof(status));

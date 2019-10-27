@@ -12,7 +12,9 @@
         @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportPostAsync), "id", Model.Post.Id, await Model.Permissions.CanReportAsync(Model.Post)))
     </h2>
 
-@Model.Post.Body
+    <div>
+        @Model.Post.Body
+    </div>
 
 @foreach (var edit in Model.Post.Edits.NullToEmpty())
 {
@@ -21,6 +23,9 @@
         <span>Reason: @edit.Reason</span>
     </div>
 }
+<div>
+    Seen @Model.Post.ViewStatistic.TotalViews times
+</div>
 
 <hr />
 <h3>Commentaries</h3>

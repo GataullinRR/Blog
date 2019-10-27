@@ -12,6 +12,8 @@ namespace DBModels
         public DateTime? BannedTill { get; set; }
         public DateTime? LastPasswordRestoreAttempt { get; set; }
 
+        public ProfileStatus() { }
+
         public ProfileStatus(ProfileState state)
         {
             State = state;

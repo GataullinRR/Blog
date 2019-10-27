@@ -26,7 +26,7 @@ namespace Blog
             if (!context.Users.Any())
             {
                 var radmir = new User(
-                    new ProfileInfo(new DateTime(2018, 1, 20)), 
+                    new Profile(new DateTime(2018, 1, 20)), 
                     new ProfileStatus(ProfileState.ACTIVE))
                 {
                     Email = "QTU100@yandex.ru",
@@ -37,7 +37,7 @@ namespace Blog
                 userManager.AddToRoleAsync(radmir, Roles.OWNER).Wait();
 
                 var alex = new User(
-                    new ProfileInfo(new DateTime(2010, 12, 9)),
+                    new Profile(new DateTime(2010, 12, 9)),
                     new ProfileStatus(ProfileState.ACTIVE))
                 {
                     Email = "Sasha@yandex.ru",
@@ -48,7 +48,7 @@ namespace Blog
                 userManager.AddToRoleAsync(alex, Roles.USER).Wait();
 
                 var ksenya = new User(
-                    new ProfileInfo(new DateTime(2019, 3, 11)),
+                    new Profile(new DateTime(2019, 3, 11)),
                     new ProfileStatus(ProfileState.ACTIVE))
                 {
                     Email = "Ksy_chemist@mail.ru",
@@ -59,7 +59,7 @@ namespace Blog
                 userManager.AddToRoleAsync(ksenya, Roles.USER).Wait();
 
                 var oleg = new User(
-                    new ProfileInfo(new DateTime(2012, 1, 5)),
+                    new Profile(new DateTime(2012, 1, 5)),
                     new ProfileStatus(ProfileState.ACTIVE))
                 {
                     Email = "Oleg@yota.ru",
@@ -71,7 +71,7 @@ namespace Blog
 
 
                 var muddy = new User(
-                    new ProfileInfo(new DateTime(1990, 1, 1)),
+                    new Profile(new DateTime(1990, 1, 1)),
                     new ProfileStatus(ProfileState.RESTRICTED))
                 {
                     Email = "Muddy@google.com",

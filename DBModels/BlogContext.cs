@@ -15,8 +15,9 @@ namespace DBModels
         public DbSet<CommentaryEdit> CommentaryEdits { get; set; }
         public DbSet<UserRuleViolation> UserRuleViolations { get; set; }
         public DbSet<ProfileStatus> ProfilesStatuses { get; set; }
-        public DbSet<ProfileInfo> ProfilesInfos { get; set; }
+        public DbSet<Profile> ProfilesInfos { get; set; }
         public DbSet<Report> Reports { get; set; }
+        public DbSet<ViewStatistic> ViewStatistics { get; set; }
 
         public BlogContext(DbContextOptions<BlogContext> options)
             : base(options)
@@ -30,6 +31,18 @@ namespace DBModels
 
             modelBuilder.Entity<Commentary>()
                 .HasOne(c => c.Author)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.ViewStatistic)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Commentary>()
+                .HasOne(p => p.ViewStatistic)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Profile>()
+                .HasOne(p => p.ViewStatistic)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
         }

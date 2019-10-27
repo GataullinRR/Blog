@@ -13,6 +13,7 @@ namespace DBModels
         [Required] public string Body { get; set; }
         [Required] public virtual List<CommentaryEdit> Edits { get; set; } = new List<CommentaryEdit>();
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
+        [Required] public virtual ViewStatistic ViewStatistic { get; set; }
 
         public Commentary() { }
 
@@ -22,6 +23,7 @@ namespace DBModels
             CreationTime = creationTime;
             Post = post ?? throw new ArgumentNullException(nameof(post));
             Body = body ?? throw new ArgumentNullException(nameof(body));
+            ViewStatistic = new ViewStatistic();
         }
     }
 }

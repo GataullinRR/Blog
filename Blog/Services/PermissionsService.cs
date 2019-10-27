@@ -229,7 +229,7 @@ namespace Blog.Services
 
             return !alreadyReported;
         }
-        async Task<bool> canReportAsync(User currentUser, ProfileInfo reportObject)
+        async Task<bool> canReportAsync(User currentUser, Profile reportObject)
         {
             var alreadyReported = db.Reports.Any(cr => cr.ReportObjectType == ReportObjectType.PROFILE
                 && cr.ReportObjectId == reportObject.Id

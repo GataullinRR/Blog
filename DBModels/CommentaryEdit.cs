@@ -7,11 +7,9 @@ namespace DBModels
     {
         [Key]
         public int Id { get; set; }
-        [Required]
-        public virtual User EditAuthor { get; set; }
+        [Required] public virtual User EditAuthor { get; set; }
         public string Reason { get; set; }
-        [Required]
-        public DateTime EditTime { get; set; }
+        [Required] public DateTime EditTime { get; set; }
 
         public CommentaryEdit() { }
 

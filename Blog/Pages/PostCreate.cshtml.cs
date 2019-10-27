@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Models;
 using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Authorization;
@@ -14,12 +15,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Blog.Pages
 {
     [Authorize(Roles = Roles.NOT_RESTRICTED)]
-    public class PostCreateModel : PageModel
+    public class PostCreateModel : ExtendedPageModel
     {
-        readonly PermissionsService _permissions;
-        readonly UserManager<User> _userManager;
-        readonly BlogContext _db;
-
         [BindProperty(), Required(), MinLength(8), MaxLength(100)]
         public string Title { get; set; }
         [BindProperty(), Required(), MinLength(500), MaxLength(100000)]
@@ -31,11 +28,8 @@ namespace Blog.Pages
         [BindProperty, Required(), MinLength(10), MaxLength(1000)]
         public string EditReason { get; set; }
 
-        public PostCreateModel(UserManager<User> userManager, BlogContext db, PermissionsService permissions)
+        public PostCreateModel(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _userManager = userManager;
-            _db = db;
-            _permissions = permissions;
         }
 
         public async Task OnGetAsync(int? editingPostId)
@@ -44,13 +38,13 @@ namespace Blog.Pages
             if (IsEditMode)
             {
                 EditingPostId = editingPostId.Value;
-                var editingPost = await _db.Posts
+                var editingPost = await DB.Posts
                     .Include(p => p.Edits)
                     .Include(p => p.Author)
                     .FirstOrDefaultAsync(p => p.Id == EditingPostId);
                 if (editingPost != null)
                 {
-                    await _permissions.ValidateEditPostAsync(editingPost);
+                    await Permissions.ValidateEditPostAsync(editingPost);
                     Title = editingPost.Title;
                     Body = editingPost.Body;
                 }
@@ -66,28 +60,28 @@ namespace Blog.Pages
         {
             int postId = 0;
 
+            var author = await GetCurrentUserModelOrThrow();
             if (IsEditMode)
             {
-                var editingPost = await _db.Posts
+                var editingPost = await DB.Posts
                     .Include(p => p.Edits)
                     .FirstOrDefaultAsync(p => p.Id == EditingPostId);
                 editingPost.Body = Body;
                 postId = EditingPostId;
-                //editingPost.Edits = editingPost.Edits ?? new List<PostEdit>();
-                editingPost.Edits.Add(new PostEdit(await _userManager.GetUserAsync(User), EditReason, DateTime.UtcNow));
+                editingPost.Edits.Add(new PostEdit(author, EditReason, DateTime.UtcNow));
 
-                await _db.SaveChangesAsync();
+                await DB.SaveChangesAsync();
             }
             else
             {
-                if (await _db.Posts.FirstOrDefaultAsync(p => p.Title == Title) != null)
+                if (await DB.Posts.FirstOrDefaultAsync(p => p.Title == Title) != null)
                 {
                     throw new ArgumentOutOfRangeException("The post with this name already exists");
                 }
 
-                var post = new Post(DateTime.UtcNow, await _userManager.GetUserAsync(HttpContext.User), Title, Body);
-                _db.Posts.Add(post);
-                await _db.SaveChangesAsync();
+                var post = new Post(DateTime.UtcNow, author, Title, Body);
+                DB.Posts.Add(post);
+                await DB.SaveChangesAsync();
 
                 postId = post.Id;
             }
