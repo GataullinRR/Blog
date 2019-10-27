@@ -16,6 +16,7 @@
         }
         else
         {
+            <input type="hidden" asp-for="Title" value="@Model.Title" />
             @Model.Title
         }
         <span asp-validation-for="Title"></span>
