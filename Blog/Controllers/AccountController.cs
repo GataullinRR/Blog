@@ -27,8 +27,11 @@ namespace Blog.Controllers
         {
             var currenUser = await UserManager.GetUserAsync(User);
             await SignInManager.SignOutAsync();
-            currenUser.Actions.Add(new DBModels.UserAction(ActionType.SIGNED_OUT, null));
-            await DB.SaveChangesAsync();
+            if (currenUser != null)
+            {
+                currenUser.Actions.Add(new DBModels.UserAction(ActionType.SIGNED_OUT, null));
+                await DB.SaveChangesAsync();
+            }
 
             return RedirectToPage("/Index");
         }

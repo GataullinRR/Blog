@@ -48,7 +48,6 @@ namespace Blog.Pages.Account
             }
 
             IsCurrentUser = currentUser?.Id == UserModel.Id;
-            UserModel.Posts = await DB.Posts.ToListAsync();
             Role = (await UserManager.GetRolesAsync(UserModel)).Single();
             UserModel.Profile.ViewStatistic.UpdateStatistic(currentUser);
 
