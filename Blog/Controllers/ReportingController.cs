@@ -78,6 +78,7 @@ namespace Blog.Controllers
             }
 
             DB.Reports.Add(report);
+            await DB.SaveChangesAsync();
             reportingUser.Actions.Add(new UserAction(ActionType.REPORT, report.Id.ToString()));
             await DB.SaveChangesAsync();
 

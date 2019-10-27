@@ -43,9 +43,10 @@ namespace Blog.Pages
                     var author = await GetCurrentUserModelOrThrowAsync();
                     var post = new Post(DateTime.UtcNow, author, Title, Body);
                     DB.Posts.Add(post);
+                    await DB.SaveChangesAsync();
                     author.Actions.Add(new UserAction(ActionType.POST_CREATE, post.Id.ToString()));
                     await DB.SaveChangesAsync();
-                    
+
                     return RedirectToPage("/Post", new { id = post.Id });
                 }
             }

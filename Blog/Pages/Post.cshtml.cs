@@ -62,6 +62,7 @@ namespace Blog.Pages
                         await DB.Posts.FindAsync(postId), 
                         commentBody);
                     DB.Commentaries.Add(comment);
+                    await DB.SaveChangesAsync();
                     currentUser.Actions.Add(new UserAction(ActionType.ADD_COMMENTARY, comment.Id.ToString()));
                     await DB.SaveChangesAsync();
                 }
