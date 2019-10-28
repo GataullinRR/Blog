@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "{handler?}/{id?}"
 @model Blog.Pages.IndexModel
 
 @{
@@ -11,9 +11,7 @@
     <hr />
 }
 
-<h3>Posts count: @Model.Posts.Count()</h3>
-
-@foreach (var post in Model.Posts)
+@foreach (var post in Model.Posts.OrderByDescending(p => p.CreationTime).Take(10))
 {
     <div style="margin: 5px 0 5px 0">
         <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
@@ -23,4 +21,37 @@
         @{ var maxViewSize = 500; }
         @post.Body.Take(maxViewSize).Concat(post.Body.Length > maxViewSize ? "..." : "").AsString()
     </div>
+}
+
+@{
+    const int MAX = 3;
+    const int SIDE_LENGTH = (MAX - 1) / 2;
+    var addStartElipsis = Model.CurrentPage - SIDE_LENGTH - 1 > 0;
+    var addEndElipsis = Model.NumOfPages - 1 - (Model.CurrentPage + SIDE_LENGTH) > 1;
+}
+
+@if (Model.CurrentPage > 0)
+{
+    <a asp-page="/Index" asp-route-pageIndex="@(Model.CurrentPage - 1)">@('<')</a>
+}
+<a asp-page="/Index" asp-route-pageIndex="0">1</a>
+@if (addStartElipsis)
+{
+    <span>...</span>
+}
+@foreach (var i in MAX.Range().Select(i => i + Model.CurrentPage - SIDE_LENGTH).Where(i => i < Model.NumOfPages - 1).SkipNegative())
+{
+    <a asp-page="/Index" asp-route-pageIndex="@i">@(i + 1)</a>
+}
+@if (addEndElipsis)
+{
+    <span>...</span>
+}
+@if (Model.NumOfPages > 1)
+{
+    <a asp-page="/Index" asp-route-pageIndex="@Model.NumOfPages.Add(-1)">@Model.NumOfPages</a>
+}
+@if (Model.CurrentPage < Model.NumOfPages - 1)
+{
+    <a asp-page="/Index" asp-route-pageIndex="@(Model.CurrentPage + 1)">></a>
 }
