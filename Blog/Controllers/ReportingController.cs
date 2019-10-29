@@ -62,22 +62,28 @@ namespace Blog.Controllers
             if (reportObject is Post post)
             {
                 report = new Report(reportingUser, post.Author, ReportObjectType.POST, post.Id, DateTime.UtcNow);
+                post.Reports.Add(report);
             }
             else if (reportObject is Profile profile)
             {
                 var owner = await DB.Users.FirstOrDefaultAsync(u => u.Profile.Id == profile.Id);
                 report = new Report(reportingUser, owner, ReportObjectType.PROFILE, profile.Id, DateTime.UtcNow);
+                profile.Reports.Add(report);
             }
             else if (reportObject is Commentary commentary)
             {
                 report = new Report(reportingUser, commentary.Author, ReportObjectType.COMMENTARY, commentary.Id, DateTime.UtcNow);
+                commentary.Reports.Add(report);
+                commentary.IsHidden = commentary.IsHidden 
+                    ? true 
+                    : commentary.ViewStatistic.TotalViews > 10
+                      && (commentary.Reports.Count() + 1) / (double)commentary.ViewStatistic.TotalViews > 0.1;
             }
             else
             {
                 throw new InvalidOperationException("Can't create report for object of such type");
             }
 
-            DB.Reports.Add(report);
             await DB.SaveChangesAsync();
             reportingUser.Actions.Add(new UserAction(ActionType.REPORT, report.Id.ToString()));
             await DB.SaveChangesAsync();

@@ -8,3 +8,7 @@
 textarea {
     width: 100%
 }
+
+span.comment-hidden {
+   color: darkgray
+}

@@ -10,7 +10,15 @@
 </h4>
 
 @await Html.PartialAsync("_ProfileImage", Model.Commentary.Author)
-@Model.Commentary.Body
+@if (Model.Commentary.IsHidden)
+{
+    <span class="comment-hidden">@Model.Commentary.Body</span>
+}
+else
+{
+    <span>@Model.Commentary.Body</span>
+}
+
 @foreach (var edit in Model.Commentary.Edits)
 {
     <div>
