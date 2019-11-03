@@ -13,19 +13,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Pages
 {
-    public class PostModel : ExtendedPageModel
+    public class PostModel : PageModelBase
     {
         public Post Post { get; private set; }
         public IEnumerable<Commentary> Commentaries { get; private set; }
 
-        public PostModel(IServiceProvider serviceProvider) : base(serviceProvider)
+        public PostModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
 
         }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            Post = await DB.Posts.FirstOrDefaultAsync(p => p.Id == id);
+            Post = await Services.Db.Posts.FirstOrDefaultAsync(p => p.Id == id);
             
             if (Post == null)
             {
@@ -33,16 +33,16 @@ namespace Blog.Pages
             }
             else
             {
-                var currentUser = await UserManager.GetUserAsync(User);
+                var currentUser = await Services.UserManager.GetUserAsync(User);
 
-                Commentaries = DB.Commentaries.Where(c => c.Post == Post);
+                Commentaries = Services.Db.Commentaries.Where(c => c.Post == Post);
                 foreach (var commentary in Commentaries)
                 {
                     commentary.ViewStatistic.UpdateStatistic(currentUser);
                 }
                 Post.ViewStatistic.UpdateStatistic(currentUser);
 
-                var x = await DB.SaveChangesAsync();
+                var x = await Services.Db.SaveChangesAsync();
 
                 return Page();
             }
@@ -57,14 +57,14 @@ namespace Blog.Pages
                 if (commentBody != null)
                 {
                     var comment = new Commentary(
-                        await DB.Users.FirstAsync(u => u.UserName == User.Identity.Name), 
+                        await Services.Db.Users.FirstAsync(u => u.UserName == User.Identity.Name), 
                         DateTime.UtcNow, 
-                        await DB.Posts.FindAsync(postId), 
+                        await Services.Db.Posts.FindAsync(postId), 
                         commentBody);
-                    DB.Commentaries.Add(comment);
-                    await DB.SaveChangesAsync();
+                    Services.Db.Commentaries.Add(comment);
+                    await Services.Db.SaveChangesAsync();
                     currentUser.Actions.Add(new UserAction(ActionType.ADD_COMMENTARY, comment.Id.ToString()));
-                    await DB.SaveChangesAsync();
+                    await Services.Db.SaveChangesAsync();
                 }
             }
          

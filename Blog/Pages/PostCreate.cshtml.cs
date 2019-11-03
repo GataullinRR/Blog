@@ -16,23 +16,23 @@ namespace Blog.Pages
 {
     public class PostCreateModel : PostCRUDPageModel
     {
-        public PostCreateModel(IServiceProvider serviceProvider) : base(serviceProvider)
+        public PostCreateModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
 
         }
 
         public async Task OnGetAsync()
         {
-            await Permissions.ValidateCreatePostAsync();
+            await Services.Permissions.ValidateCreatePostAsync();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            await Permissions.ValidateCreatePostAsync();
+            await Services.Permissions.ValidateCreatePostAsync();
 
             if (ModelState.IsValid)
             {
-                if (await DB.Posts.FirstOrDefaultAsync(p => p.Title == Title) != null)
+                if (await Services.Db.Posts.FirstOrDefaultAsync(p => p.Title == Title) != null)
                 {
                     ModelState.AddModelError("", "Post with this name already exists");
 
@@ -42,10 +42,10 @@ namespace Blog.Pages
                 {
                     var author = await GetCurrentUserModelOrThrowAsync();
                     var post = new Post(DateTime.UtcNow, author, Title, Body);
-                    DB.Posts.Add(post);
-                    await DB.SaveChangesAsync();
+                    Services.Db.Posts.Add(post);
+                    await Services.Db.SaveChangesAsync();
                     author.Actions.Add(new UserAction(ActionType.POST_CREATE, post.Id.ToString()));
-                    await DB.SaveChangesAsync();
+                    await Services.Db.SaveChangesAsync();
 
                     return RedirectToPage("/Post", new { id = post.Id });
                 }

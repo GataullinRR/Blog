@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using Blog.Models;
+using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Blog.Pages
 {
     [Authorize(Roles = Roles.NOT_RESTRICTED)]
-    public abstract class PostCRUDPageModel : ExtendedPageModel
+    public abstract class PostCRUDPageModel : PageModelBase
     {
         [BindProperty(), Required(), MinLength(8), MaxLength(100)]
         public string Title { get; set; }
@@ -17,7 +18,7 @@ namespace Blog.Pages
         [BindProperty]
         public int PostId { get; set; }
 
-        public PostCRUDPageModel(IServiceProvider serviceProvider) : base(serviceProvider)
+        public PostCRUDPageModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
 
         }

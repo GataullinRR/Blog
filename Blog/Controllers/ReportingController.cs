@@ -3,16 +3,23 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Services;
 using DBModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Utilities.Extensions;
 
 namespace Blog.Controllers
 {
-    public class ReportingController : ExtendedController
+    public class ReportingController : ControllerBase
     {
-        public ReportingController(IServiceProvider serviceProvider) : base(serviceProvider)
+        readonly ReportViewConfirmationTokenProvider _reportViewConfirmationTokens;
+
+        public ReportingController(ServicesProvider serviceProvider) : base(serviceProvider)
         {
+            _reportViewConfirmationTokens = Services.ServiceProvider.GetService<ReportViewConfirmationTokenProvider>();
+
             PersistLayoutModel = true;
         }
 
@@ -20,7 +27,7 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                return await reportAsync(DB.ProfilesInfos.FirstOrDefault(p => p.Id == id));
+                return await reportAsync(Services.Db.ProfilesInfos.FirstOrDefault(p => p.Id == id));
             }
             else
             {
@@ -32,7 +39,7 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                return await reportAsync(DB.Posts.FirstOrDefault(p => p.Id == id));
+                return await reportAsync(Services.Db.Posts.FirstOrDefault(p => p.Id == id));
 
             }
             else
@@ -45,7 +52,7 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                return await reportAsync(DB.Commentaries.FirstOrDefault(p => p.Id == id));
+                return await reportAsync(Services.Db.Commentaries.FirstOrDefault(p => p.Id == id));
             }
             else
             {
@@ -53,44 +60,48 @@ namespace Blog.Controllers
             }
         }
 
-        async Task<IActionResult> reportAsync(object reportObject)
+        async Task<IActionResult> reportAsync(IReportObject reportObject)
         {
-            await Permissions.ValidateReportAsync(reportObject);
+            await Services.Permissions.ValidateReportAsync(reportObject);
 
             Report report;
-            var reportingUser = await UserManager.GetUserAsync(User);
+            var reportingUser = await Services.UserManager.GetUserAsync(User);
             if (reportObject is Post post)
             {
-                report = new Report(reportingUser, post.Author, ReportObjectType.POST, post.Id, DateTime.UtcNow);
-                post.Reports.Add(report);
+                report = new Report(reportingUser, post.Author, reportObject);
             }
             else if (reportObject is Profile profile)
             {
-                var owner = await DB.Users.FirstOrDefaultAsync(u => u.Profile.Id == profile.Id);
-                report = new Report(reportingUser, owner, ReportObjectType.PROFILE, profile.Id, DateTime.UtcNow);
-                profile.Reports.Add(report);
+                var owner = await Services.Db.Users.FirstOrDefaultAsync(u => u.Profile.Id == profile.Id);
+                report = new Report(reportingUser, owner, reportObject);
             }
             else if (reportObject is Commentary commentary)
             {
-                report = new Report(reportingUser, commentary.Author, ReportObjectType.COMMENTARY, commentary.Id, DateTime.UtcNow);
-                commentary.Reports.Add(report);
+                report = new Report(reportingUser, commentary.Author, reportObject);
                 commentary.IsHidden = commentary.IsHidden 
                     ? true 
-                    : commentary.ViewStatistic.TotalViews > 10
-                      && (commentary.Reports.Count() + 1) / (double)commentary.ViewStatistic.TotalViews > 0.1;
+                    : Services.Decisions.ShouldHide(commentary);
+                if (Services.Decisions.ShouldReportToModerator(commentary))
+                {
+                    await Services.DbUpdator.EnsureHasEnoughModeratorsInChargeAsync(commentary.Author);
+                    foreach (var moderator in commentary.Author.ModeratorsInCharge)
+                    {
+                        moderator.ModeratorPanel.CommentariesToCheck.Add(new EntityToCheck<Commentary>(commentary));
+                    }
+                }
             }
             else
             {
                 throw new InvalidOperationException("Can't create report for object of such type");
             }
 
-            await DB.SaveChangesAsync();
-            reportingUser.Actions.Add(new UserAction(ActionType.REPORT, report.Id.ToString()));
-            await DB.SaveChangesAsync();
+            Services.Db.Reports.Add(report);
+            reportingUser.Actions.Add(new UserAction(ActionType.REPORT, reportObject));
+            await Services.Db.SaveChangesAsync();
 
             LayoutModel.Messages.Add("Report has been submitted");
 
-            return Redirect(History.GetLastURL());
+            return Redirect(Services.History.GetLastURL());
         }
     }
 }

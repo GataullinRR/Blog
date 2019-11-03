@@ -15,9 +15,9 @@ using Utilities.Extensions;
 
 namespace Blog.Controllers
 {
-    public class AccountController : ExtendedController
+    public class AccountController : ControllerBase
     {
-        public AccountController(IServiceProvider serviceProvider) : base(serviceProvider)
+        public AccountController(ServicesProvider serviceProvider) : base(serviceProvider)
         {
             PersistLayoutModel = true;
         }
@@ -25,12 +25,12 @@ namespace Blog.Controllers
         [HttpGet(), Authorize()]
         public async Task<IActionResult> Logout()
         {
-            var currenUser = await UserManager.GetUserAsync(User);
-            await SignInManager.SignOutAsync();
+            var currenUser = await Services.UserManager.GetUserAsync(User);
+            await Services.SignInManager.SignOutAsync();
             if (currenUser != null)
             {
                 currenUser.Actions.Add(new DBModels.UserAction(ActionType.SIGNED_OUT, null));
-                await DB.SaveChangesAsync();
+                await Services.Db.SaveChangesAsync();
             }
 
             return RedirectToPage("/Index");
@@ -41,16 +41,16 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var targetUser = await UserManager.FindByIdAsync(userId);
-                await Permissions.ValidateUnbanUserAsync(targetUser);
+                var targetUser = await Services.UserManager.FindByIdAsync(userId);
+                await Services.Permissions.ValidateUnbanUserAsync(targetUser);
 
                 targetUser.Status.State = targetUser.EmailConfirmed
                     ? ProfileState.ACTIVE
                     : ProfileState.RESTRICTED;
                 targetUser.Status.StateReason = null;
                 targetUser.Status.BannedTill = null;
-                targetUser.Actions.Add(new DBModels.UserAction(ActionType.UNBAN, DateTime.UtcNow, targetUser.Id));
-                await DB.SaveChangesAsync();
+                targetUser.Actions.Add(new UserAction(ActionType.UNBAN, targetUser));
+                await Services.Db.SaveChangesAsync();
 
                 LayoutModel.Messages.Add($"User \"{targetUser.UserName}\" has been unbanned");
 
@@ -67,8 +67,8 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await UserManager.GetUserAsync(HttpContext.User);
-                var expectedToken = ConfirmationTokens.GetToken(user, AccountOperation.EMAIL_CONFIRMATION);
+                var user = await Services.UserManager.GetUserAsync(HttpContext.User);
+                var expectedToken = Services.ConfirmationTokens.GetToken(user, AccountOperation.EMAIL_CONFIRMATION);
                 if (confirmationToken == expectedToken)
                 {
                     if (user.EmailConfirmed)
@@ -78,9 +78,9 @@ namespace Blog.Controllers
                     else
                     {
                         user.EmailConfirmed = true;
-                        await UserManager.AddToRoleAsync(user, Roles.USER);
-                        user.Actions.Add(new DBModels.UserAction(ActionType.EMAIL_CONFIRMATION, DateTime.UtcNow, null));
-                        await DB.SaveChangesAsync();
+                        await Services.UserManager.AddToRoleAsync(user, Roles.USER);
+                        user.Actions.Add(new UserAction(ActionType.EMAIL_CONFIRMATION, user));
+                        await Services.Db.SaveChangesAsync();
 
                         return RedirectToPage("/Account/ConfirmEMail"); // Will show greeting
                     }
@@ -101,23 +101,23 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await UserManager.FindByIdAsync(userId);
+                var user = await Services.UserManager.FindByIdAsync(userId);
 #warning add something similar
                 //_permissions.ValidateResetPassword(User, user);
 
-                var expectedToken = ConfirmationTokens.GetToken(user, AccountOperation.PASSWORD_RESET);
+                var expectedToken = Services.ConfirmationTokens.GetToken(user, AccountOperation.PASSWORD_RESET);
                 if (confirmationToken == expectedToken)
                 {
                     var newPassword = 3.Times(_ => Global.Random.NextENWord().Capitalize()).Aggregate("");
-                    var isSent = await EMail.TrySendMessageAsync(user, "Password reset", "New password", $@"Your new password is: {newPassword}
+                    var isSent = await Services.EMail.TrySendMessageAsync(user, "Password reset", "New password", $@"Your new password is: {newPassword}
 Please delete this message so that nobody can see it");
                     if (isSent)
                     {
-                        user.PasswordHash = UserManager.PasswordHasher.HashPassword(user, newPassword);
-                        var result = await UserManager.UpdateAsync(user);
-                        await SignInManager.SignOutAsync();
-                        user.Actions.Add(new DBModels.UserAction(ActionType.PASSWORD_RESET, DateTime.UtcNow, null));
-                        await DB.SaveChangesAsync();
+                        user.PasswordHash = Services.UserManager.PasswordHasher.HashPassword(user, newPassword);
+                        var result = await Services.UserManager.UpdateAsync(user);
+                        await Services.SignInManager.SignOutAsync();
+                        user.Actions.Add(new UserAction(ActionType.PASSWORD_RESET, null));
+                        await Services.Db.SaveChangesAsync();
 
                         LayoutModel.Messages.Add("New password has been sent to your E-Mail");
 

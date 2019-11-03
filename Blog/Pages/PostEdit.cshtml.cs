@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -15,7 +16,7 @@ namespace Blog.Pages
         public string EditReason { get; set; }
         public Post Post { get; private set; }
 
-        public PostEditModel(IServiceProvider serviceProvider) : base(serviceProvider)
+        public PostEditModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
 
         }
@@ -24,10 +25,10 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                var post = await DB.Posts.FirstOrDefaultByIdAsync(id);
+                var post = await Services.Db.Posts.FirstOrDefaultByIdAsync(id);
                 if (post != null)
                 {
-                    await Permissions.ValidateEditPostAsync(post);
+                    await Services.Permissions.ValidateEditPostAsync(post);
                     Title = post.Title;
                     Body = post.Body;
                     Post = post;
@@ -37,26 +38,26 @@ namespace Blog.Pages
                 }
             }
 
-            return Redirect(History.GetLastURL());
+            return Redirect(Services.History.GetLastURL());
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             if (ModelState.IsValid)
             {
-                var editingPost = await DB.Posts.FirstOrDefaultByIdAsync(PostId);
+                var editingPost = await Services.Db.Posts.FirstOrDefaultByIdAsync(PostId);
 
-                await Permissions.ValidateEditPostAsync(editingPost);
+                await Services.Permissions.ValidateEditPostAsync(editingPost);
 
                 var author = await GetCurrentUserModelOrThrowAsync();
                 editingPost.Body = Body;
-                if (await Permissions.CanEditPostTitleAsync(editingPost))
+                if (await Services.Permissions.CanEditPostTitleAsync(editingPost))
                 {
                     editingPost.Title = Title;
                 }
                 editingPost.Edits.Add(new PostEdit(author, EditReason, DateTime.UtcNow));
                 author.Actions.Add(new UserAction(ActionType.POST_EDIT, editingPost.Id.ToString()));
-                await DB.SaveChangesAsync();
+                await Services.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Post", new { id = editingPost.Id });
             }

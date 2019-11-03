@@ -41,9 +41,12 @@ namespace Blog
             services.AddIdentity<User, IdentityRole>(options =>
                     {
                         options.User.RequireUniqueEmail = false;
+                        options.Tokens.ProviderMap.Add("CustomEmailConfirmation", new TokenProviderDescriptor(
+                            typeof(ReportViewConfirmationTokenProvider)));
                     })
                     .AddEntityFrameworkStores<BlogContext>()
                     .AddDefaultTokenProviders();
+            services.AddTransient<ReportViewConfirmationTokenProvider>();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -71,11 +74,14 @@ namespace Blog
             services.AddSession();
             services.AddMemoryCache();
             services.AddUrlHelper();
-            services.AddTransient<EMailService>();
-            services.AddTransient<ConfirmationTokenService>();
-            services.AddTransient<PermissionsService>();
-            services.AddTransient<HistoryService>();
+            services.AddScoped<EMailService>();
+            services.AddScoped<ConfirmationTokenService>();
+            services.AddScoped<PermissionsService>();
+            services.AddScoped<HistoryService>();
             services.AddSingleton<AutounbanService>();
+            services.AddScoped<DecisionsService>();
+            services.AddScoped<DbEntitiesUpdateService>();
+            services.AddScoped<ServicesProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

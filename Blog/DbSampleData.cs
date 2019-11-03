@@ -64,7 +64,8 @@ namespace Blog
                 {
                     Email = "Oleg@yota.ru",
                     UserName = "Oleg",
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    ModeratorPanel = new ModeratorPannel()
                 };
                 userManager.CreateAsync(oleg, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(oleg, Roles.MODERATOR).Wait();

@@ -19,6 +19,7 @@ namespace DBModels
         public DbSet<Report> Reports { get; set; }
         public DbSet<ViewStatistic> ViewStatistics { get; set; }
         public DbSet<UserAction> UsersActions { get; set; }
+        public DbSet<ModeratorPannel> ModeratorsPannels { get; set; }
 
         public BlogContext(DbContextOptions<BlogContext> options)
             : base(options)

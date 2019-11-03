@@ -10,33 +10,33 @@ namespace Blog.Services
     public class HistoryService : ServiceBase
     {
         const string LAST_URL_KEY = "LastGetRequestPath";
-        public bool HasLastUri => httpContext.Session.Keys.Contains(LAST_URL_KEY);
+        public bool HasLastUri => Services.HttpContext.Session.Keys.Contains(LAST_URL_KEY);
 
-        public HistoryService(IServiceProvider serviceProvider) : base(serviceProvider)
+        public HistoryService(ServicesProvider serviceProvider) : base(serviceProvider)
         {
 
         }
 
         public void SaveCurrentURL()
         {
-            if (httpContext.Request.Method == "GET")
+            if (Services.HttpContext.Request.Method == "GET")
             {
                 var url = new UriBuilder
                 {
-                    Scheme = httpContext.Request.Scheme,
-                    Host = httpContext.Request.Host.Host,
-                    Port = httpContext.Request.Host.Port.GetValueOrDefault(80),
-                    Path = httpContext.Request.Path.ToString(),
-                    Query = httpContext.Request.QueryString.ToString()
+                    Scheme = Services.HttpContext.Request.Scheme,
+                    Host = Services.HttpContext.Request.Host.Host,
+                    Port = Services.HttpContext.Request.Host.Port.GetValueOrDefault(80),
+                    Path = Services.HttpContext.Request.Path.ToString(),
+                    Query = Services.HttpContext.Request.QueryString.ToString()
                 }.Uri.ToString();
 
-                httpContext.Session.Set(LAST_URL_KEY, url.GetBytes(Encoding.UTF8));
+                Services.HttpContext.Session.Set(LAST_URL_KEY, url.GetBytes(Encoding.UTF8));
             }
         }
 
         public string GetLastURL()
         {
-            var has = httpContext.Session.TryGetValue(LAST_URL_KEY, out byte[] uri);
+            var has = Services.HttpContext.Session.TryGetValue(LAST_URL_KEY, out byte[] uri);
             if (!has)
             {
                 // ToDo

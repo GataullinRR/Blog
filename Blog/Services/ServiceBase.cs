@@ -9,20 +9,11 @@ namespace Blog.Services
 {
     public class ServiceBase
     {
-        readonly IServiceProvider _serviceProvider;
+        protected ServicesProvider Services { get; }
 
-        readonly Lazy<IHttpContextAccessor> _httpContext;
-        readonly Lazy<BlogContext> _db;
-
-        protected HttpContext httpContext => _httpContext.Value.HttpContext;
-        protected BlogContext db => _db.Value;
-
-        public ServiceBase(IServiceProvider serviceProvider)
+        public ServiceBase(ServicesProvider services)
         {
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-
-            _httpContext = _serviceProvider.GetLazyService<IHttpContextAccessor>();
-            _db = _serviceProvider.GetLazyService<BlogContext>();
+            Services = services;
         }
     }
 }

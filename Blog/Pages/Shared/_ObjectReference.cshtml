@@ -1,0 +1,32 @@
+﻿@model ObjectReferenceModel
+
+@if (Model.Object is Commentary commentary)
+{
+    <span>commentary</span>
+}
+else if (Model.Object is Post post)
+{
+    @if (Model.IsActive)
+    {
+        <a asp-page="/Post" asp-all-route-id="@post.Id">post</a>
+    }
+    else
+    {
+        <span>post</span>
+    }
+}
+else if (Model.Object is User user)
+{
+    if (Model.IsActive)
+    {
+        <a asp-page="/Account/Profile" asp-all-route-id="@user.Id">user</a>
+    }
+    else
+    {
+        <span>user</span>
+    }
+}
+else if (Model.Object is Profile profile)
+{
+    <span>profile</span>
+}

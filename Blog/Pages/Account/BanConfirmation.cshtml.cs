@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Blog.Models;
+using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -11,7 +12,7 @@ using Utilities.Extensions;
 
 namespace Blog.Pages.Account
 {
-    public class BanConfirmationModel : ExtendedPageModel
+    public class BanConfirmationModel : PageModelBase
     {
         [BindProperty()]
         public string UserId { get; set; }
@@ -20,7 +21,7 @@ namespace Blog.Pages.Account
         [BindProperty, DataType(DataType.MultilineText), MinLength(10), Required]
         public string Reason { get; set; }
 
-        public BanConfirmationModel(IServiceProvider serviceProvider) : base(serviceProvider)
+        public BanConfirmationModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
             PersistLayoutModel = true;
         }
@@ -28,8 +29,8 @@ namespace Blog.Pages.Account
         public async Task OnGetAsync(string id)
         {
             UserId = id;
-            var targetUser = await UserManager.FindByIdAsync(id);
-            await Permissions.ValidateBanUserAsync(targetUser);
+            var targetUser = await Services.UserManager.FindByIdAsync(id);
+            await Services.Permissions.ValidateBanUserAsync(targetUser);
         }
 
         public async Task<IActionResult> OnPostBanAsync()
@@ -44,16 +45,16 @@ namespace Blog.Pages.Account
                 }
                 else
                 {
-                    var targetUser = await UserManager.FindByIdAsync(UserId);
-                    await Permissions.ValidateBanUserAsync(targetUser);
+                    var targetUser = await Services.UserManager.FindByIdAsync(UserId);
+                    await Services.Permissions.ValidateBanUserAsync(targetUser);
 
                     targetUser.Status.State = DBModels.ProfileState.BANNED;
                     targetUser.Status.BannedTill = BannedTill.ToUniversalTime();
                     targetUser.Status.StateReason = Reason;
                     targetUser.Actions.Add(new UserAction(ActionType.BAN, targetUser.Id));
-                    await DB.SaveChangesAsync();
+                    await Services.Db.SaveChangesAsync();
 
-                    await EMail.TrySendMessageAsync(targetUser, "Administration", "Profile has been banned", $@"Profile name: {targetUser.UserName}
+                    await Services.EMail.TrySendMessageAsync(targetUser, "Administration", "Profile has been banned", $@"Profile name: {targetUser.UserName}
 Reason: {Reason}
 Ban will expire at {BannedTill.ToString("dd.MM.yyyy")}");
 

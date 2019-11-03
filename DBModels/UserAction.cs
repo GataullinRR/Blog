@@ -25,7 +25,9 @@ namespace DBModels
         EMAIL_CONFIRMATION = 1000,
         SIGNED_IN = 1100,
         SIGNED_OUT = 1200,
-        SIGN_IN_FAIL = 1300
+        SIGN_IN_FAIL = 1300,
+
+        REPORT_CHECKED = 1400
     }
 
     public class UserAction : IDbEntity
@@ -34,20 +36,20 @@ namespace DBModels
         public int Id { get; set; }
         public ActionType ActionType { get; set; }
         public DateTime ActionDate { get; set; }
-        public string ObjectId { get; set; }
+        public virtual Commentary CommentaryObject { get; set; }
+        public virtual Post PostObject { get; set; }
+        public virtual Profile ProfileObject { get; set; }
+        public IReportObject ReportObject => CommentaryObject ?? (IReportObject)PostObject ?? ProfileObject;
 
         public UserAction() { }
 
-        public UserAction(ActionType actionType, string objectId)
-            :this(actionType, DateTime.UtcNow, objectId)
-        {
-
-        }
-        public UserAction(ActionType actionType, DateTime actionDate, string objectId)
+        public UserAction(ActionType actionType, object actionObject)
         {
             ActionType = actionType;
-            ActionDate = actionDate;
-            ObjectId = objectId;
+            ActionDate = DateTime.UtcNow;
+            CommentaryObject = actionObject as Commentary;
+            PostObject = actionObject as Post;
+            ProfileObject = actionObject as Profile;
         }
     }
 }

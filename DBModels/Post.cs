@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace DBModels
 {
-    public class Post : IDbEntity
+    public class Post : IDbEntity, IReportObject
     {
         [Key]
         public int Id { get; set; }
@@ -19,6 +20,7 @@ namespace DBModels
         public string Body { get; set; }
         [Required] public virtual List<PostEdit> Edits { get; set; } = new List<PostEdit>();
         [Required] public virtual ViewStatistic ViewStatistic { get; set; }
+        [InverseProperty(nameof(Report.PostObject))]
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
 
         public Post() 

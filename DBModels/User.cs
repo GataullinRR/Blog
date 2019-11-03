@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Policy;
 
 namespace DBModels
@@ -40,11 +41,16 @@ namespace DBModels
         public virtual List<Commentary> Commentaries { get; set; }
         public virtual List<UserRuleViolation> Violations { get; set; } = new List<UserRuleViolation>();
         public virtual List<UserRuleViolation> ReportedViolations { get; set; } = new List<UserRuleViolation>();
-
         [Required] public virtual List<UserAction> Actions { get; set; } = new List<UserAction>();
-        [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
         [Required] public virtual List<Report> ReportedReports { get; set; } = new List<Report>();
-        
+        [InverseProperty(nameof(Report.ReportObjectOwner))]
+        [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
+        /// <summary>
+        /// Not null for User in <see cref="Roles.MODERATOR"/>
+        /// </summary>
+        public virtual ModeratorPannel ModeratorPanel { get; set; }
+        public virtual List<User> ModeratorsInCharge { get; set; } = new List<User>();
+
         public User() { }
 
         public User(Profile info, ProfileStatus status)

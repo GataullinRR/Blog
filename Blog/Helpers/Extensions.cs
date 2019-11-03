@@ -89,5 +89,33 @@ namespace Blog
         {
             return await entities.FirstOrDefaultAsync(e => e.Id == id);
         }
+
+        public static async Task<IQueryable<User>> GetUsersInRoleAsync(this BlogContext db, string role)
+        {
+            var roleId = (await db.Roles.FirstAsync(r => r.Name == role)).Id;
+            var usersIds = db.UserRoles.Where(r => r.RoleId == roleId).Select(ur => ur.UserId);
+
+            return db.Users.Where(u => usersIds.Contains(u.Id));
+        }
+
+        public static string ToCurrentTimeRelativeString(this TimeSpan span)
+        {
+            if (span < TimeSpan.FromSeconds(60))
+            {
+                return "just now";
+            }
+            else if (span < TimeSpan.FromMinutes(60))
+            {
+                return $"{span.TotalMinutes.ToInt32()} minutes ago";
+            }
+            else if (span < TimeSpan.FromHours(24))
+            {
+                return $"{span.TotalHours.Round()} hours ago";
+            }
+            else
+            {
+                return $"{span.TotalDays} days ago";
+            }
+        }
     }
 }

@@ -1,0 +1,80 @@
+﻿@page
+@model Blog.Pages.ModeratorPanelModel
+@{
+    ViewData["Title"] = "Moderator panel";
+}
+
+<h3>Moderator panel</h3>
+
+<h4>Owners</h4>
+
+@foreach (var user in Model.Panel.Owners)
+{
+    <a asp-page="/Account/Profile" asp-all-route-id="@user.Id">@user.UserName</a>
+}
+
+<h4>Users you are in charge of</h4>
+
+@if (!Model.TargetUsers.Any())
+{
+    <span>None at the moment :(</span>
+}
+
+@foreach (var user in Model.TargetUsers)
+{
+    <a asp-page="/Account/Profile" asp-all-route-id="@user.Id">@user.UserName</a>
+}
+
+@{
+    var assignedEntities = Model.Entities.Where(e => e.AssignedModerator == Model.Moderator);
+    var unassignedEntities = Model.Entities.Where(e => e.AssignedModerator != Model.Moderator);
+}
+
+<h4>Entities you are assigned for</h4>
+
+@if (!assignedEntities.Any())
+{
+    <div>There are no entities assigned :(</div>
+    if (unassignedEntities.Any())
+    {
+        <div>You can <a href="#UnassignedEntities">assign</a> new ones</div>
+    }
+}
+
+<ul>
+    @foreach (var entity in assignedEntities)
+    {
+        <li>
+            @{ await Html.RenderPartialAsync("_EntityToCheck", entity); }
+            <a asp-page-handler="Check" asp-route-id="@entity.Id">Mark as resolved</a>
+        </li>
+    }
+</ul>
+
+<h4 id="UnassignedEntities">Unassigned entities</h4>
+
+@if (unassignedEntities.Any())
+{
+    <form method="post" asp-page-handler="Assign">
+        <div class="form-group">
+            <label>Number of entities to assign</label>
+            <input asp-for="NumOfEntitiesToAssign" />
+            <span asp-validation-for="NumOfEntitiesToAssign"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Assign</button>
+    </form>
+}
+else
+{
+    <div>There are no entities to process. Come back later!</div>
+}
+
+<ul>
+    @foreach (var entity in unassignedEntities.Take(100))
+    {
+        <li>
+            @{ await Html.RenderPartialAsync("_EntityToCheck", entity); }
+        </li>
+    }
+</ul>

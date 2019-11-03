@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DBModels
 {
-    public class Commentary : IDbEntity
+    public class Commentary : IDbEntity, IReportObject
     {
         [Key] public int Id { get; set; }
         [Required] public virtual User Author { get; set; }
-        [Required] public DateTime CreationTime { get; set; }
+        public DateTime CreationTime { get; set; }
         [Required] public virtual Post Post { get; set; }
         [Required] public string Body { get; set; }
         [Required] public virtual List<CommentaryEdit> Edits { get; set; } = new List<CommentaryEdit>();
+        [InverseProperty(nameof(Report.CommentaryObject))]
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
         [Required] public virtual ViewStatistic ViewStatistic { get; set; }
         public bool IsHidden { get; set; }

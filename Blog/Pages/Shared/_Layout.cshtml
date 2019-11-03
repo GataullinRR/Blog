@@ -1,6 +1,7 @@
-﻿@{ 
+﻿@{
     var model = (Model as ILayoutModelProvider)?.LayoutModel ?? new LayoutModel();
 }
+@inject Blog.Services.PermissionsService Permissions
 
 <!DOCTYPE html>
 
@@ -25,6 +26,10 @@
     {
         <a asp-page="/Account/Login">Login</a>
         <a asp-page="/Account/Register">Register</a>
+    }
+    @if (await Permissions.CanAccessModeratorsPanelAsync())
+    {
+        <a asp-page="/ModeratorPanel">Moderator panel</a>
     }
     <hr />
 

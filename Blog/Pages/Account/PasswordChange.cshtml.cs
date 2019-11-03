@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Blog.Models;
+using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +13,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace Blog.Pages.Account
 {
     [Authorize(Roles = Roles.NOT_RESTRICTED)]
-    public class PasswordChangeModel : ExtendedPageModel
+    public class PasswordChangeModel : PageModelBase
     {
         [BindProperty, DataType(DataType.Password), Required]
         public string NewPassword { get; set; }
@@ -21,14 +22,14 @@ namespace Blog.Pages.Account
         [BindProperty, DataType(DataType.Password), Required]
         public string CurrentPassword { get; set; }
 
-        public PasswordChangeModel(IServiceProvider serviceProvider) : base(serviceProvider)
+        public PasswordChangeModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
             PersistLayoutModel = true;
         }
 
         public async Task OnGetAsync()
         {
-            await Permissions.ValidateChangePasswordAsync(await UserManager.GetUserAsync(User));
+            await Services.Permissions.ValidateChangePasswordAsync(await Services.UserManager.GetUserAsync(User));
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -37,13 +38,13 @@ namespace Blog.Pages.Account
             {
                 if (NewPassword == NewPasswordConfirmation)
                 {
-                    var user = await UserManager.GetUserAsync(User);
-                    var result = await UserManager.ChangePasswordAsync(user, CurrentPassword, NewPassword);
+                    var user = await Services.UserManager.GetUserAsync(User);
+                    var result = await Services.UserManager.ChangePasswordAsync(user, CurrentPassword, NewPassword);
                     if (result.Succeeded)
                     {
-                        await SignInManager.SignOutAsync();
+                        await Services.SignInManager.SignOutAsync();
                         user.Actions.Add(new DBModels.UserAction(ActionType.PASSWORD_CHANGED, null));
-                        await DB.SaveChangesAsync();
+                        await Services.Db.SaveChangesAsync();
 
                         LayoutModel.Messages.Add("Password has been changed");
 

@@ -17,35 +17,17 @@ namespace Blog.Models
         LayoutModel LayoutModel { get; }
     }
 
-    public abstract class ExtendedPageModel : PageModel, ILayoutModelProvider
+    public abstract class PageModelBase : PageModel, ILayoutModelProvider
     {
-        readonly IServiceProvider _serviceProvider;
-        readonly Lazy<BlogContext> _db;
-        readonly Lazy<PermissionsService> _permissions;
-        readonly Lazy<UserManager<User>> _userManager;
-        readonly Lazy<SignInManager<User>> _signInManager;
-        readonly Lazy<EMailService> _eMail;
+        public ServicesProvider Services { get; set; }
 
-        protected BlogContext DB => _db.Value;
-        protected UserManager<User> UserManager => _userManager.Value;
-        protected SignInManager<User> SignInManager => _signInManager.Value;
-        protected EMailService EMail => _eMail.Value;
-        protected HistoryService History { get; }
-        public PermissionsService Permissions => _permissions.Value;
-
+        public PermissionsService Permissions => Services.Permissions;
         public LayoutModel LayoutModel { get; private set; } = new LayoutModel();
-        public bool PersistLayoutModel { get; set; } = false;
+        internal bool PersistLayoutModel { get; set; } = false;
 
-        public ExtendedPageModel(IServiceProvider serviceProvider)
+        public PageModelBase(ServicesProvider services)
         {
-            _serviceProvider = serviceProvider;
-
-            _db = _serviceProvider.GetLazyService<BlogContext>();
-            _permissions = _serviceProvider.GetLazyService<PermissionsService>();
-            _userManager = _serviceProvider.GetLazyService<UserManager<User>>();
-            _signInManager = _serviceProvider.GetLazyService<SignInManager<User>>();
-            _eMail = _serviceProvider.GetLazyService<EMailService>();
-            History = _serviceProvider.GetService<HistoryService>();
+            Services = services;
         }
 
         public override void OnPageHandlerSelected(PageHandlerSelectedContext context)
@@ -68,14 +50,14 @@ namespace Blog.Models
                 HttpContext.Session.Remove(nameof(LayoutModel));
             }
 
-            History.SaveCurrentURL();
+            Services.History.SaveCurrentURL();
 
             base.OnPageHandlerExecuted(context);
         }
 
         public async Task<User> GetCurrentUserModelOrThrowAsync()
         {
-            var user = await UserManager.GetUserAsync(User);
+            var user = await Services.UserManager.GetUserAsync(User);
             if (user == null)
             {
                 throw new UnauthorizedAccessException();

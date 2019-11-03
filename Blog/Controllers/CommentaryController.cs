@@ -15,9 +15,9 @@ using Microsoft.EntityFrameworkCore.Query;
 namespace Blog.Controllers
 {
     [Authorize(Roles = Roles.NOT_RESTRICTED)]
-    public class CommentaryController : ExtendedController
+    public class CommentaryController : ControllerBase
     {
-        public CommentaryController(IServiceProvider serviceProvider) : base(serviceProvider)
+        public CommentaryController(ServicesProvider serviceProvider) : base(serviceProvider)
         {
 
         }
@@ -27,8 +27,8 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var commentary = await DB.Commentaries.FirstAsync(c => c.Id == id);
-                await Permissions.ValidateEditCommentaryAsync(commentary);
+                var commentary = await Services.Db.Commentaries.FirstAsync(c => c.Id == id);
+                await Services.Permissions.ValidateEditCommentaryAsync(commentary);
 
                 return PartialView("_CommentaryEdit", commentary);
             }
@@ -43,10 +43,10 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var commentary = await DB.Commentaries.FirstAsync(c => c.Id == id);
-                var user = await UserManager.GetUserAsync(User);
+                var commentary = await Services.Db.Commentaries.FirstAsync(c => c.Id == id);
+                var user = await Services.UserManager.GetUserAsync(User);
 
-                return PartialView("_Commentary", new CommentaryModel(user, commentary, Permissions));
+                return PartialView("_Commentary", new CommentaryModel(user, commentary, Services.Permissions));
             }
             else
             {
@@ -59,15 +59,15 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var currentUser = await UserManager.GetUserAsync(User);
-                var commentary = await DB.Commentaries.FirstAsync(c => c.Id == id);
-                await Permissions.ValidateEditCommentaryAsync(commentary);
+                var currentUser = await Services.UserManager.GetUserAsync(User);
+                var commentary = await Services.Db.Commentaries.FirstAsync(c => c.Id == id);
+                await Services.Permissions.ValidateEditCommentaryAsync(commentary);
 
-                var user = await UserManager.GetUserAsync(User);
+                var user = await Services.UserManager.GetUserAsync(User);
                 commentary.Body = body;
                 commentary.Edits.Add(new CommentaryEdit(user, editReason, DateTime.UtcNow));
-                currentUser.Actions.Add(new UserAction(ActionType.COMMENTARY_EDIT, commentary.Id.ToString()));
-                await DB.SaveChangesAsync();
+                currentUser.Actions.Add(new UserAction(ActionType.COMMENTARY_EDIT, commentary));
+                await Services.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Post", new { id = commentary.Post.Id });
             }

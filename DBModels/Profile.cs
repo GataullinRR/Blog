@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DBModels
 {
-    public class Profile : IDbEntity
+    public class Profile : IDbEntity, IReportObject
     {
         [Key]
         public int Id { get; set; }
@@ -13,7 +14,7 @@ namespace DBModels
         public string Image { get; set; }
         public string About { get; set; } = "";
         [Required] public virtual ViewStatistic ViewStatistic { get; set; }
-
+        [InverseProperty(nameof(Report.ProfileObject))]
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
 
         public Profile() { }

@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Pages.Account
 {
-    public class ProfileModel : ExtendedPageModel
+    public class ProfileModel : PageModelBase
     {
         public User UserModel { get; private set; }
         public string Role { get; private set; }
@@ -23,14 +23,14 @@ namespace Blog.Pages.Account
         /// </summary>
         public bool IsCurrentUser { get; private set; }
 
-        public ProfileModel(IServiceProvider serviceProvider) : base(serviceProvider)
+        public ProfileModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
 
         }
 
         public async Task<IActionResult> OnGetAsync(string id)
         {
-            var currentUser = await UserManager.GetUserAsync(HttpContext.User);
+            var currentUser = await Services.UserManager.GetUserAsync(HttpContext.User);
             if (id == null)
             {
                 if (currentUser == null)
@@ -44,21 +44,21 @@ namespace Blog.Pages.Account
             }
             else
             {
-                UserModel = await UserManager.FindByIdAsync(id);
+                UserModel = await Services.UserManager.FindByIdAsync(id);
             }
 
             IsCurrentUser = currentUser?.Id == UserModel.Id;
-            Role = (await UserManager.GetRolesAsync(UserModel)).Single();
+            Role = (await Services.UserManager.GetRolesAsync(UserModel)).Single();
             UserModel.Profile.ViewStatistic.UpdateStatistic(currentUser);
 
-            await DB.SaveChangesAsync();
+            await Services.Db.SaveChangesAsync();
 
             return Page();
         }
 
         public async Task<IActionResult> OnPostBanAsync(string id)
         {
-            var currentUser = await UserManager.GetUserAsync(HttpContext.User);
+            var currentUser = await Services.UserManager.GetUserAsync(HttpContext.User);
             if (id == null)
             {
                 if (currentUser == null)
@@ -72,15 +72,15 @@ namespace Blog.Pages.Account
             }
             else
             {
-                UserModel = await UserManager.FindByIdAsync(id);
+                UserModel = await Services.UserManager.FindByIdAsync(id);
             }
 
             IsCurrentUser = currentUser?.Id == UserModel.Id;
-            UserModel.Posts = await DB.Posts
+            UserModel.Posts = await Services.Db.Posts
                 .IncludeAuthor()
                 .Where(p => p.Author == UserModel)
                 .ToListAsync();
-            Role = (await UserManager.GetRolesAsync(UserModel)).Single();
+            Role = (await Services.UserManager.GetRolesAsync(UserModel)).Single();
             return Page();
         }
     }

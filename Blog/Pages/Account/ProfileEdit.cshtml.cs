@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ASPCoreUtilities;
 using Blog.Models;
+using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +20,7 @@ using Utilities.Extensions;
 namespace Blog.Pages.Account
 {
     [Authorize(Roles = Roles.NOT_RESTRICTED)]
-    public class ProfileEditModel : ExtendedPageModel
+    public class ProfileEditModel : PageModelBase
     {
         [BindProperty]
         [MaxLength(5000)]
@@ -31,7 +32,7 @@ namespace Blog.Pages.Account
         [BindProperty]
         public string EditUserId { get; set; }
 
-        public ProfileEditModel(IServiceProvider serviceProvider) : base(serviceProvider)
+        public ProfileEditModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
             
         }
@@ -39,8 +40,8 @@ namespace Blog.Pages.Account
         public async Task<IActionResult> OnGetAsync([Required]string id)
         {
             EditUserId = id;
-            var currentUser = await UserManager.GetUserAsync(User);
-            var editUser = await UserManager.FindByIdAsync(EditUserId);
+            var currentUser = await Services.UserManager.GetUserAsync(User);
+            var editUser = await Services.UserManager.FindByIdAsync(EditUserId);
             if (editUser != null &&
                (currentUser.Id == EditUserId || User.IsInOneOfTheRoles(Roles.GetAllNotLess(Roles.MODERATOR))))
             {
@@ -74,7 +75,7 @@ namespace Blog.Pages.Account
                 }
                 editingUser.Profile.About = About;
                 currentUser.Actions.Add(new UserAction(ActionType.PROFILE_EDIT, editingUser.Id));
-                await DB.SaveChangesAsync();
+                await Services.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Account/Profile", new { id = editingUser.Id });
             }
@@ -85,9 +86,9 @@ namespace Blog.Pages.Account
 
             async Task<User> getEditingUserIfAuthorizedAsync(string userId)
             {
-                var currentUser = await UserManager.GetUserAsync(User);
+                var currentUser = await Services.UserManager.GetUserAsync(User);
                 var isEditAuthorized = currentUser?.Id == userId || User.IsInOneOfTheRoles(Roles.GetAllNotLess(Roles.MODERATOR));
-                var editUser = await UserManager.FindByIdAsync(userId);
+                var editUser = await Services.UserManager.FindByIdAsync(userId);
 
                 return isEditAuthorized ? editUser : null;
             }

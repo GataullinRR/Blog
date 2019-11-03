@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Pages.Account
 {
-    public class LoginModel : ExtendedPageModel
+    public class LoginModel : PageModelBase
     {
         [BindProperty]
         [Required(ErrorMessage = "Login is required")]
@@ -22,7 +22,7 @@ namespace Blog.Pages.Account
         [Required(ErrorMessage = "Password is required"), DataType(DataType.Password)]
         public string Password { get; set; }
 
-        public LoginModel(IServiceProvider serviceProvider) : base(serviceProvider)
+        public LoginModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
 
         }
@@ -45,7 +45,7 @@ namespace Blog.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var user = await UserManager.FindByNameAsync(Login);
+                var user = await Services.UserManager.FindByNameAsync(Login);
                 if (user == null)
                 {
                     ModelState.AddModelError("", "This login is not registered");
@@ -54,18 +54,18 @@ namespace Blog.Pages.Account
                 }
                 else
                 {
-                    var result = await SignInManager.PasswordSignInAsync(user, Password, true, false);
+                    var result = await Services.SignInManager.PasswordSignInAsync(user, Password, true, false);
                     if (result.Succeeded)
                     {
-                        user.Actions.Add(new DBModels.UserAction(ActionType.SIGNED_IN, DateTime.UtcNow, null));
-                        await DB.SaveChangesAsync();
+                        user.Actions.Add(new UserAction(ActionType.SIGNED_IN, null));
+                        await Services.Db.SaveChangesAsync();
 
                         return RedirectToPage("/Index");
                     }
                     else
                     {
-                        user.Actions.Add(new DBModels.UserAction(ActionType.SIGN_IN_FAIL, DateTime.UtcNow, null));
-                        await DB.SaveChangesAsync();
+                        user.Actions.Add(new UserAction(ActionType.SIGN_IN_FAIL, null));
+                        await Services.Db.SaveChangesAsync();
 
                         ModelState.AddModelError("", "Login or password is not valid");
 

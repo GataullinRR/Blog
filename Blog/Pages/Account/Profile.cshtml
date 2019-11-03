@@ -127,20 +127,21 @@ else
         {
             <li>
                 <span>Reported by <a asp-page="/Account/Profile" asp-route-id="@report.Reporter.Id">@report.Reporter.UserName</a> at @report.CreationDate.ToString("hh:mm dd.MM.yyyy"). Report object: </span>
-                @switch (report.ReportObjectType)
+                @if (report.CommentaryObject != null)
                 {
-                    case ReportObjectType.PROFILE:
-                        <a asp-page="/Account/Profile" asp-route-id="@targetUser.Id">profile</a>
-                        break;
-                    case ReportObjectType.POST:
-                        <a asp-page="/Post" asp-route-id="@report.ReportObjectId">post</a>
-                        break;
-                    case ReportObjectType.COMMENTARY:
-                        <span>commentary</span>
-                        break;
-                    default:
-                        <span>unknown</span>
-                        break;
+                    <span>commentary</span>
+                }
+                else if (report.PostObject != null)
+                {
+                    <a asp-page="/Post" asp-route-id="@report.PostObject.Id">post</a>
+                }
+                else if (report.ProfileObject != null)
+                {
+                    <a asp-page="/Account/Profile" asp-route-id="@report.ProfileObject.Id">profile</a>
+                }
+                else
+                {
+                    <span>unknown</span>
                 }
             </li>
         }
@@ -161,13 +162,14 @@ else
         {
             <li>
                 <span>@action.ActionType.ToString() at @action.ActionDate.ToString("hh:mm dd.MM.yyyy"). Object id: </span>
-                @if (action.ObjectId != null)
+
+                @if (action.ReportObject != null)
                 {
-                    <span>@action.ObjectId</span>
+                    <span>@action.ReportObject.Id</span> 
                 }
                 else
                 {
-                    <span>not set</span>
+                    <span>unknown</span>
                 }
             </li>
         }

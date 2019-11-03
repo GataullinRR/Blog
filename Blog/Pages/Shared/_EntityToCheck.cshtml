@@ -1,0 +1,10 @@
+﻿@model IEntityToCheck
+
+@{
+    var dT = DateTime.UtcNow - Model.AddTime;
+}
+
+<span>
+    Added @dT.ToCurrentTimeRelativeString(), check reason: @Model.CheckReason, check object:
+    @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(Model.Entity, true)); }
+</span>
