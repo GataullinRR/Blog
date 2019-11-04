@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Blog
 {
-    class DbSampleData
+    public class DbSampleData
     {
         public static void Initialize(
             BlogContext context, 

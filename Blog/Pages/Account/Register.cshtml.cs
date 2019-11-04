@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Blog.Models;
 using Blog.Pages.Account;
 using Blog.Services;
 using DBModels;
@@ -19,13 +20,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Blog.Pages.Account
 {
-    public class RegisterModel : PageModel
+    public class RegisterModel : PageModelBase
     {
-        readonly BlogContext _db;
-        readonly SignInManager<User> _signInManager;
-        readonly RoleManager<IdentityRole> _roleManager;
-        readonly UserManager<User> _userManager;
-
         [Required, MaxLength(16), BindProperty]
         public string Username { get; set; }
         [Required, DataType(DataType.EmailAddress), BindProperty]
@@ -36,12 +32,9 @@ namespace Blog.Pages.Account
         [DataType(DataType.Password), BindProperty]
         public string ConfirmPassword { get; set; }
 
-        public RegisterModel(BlogContext db, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
+        public RegisterModel(ServicesProvider services) : base(services)
         {
-            _db = db;
-            _signInManager = signInManager;
-            _roleManager = roleManager;
-            _userManager = userManager;
+
         }
 
         public IActionResult OnGet()
@@ -65,7 +58,7 @@ namespace Blog.Pages.Account
 
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByNameAsync(Username);
+                var user = await Services.UserManager.FindByNameAsync(Username);
                 if (user == null)
                 {
                     var newUser = new User(new Profile(DateTime.UtcNow), new ProfileStatus(default))
@@ -73,10 +66,12 @@ namespace Blog.Pages.Account
                         UserName = Username,
                         Email = EMail
                     };
-                    var result = await _userManager.CreateAsync(newUser, Password);
+                    var result = await Services.UserManager.CreateAsync(newUser, Password);
                     if (result.Succeeded)
                     {
-                        await _signInManager.SignInAsync(newUser, true);
+                        await Services.UserManager.AddToRoleAsync(newUser, Roles.USER);
+                        await Services.SignInManager.SignInAsync(newUser, true);
+                        await Services.Db.SaveChangesAsync();
 
                         return RedirectToPage("/Account/ConfirmEmail");
                     }

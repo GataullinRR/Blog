@@ -2,12 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyVersion>2019.8.1.2157</AssemblyVersion>
-    <FileVersion>2019.8.1.2157</FileVersion>
+    <AssemblyVersion>2019.8.1.2177</AssemblyVersion>
+    <FileVersion>2019.8.1.2177</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.2.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.6" />
   </ItemGroup>
