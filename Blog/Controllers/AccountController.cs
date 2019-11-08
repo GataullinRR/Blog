@@ -22,9 +22,11 @@ namespace Blog.Controllers
             PersistLayoutModel = true;
         }
 
-        [HttpGet(), Authorize()]
+        [HttpGet()]
         public async Task<IActionResult> Logout()
         {
+            await Services.Permissions.ValidateLogoutAsync();
+
             var currenUser = await Services.UserManager.GetUserAsync(User);
             await Services.SignInManager.SignOutAsync();
             if (currenUser != null)
@@ -36,7 +38,7 @@ namespace Blog.Controllers
             return RedirectToPage("/Index");
         }
 
-        [HttpGet(), Authorize()]
+        [HttpGet()]
         public async Task<IActionResult> UnbanAsync([Required]string userId)
         {
             if (ModelState.IsValid)

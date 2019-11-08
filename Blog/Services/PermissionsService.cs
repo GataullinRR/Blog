@@ -4,8 +4,11 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Web.Http;
 using Utilities.Extensions;
 
 namespace Blog.Services
@@ -23,7 +26,7 @@ namespace Blog.Services
         {
             if (!await CanEditPostAsync(post))
             {
-                throw new UnauthorizedAccessException($"The post \"{post.Title}\" can not be edited by current user");
+                throw buildException($"The post \"{post.Title}\" can not be edited by current user");
             }
         }
         public async Task<bool> CanEditPostAsync(Post post)
@@ -61,7 +64,7 @@ namespace Blog.Services
         {
             if (!await CanCreatePostAsync())
             {
-                throw new UnauthorizedAccessException();
+                throw buildException();
             }
         }
         public async Task<bool> CanCreatePostAsync()
@@ -82,7 +85,7 @@ namespace Blog.Services
         {
             if (!await CanEditCommentaryAsync(comment))
             {
-                throw new UnauthorizedAccessException($"The post \"{comment.Id}\" can not be edited by current user");
+                throw buildException($"The post \"{comment.Id}\" can not be edited by current user");
             }
         }
         public async Task<bool> CanEditCommentaryAsync(Commentary comment)
@@ -107,7 +110,7 @@ namespace Blog.Services
         {
             if (!await CanRestorePasswordAsync(targetUser))
             {
-                throw new UnauthorizedAccessException($"Can not restore password for user \"{targetUser.UserName}\"");
+                throw buildException();
             }
         }
         public async Task<bool> CanRestorePasswordAsync(User targetUser)
@@ -131,7 +134,7 @@ namespace Blog.Services
         {
             if (!await CanChangePasswordAsync(targetUser))
             {
-                throw new UnauthorizedAccessException();
+                throw buildException();
             }
         }
         public async Task<bool> CanChangePasswordAsync(User targetUser)
@@ -154,7 +157,7 @@ namespace Blog.Services
         {
             if (!await CanBanUserAsync(targetUser))
             {
-                throw new UnauthorizedAccessException();
+                throw buildException();
             }
         }
         public async Task<bool> CanBanUserAsync(User targetUser)
@@ -176,7 +179,7 @@ namespace Blog.Services
         {
             if (!await CanUnbanUserAsync(targetUser))
             {
-                throw new UnauthorizedAccessException();
+                throw buildException();
             }
         }
         public async Task<bool> CanUnbanUserAsync(User targetUser)
@@ -192,6 +195,18 @@ namespace Blog.Services
                     && await Services.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
                     && (await Services.UserManager.GetRolesAsync(targetUser)).Single().IsLess((await Services.UserManager.GetRolesAsync(currentUser)).Single());
             }
+        }
+
+        public async Task ValidateLogoutAsync()
+        {
+            if (!await CanLogoutAsync())
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanLogoutAsync()
+        {
+            return Services.HttpContext.User.Identity.IsAuthenticated;
         }
 
         public async Task<bool> CanSeePrivateInformationAsync(User targetUser)
@@ -228,7 +243,7 @@ namespace Blog.Services
         {
             if (!await CanReportAsync(reportObject))
             {
-                throw new UnauthorizedAccessException();
+                throw buildException();
             }
         }
         public async Task<bool> CanReportAsync(IReportObject reportObject)
@@ -248,7 +263,7 @@ namespace Blog.Services
         {
             if (!await CanAccessModeratorsPanelAsync())
             {
-                throw new UnauthorizedAccessException();
+                throw buildException();
             }
         }
         public async Task<bool> CanAccessModeratorsPanelAsync()
@@ -267,6 +282,13 @@ namespace Blog.Services
         async Task<User> getCurrentUserOrNullAsync()
         {
             return await Services.UserManager.GetUserAsync(Services.HttpContext.User);
+        }
+
+        Exception buildException(string reason = null)
+        {
+            Services.HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+
+            return new UnauthorizedAccessException(reason);
         }
     }
 }

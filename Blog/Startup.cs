@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using AspNetCore.IServiceCollection.AddIUrlHelper;
+using Blog.Middlewares;
 using Blog.Pages.Account;
 using Blog.Services;
 using DBModels;
@@ -92,16 +94,33 @@ namespace Blog
             if (env.IsDevelopment())
             {
                 app.UseBrowserLink();
-                app.UseDeveloperExceptionPage();
+                app.UseStatusCodePagesWithRedirects("/Errors/Error?code={0}");
+                //app.UseExceptionHandler("/Errors/Error");
+                //app.UseDeveloperExceptionPage();
             }
             else
             {
-                //app.UseExceptionHandler("/Home/Error");
+
             }
 
             app.UseAuthentication();
             app.UseStaticFiles();
             app.UseSession();
+            app.UseMiddleware<UnathorizedExceptionToStatusMiddleware>();
+            //app.Use(async (ctx, next) =>
+            //{
+            //    await next();
+
+            //    if (ctx.Response.StatusCode == 404 && !ctx.Response.HasStarted)
+            //    {
+            //        ctx.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            //        ////Re-execute the request so the user gets the error page
+            //        //string originalPath = ctx.Request.Path.Value;
+            //        //ctx.Items["originalPath"] = originalPath;
+            //        //ctx.Request.Path = "/error/404";
+            //        await next();
+            //    }
+            //});
             app.UseMvc(routes =>
             {
                 routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");

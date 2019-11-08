@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Blog.Pages
 {
-    [Authorize(Roles = Roles.MODERATOR)]
     public class ModeratorPanelModel : PageModelBase
     {
         public ModeratorPannel Panel { get; private set; }

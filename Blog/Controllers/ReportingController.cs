@@ -40,7 +40,6 @@ namespace Blog.Controllers
             if (ModelState.IsValid)
             {
                 return await reportAsync(Services.Db.Posts.FirstOrDefault(p => p.Id == id));
-
             }
             else
             {
