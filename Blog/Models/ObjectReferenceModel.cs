@@ -7,13 +7,11 @@ namespace Blog.Models
 {
     public class ObjectReferenceModel
     {
-        public ObjectReferenceModel(object @object, bool isActive)
+        public ObjectReferenceModel(object @object)
         {
             Object = @object ?? throw new ArgumentNullException(nameof(@object));
-            IsActive = isActive;
         }
 
         public object Object { get; }
-        public bool IsActive { get; }
     }
 }

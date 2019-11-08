@@ -224,6 +224,20 @@ namespace Blog.Services
             }
         }
 
+        public async Task<bool> CanSeeServiceInformationAsync()
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null)
+            {
+                return false;
+            }
+            else
+            {
+                return currentUser.Status.State == ProfileState.ACTIVE
+                    && await Services.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR));
+            }
+        }
+
         public async Task<bool> CanEditProfileAsync(User targetUser)
         {
             var currentUser = await getCurrentUserOrNullAsync();

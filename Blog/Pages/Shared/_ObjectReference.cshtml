@@ -2,29 +2,15 @@
 
 @if (Model.Object is Commentary commentary)
 {
-    <span>commentary</span>
+    <a asp-page="/Commentary" asp-route-id="@commentary.Id">commentary</a>
 }
 else if (Model.Object is Post post)
 {
-    @if (Model.IsActive)
-    {
-        <a asp-page="/Post" asp-all-route-id="@post.Id">post</a>
-    }
-    else
-    {
-        <span>post</span>
-    }
+    <a asp-page="/Post" asp-route-id="@post.Id">post</a>
 }
 else if (Model.Object is User user)
 {
-    if (Model.IsActive)
-    {
-        <a asp-page="/Account/Profile" asp-all-route-id="@user.Id">user</a>
-    }
-    else
-    {
-        <span>user</span>
-    }
+    <a asp-page="/Account/Profile" asp-route-id="@user.Id">user</a>
 }
 else if (Model.Object is Profile profile)
 {

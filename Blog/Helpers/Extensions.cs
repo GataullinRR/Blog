@@ -114,7 +114,7 @@ namespace Blog
             }
             else
             {
-                return $"{span.TotalDays} days ago";
+                return $"{span.TotalDays.Round()} days ago";
             }
         }
     }

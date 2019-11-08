@@ -4,5 +4,27 @@
     ViewData["Title"] = "Commentary";
 }
 
-<h2>Commentary</h2>
+<h4>Commentary</h4>
 
+@{ await Html.RenderPartialAsync("_CommentaryContainer", Model.Commentary); }
+
+@if (await Model.Permissions.CanSeeServiceInformationAsync())
+{
+    <h4>Info</h4>
+    var parameters = new Dictionary<string, object>()
+{
+        { "Id", Model.Commentary.Id },
+        { "Registred users views", Model.Commentary.ViewStatistic.RegistredUserViews },
+        { "Total views", Model.Commentary.ViewStatistic.TotalViews },
+        { "Number of reports", Model.Commentary.Reports.Count() },
+    };
+
+    foreach (var parameter in parameters)
+    {
+        <div>@parameter.Key: @parameter.Value</div>
+    }
+}
+
+@section Scripts {
+    <partial name="_CommentartyScripts" />
+}

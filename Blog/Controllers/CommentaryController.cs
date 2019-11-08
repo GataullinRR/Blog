@@ -69,7 +69,7 @@ namespace Blog.Controllers
                 currentUser.Actions.Add(new UserAction(ActionType.COMMENTARY_EDIT, commentary));
                 await Services.Db.SaveChangesAsync();
 
-                return RedirectToPage("/Post", new { id = commentary.Post.Id });
+                return Redirect(Services.History.GetLastURL());
             }
             else
             {
