@@ -3,7 +3,6 @@ using Xunit;
 
 namespace BlogTests
 {
-
     /// <summary>
     /// Used by CustomOrderer
     /// </summary>

@@ -27,39 +27,29 @@ using BlogTests;
 using System.Diagnostics;
 using Xunit.Abstractions;
 
-[assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 namespace BlogTests
 {
-    [TestCaseOrderer(CustomTestCaseOrderer.TypeName, CustomTestCaseOrderer.AssembyName)]
-    public class BasicTests /*: IClassFixture<CustomWebApplicationFactory<Blog.Startup>>*/
+    public class BasicAccessTests : SingleContextTestsBase
     {
         const string TEST_USER_NAME = "Test";
-        static readonly CustomWebApplicationFactory<Blog.Startup> _factory = new CustomWebApplicationFactory<Startup>();
+        const string TEST_USER_PASSWORD = "test@doesnotexists.ru";
+
+        static readonly CustomWebApplicationFactory<Startup> _factory;
         static HttpClient _client;
 
-        static BasicTests()
+        static BasicAccessTests()
         {
+            _factory = instantiateApplication();
             _client = _factory.CreateClient();
-
-            using (var scope = _factory.Server.Host.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<BlogContext>();
-
-                DbSampleData.Initialize(db,
-                    scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>(),
-                    scope.ServiceProvider.GetRequiredService<UserManager<User>>(),
-                    scope.ServiceProvider.GetRequiredService<SignInManager<User>>());
-            }
-
-            Debug.WriteLine("Static");
         }
 
-        readonly ITestOutputHelper _output;
+        protected override CustomWebApplicationFactory<Startup> factory => _factory;
+        protected override HttpClient currentClient => _client;
 
-        public BasicTests(ITestOutputHelper output)
+        public BasicAccessTests(ITestOutputHelper output) : base(output)
         {
-            this._output = output;
+
         }
 
         [Fact, Order(0)]
@@ -82,7 +72,7 @@ namespace BlogTests
 
                 foreach (var uri in authorizedUris)
                 {
-                    await assertEndpointAccesible(uri);
+                    await assertEndpointAccessible(uri);
                 }
             }
 
@@ -99,8 +89,8 @@ namespace BlogTests
             {
                 { "Username", userName },
                 { "EMail", "test@doesnotexists.ru" },
-                { "Password", "test@doesnotexists.ru" },
-                { "ConfirmPassword", "test@doesnotexists.ru" },
+                { "Password", TEST_USER_PASSWORD },
+                { "ConfirmPassword", TEST_USER_PASSWORD },
                 { "__RequestVerificationToken", await ensureAntiforgeryTokenAsync(_client, uri) }
             };
 
@@ -153,7 +143,7 @@ namespace BlogTests
 
                 foreach (var uri in authorizedUris)
                 {
-                    await assertEndpointAccesible(uri);
+                    await assertEndpointAccessible(uri);
                 }
                 foreach (var uri in unauthorizedUris)
                 {
@@ -200,7 +190,7 @@ namespace BlogTests
 
                 foreach (var uri in authorizedUris)
                 {
-                    await assertEndpointAccesible(uri);
+                    await assertEndpointAccessible(uri);
                 }
                 foreach (var uri in unauthorizedUris)
                 {
@@ -217,76 +207,33 @@ namespace BlogTests
             using (getServices(out var services))
             {
                 // Act
-                await assertEndpointAccesible(testEndpoint);
-                await assertEndpointAccesible("/Account/Logout");
+                await assertEndpointAccessible(testEndpoint);
+                await assertEndpointAccessible("/Account/Logout");
 
                 // Assert
                 await assertEndpointReturnsErrorPage(testEndpoint, HttpStatusCode.InternalServerError);
             }
         }
 
-        async Task assertEndpointAccesible(string url)
+        [Fact, Order(500)]
+        public async Task LogIn()
         {
-            _output.WriteLine(url);
+            // Arrange
+            _client = _factory.CreateClient();
+            var uri = "/Account/Login";
+            var formData = new Dictionary<string, string>
+            {
+                { "Login", TEST_USER_NAME },
+                { "Password", TEST_USER_PASSWORD },
+                { "__RequestVerificationToken", await ensureAntiforgeryTokenAsync(_client, uri) }
+            };
 
             // Act
-            var response = await _client.GetAsync(url);
+            var response = await _client.PostAsync(uri, new FormUrlEncodedContent(formData));
 
             // Assert
             ensureOkResponse(response);
-        }
-        async Task assertEndpointReturnsErrorPage(string url, HttpStatusCode statusCode)
-        {
-            _output.WriteLine(url);
-
-            // Act
-            var response = await _client.GetAsync(url);
-
-            ensureOkResponse(response);
-            Assert.NotNull(response?.RequestMessage?.RequestUri?.AbsoluteUri);
-            Assert.EndsWith($"code={(int)statusCode}", response.RequestMessage.RequestUri.AbsoluteUri);
-        }
-        void ensureOkResponse(HttpResponseMessage response)
-        {
-            response.EnsureSuccessStatusCode(); // Status Code 200-299
-            Assert.Equal("text/html; charset=utf-8", response.Content.Headers.ContentType.ToString());
-        }
-
-        IDisposable getServices(out ServicesProvider services)
-        {
-            var scope = _factory.Server.Host.Services.CreateScope();
-            services = scope.ServiceProvider.GetRequiredService<ServicesProvider>();
-
-            return scope;
-        }
-
-        SetCookieHeaderValue _antiforgeryCookie;
-        string _antiforgeryToken;
-        static readonly Regex AntiforgeryFormFieldRegex = new Regex(@"\<input name=""__RequestVerificationToken"" type=""hidden"" value=""([^""]+)"" \/\>");
-        async Task<string> ensureAntiforgeryTokenAsync(HttpClient client, string uri)
-        {
-            if (_antiforgeryToken != null)
-            {
-                return _antiforgeryToken;
-            }
-
-            var response = await client.GetAsync(uri);
-            response.EnsureSuccessStatusCode();
-            if (response.Headers.TryGetValues("Set-Cookie", out IEnumerable<string> values))
-            {
-                _antiforgeryCookie = SetCookieHeaderValue.ParseList(values.ToList()).SingleOrDefault(c => c.Name.StartsWith(".AspNetCore.AntiForgery.", StringComparison.InvariantCultureIgnoreCase));
-            }
-            Assert.NotNull(_antiforgeryCookie);
-            client.DefaultRequestHeaders.Add("Cookie", new Microsoft.Net.Http.Headers.CookieHeaderValue(_antiforgeryCookie.Name, _antiforgeryCookie.Value).ToString());
-
-            var responseHtml = await response.Content.ReadAsStringAsync();
-            var match = AntiforgeryFormFieldRegex.Match(responseHtml);
-            _antiforgeryToken = match.Success 
-                ? match.Groups[1].Captures[0].Value 
-                : null;
-            Assert.NotNull(_antiforgeryToken);
-
-            return _antiforgeryToken;
+            await CheckEndpoints_NotRestrictedAuthorizedUser();
         }
     }
 }

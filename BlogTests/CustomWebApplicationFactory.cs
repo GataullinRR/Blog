@@ -29,21 +29,6 @@ namespace BlogTests
                     services.Remove(descriptor);
                 }
 
-                //services
-                //    .AddEntityFrameworkInMemoryDatabase()
-                //    .AddEntityFrameworkProxies();
-                ////var serviceProvider = new ServiceCollection()
-                ////    .AddEntityFrameworkInMemoryDatabase()
-                ////    .AddEntityFrameworkProxies()
-                ////    .BuildServiceProvider();
-                //// Add ApplicationDbContext using an in-memory database for testing.
-                //services.AddDbContext<BlogContext>((options, context) =>
-                //{
-                //    context
-                //        .UseLazyLoadingProxies()
-                //        .UseInMemoryDatabase("InMemoryDbForTesting");
-                //        //.UseInternalServiceProvider(serviceProvider);
-                //});
                 string connection = "Server=(localdb)\\mssqllocaldb;Database=TestBlogDB;Trusted_Connection=True;MultipleActiveResultSets=true";
                 services.AddDbContext<BlogContext>(options => options
                         .UseLazyLoadingProxies()
@@ -64,10 +49,7 @@ namespace BlogTests
                     db.Database.EnsureCreated();
                     try
                     {
-                        //DbSampleData.Initialize(db,
-                        //    scopedServices.GetRequiredService<RoleManager<IdentityRole>>(), 
-                        //    scopedServices.GetRequiredService<UserManager<User>>(), 
-                        //    scopedServices.GetRequiredService<SignInManager<User>>());
+
                     }
                     catch (Exception ex)
                     {

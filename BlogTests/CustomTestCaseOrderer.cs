@@ -13,8 +13,6 @@ namespace BlogTests
     /// </summary>
     public class CustomTestCaseOrderer : ITestCaseOrderer
     {
-        //public const string TypeName = "xUnitCustom.CustomTestCaseOrderer";
-        //public const string AssembyName = "xUnitCustom";
         public const string TypeName = "BlogTests.CustomTestCaseOrderer";
         public const string AssembyName = "BlogTests";
 

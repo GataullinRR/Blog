@@ -127,22 +127,7 @@ else
         {
             <li>
                 <span>Reported by <a asp-page="/Account/Profile" asp-route-id="@report.Reporter.Id">@report.Reporter.UserName</a> at @report.CreationDate.ToString("hh:mm dd.MM.yyyy"). Report object: </span>
-                @if (report.CommentaryObject != null)
-                {
-                    <span>commentary</span>
-                }
-                else if (report.PostObject != null)
-                {
-                    <a asp-page="/Post" asp-route-id="@report.PostObject.Id">post</a>
-                }
-                else if (report.ProfileObject != null)
-                {
-                    <a asp-page="/Account/Profile" asp-route-id="@report.ProfileObject.Id">profile</a>
-                }
-                else
-                {
-                    <span>unknown</span>
-                }
+                @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(report.ReportObject)); }
             </li>
         }
     </ul>
@@ -160,18 +145,17 @@ else
     <ul>
         @foreach (var action in targetUser.Actions.OrderByDescending(r => r.ActionDate))
         {
-            <li>
-                <span>@action.ActionType.ToString() at @action.ActionDate.ToString("hh:mm dd.MM.yyyy"). Object id: </span>
-
-                @if (action.ReportObject != null)
-                {
-                    <span>@action.ReportObject.Id</span> 
-                }
-                else
-                {
-                    <span>unknown</span>
-                }
-            </li>
+        <li>
+            <span>@action.ActionType.ToString() at @action.ActionDate.ToString("hh:mm dd.MM.yyyy"). Object: </span>
+            @if (action.ReportObject != null)
+            {
+                await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(action.ReportObject));
+            }
+            else
+            {
+                <span>unknown</span>
+            }
+        </li>
         }
     </ul>
 }
