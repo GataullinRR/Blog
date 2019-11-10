@@ -25,8 +25,6 @@ namespace Blog.Pages.Account
         {
             _email = email ?? throw new ArgumentNullException(nameof(email));
             _confirmation = confirmation ?? throw new ArgumentNullException(nameof(confirmation));
-
-            PersistLayoutModel = true;
         }
 
         [BindProperty(), Required()]
@@ -57,13 +55,13 @@ After openning the link, new password will be sent to this E-Mail");
                         user.Status.LastPasswordRestoreAttempt = DateTime.UtcNow;
                         await Services.UserManager.UpdateAsync(user);
 
-                        LayoutModel.Messages.Add("Password reset confirmation link has been sent");
+                        LayoutModel.AddMessage("Password reset confirmation link has been sent");
 
                         return RedirectToPage("/Index");
                     }
                     else
                     {
-                        LayoutModel.Messages.Add("Error while sending pasword reset confirmation link");
+                        LayoutModel.AddMessage("Error while sending pasword reset confirmation link");
 
                         return Page();
                     }
@@ -71,7 +69,7 @@ After openning the link, new password will be sent to this E-Mail");
             }
             else
             {
-                LayoutModel.Messages.Add("Profile name is not provided");
+                LayoutModel.AddMessage("Profile name is not provided");
 
                 return Page();
             }

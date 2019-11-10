@@ -16,8 +16,7 @@ namespace Blog.Controllers
     public abstract class ControllerBase : Controller, ILayoutModelProvider
     {
         internal ServicesProvider Services { get; }
-        public LayoutModel LayoutModel { get; private set; } = new LayoutModel();
-        public bool PersistLayoutModel { get; set; } = false;
+        public LayoutModel LayoutModel { get; private set; }
 
         public ControllerBase(ServicesProvider serviceProvider)
         {
@@ -26,23 +25,15 @@ namespace Blog.Controllers
 
         public override void OnActionExecuted(ActionExecutedContext context)
         {
-            if (PersistLayoutModel)
-            {
-                HttpContext.Session.SetString(nameof(LayoutModel), LayoutModel.Serialize().ToBase64());
-            }
-            else
-            {
-                HttpContext.Session.Remove(nameof(LayoutModel));
-            }
+            LayoutModel.UpdateMessages();
+            LayoutModel.Save(HttpContext.Session);
 
             base.OnActionExecuted(context);
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            LayoutModel = HttpContext.Session.Keys.Contains(nameof(LayoutModel))
-                ? HttpContext.Session.GetString(nameof(LayoutModel)).FromBase64().Deserialize<LayoutModel>()
-                : LayoutModel;
+            LayoutModel = LayoutModel.LoadOrNew(HttpContext.Session);
 
             base.OnActionExecuting(context);
         }

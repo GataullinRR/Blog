@@ -23,7 +23,6 @@ namespace Blog.Pages.Account
 
         public BanConfirmationModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
-            PersistLayoutModel = true;
         }
 
         public async Task OnGetAsync(string id)
@@ -58,7 +57,7 @@ namespace Blog.Pages.Account
 Reason: {Reason}
 Ban will expire at {BannedTill.ToString("dd.MM.yyyy")}");
 
-                    LayoutModel.Messages.Add($"User \"{targetUser.UserName}\" has been banned till {BannedTill.ToString("dd.MM.yyyy")}");
+                    LayoutModel.AddMessage($"User \"{targetUser.UserName}\" has been banned till {BannedTill.ToString("dd.MM.yyyy")}");
 
                     return RedirectToPage("/Index");
                 }

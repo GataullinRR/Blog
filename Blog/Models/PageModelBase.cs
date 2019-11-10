@@ -23,8 +23,7 @@ namespace Blog.Models
         public ServicesProvider Services { get; set; }
 
         public PermissionsService Permissions => Services.Permissions;
-        public LayoutModel LayoutModel { get; private set; } = new LayoutModel();
-        internal bool PersistLayoutModel { get; set; } = false;
+        public LayoutModel LayoutModel { get; private set; }
 
         public PageModelBase(ServicesProvider services)
         {
@@ -33,24 +32,15 @@ namespace Blog.Models
 
         public override void OnPageHandlerSelected(PageHandlerSelectedContext context)
         {
-            LayoutModel = HttpContext.Session.Keys.Contains(nameof(LayoutModel)) 
-                ? HttpContext.Session.GetString(nameof(LayoutModel)).FromBase64().Deserialize<LayoutModel>() 
-                : LayoutModel;
+            LayoutModel = LayoutModel.LoadOrNew(HttpContext.Session);
 
             base.OnPageHandlerSelected(context);
         }
 
         public override void OnPageHandlerExecuted(PageHandlerExecutedContext context)
         {
-            if (PersistLayoutModel)
-            {
-                HttpContext.Session.SetString(nameof(LayoutModel), LayoutModel.Serialize().ToBase64());
-            }
-            else
-            {
-                HttpContext.Session.Remove(nameof(LayoutModel));
-            }
-
+            LayoutModel.UpdateMessages();
+            LayoutModel.Save(HttpContext.Session);
             Services.History.SaveCurrentURL();
 
             base.OnPageHandlerExecuted(context);

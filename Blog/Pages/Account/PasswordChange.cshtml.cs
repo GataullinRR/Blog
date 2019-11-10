@@ -24,7 +24,6 @@ namespace Blog.Pages.Account
 
         public PasswordChangeModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
-            PersistLayoutModel = true;
         }
 
         public async Task OnGetAsync()
@@ -46,13 +45,13 @@ namespace Blog.Pages.Account
                         user.Actions.Add(new DBModels.UserAction(ActionType.PASSWORD_CHANGED, null));
                         await Services.Db.SaveChangesAsync();
 
-                        LayoutModel.Messages.Add("Password has been changed");
+                        LayoutModel.AddMessage("Password has been changed");
 
                         return RedirectToPage("/Account/Login", new { userName = user.UserName });
                     }
                     else
-                    { 
-                        LayoutModel.Messages.Add("Could not change password");
+                    {
+                        LayoutModel.AddMessage("Could not change password");
 
                         return Page();
                     }

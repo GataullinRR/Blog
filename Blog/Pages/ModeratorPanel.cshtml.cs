@@ -24,7 +24,6 @@ namespace Blog.Pages
 
         public ModeratorPanelModel(ServicesProvider services) : base(services)
         {
-            PersistLayoutModel = true;
         }
 
         public async Task OnGet()
@@ -50,7 +49,7 @@ namespace Blog.Pages
                 }
                 await Services.Db.SaveChangesAsync();
 
-                LayoutModel.Messages.Add($"{entities.Length} new entities were assigned to you");
+                LayoutModel.AddMessage($"{entities.Length} new entities were assigned to you");
 
                 return Page();
             }
@@ -65,7 +64,10 @@ namespace Blog.Pages
             if (ModelState.IsValid)
             {
                 await OnGet();
-                Panel.EntitiesToCheck.First(e => e.Id == id).ResolvingTime = DateTime.UtcNow;
+                var entity = Panel.EntitiesToCheck.First(e => e.Id == id);
+                entity.ResolvingTime = DateTime.UtcNow;
+                Moderator.Actions.Add(new UserAction(ActionType.REPORT_CHECKED, entity));
+
                 await Services.Db.SaveChangesAsync();
 
                 return Page();

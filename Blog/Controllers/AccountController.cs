@@ -19,7 +19,6 @@ namespace Blog.Controllers
     {
         public AccountController(ServicesProvider serviceProvider) : base(serviceProvider)
         {
-            PersistLayoutModel = true;
         }
 
         [HttpGet()]
@@ -60,7 +59,7 @@ namespace Blog.Controllers
                 targetUser.Actions.Add(new UserAction(ActionType.UNBAN, targetUser));
                 await Services.Db.SaveChangesAsync();
 
-                LayoutModel.Messages.Add($"User \"{targetUser.UserName}\" has been unbanned");
+                LayoutModel.AddMessage($"User \"{targetUser.UserName}\" has been unbanned");
 
                 return RedirectToPage("/Account/Profile", new { id = userId });
             }
@@ -127,7 +126,7 @@ Please delete this message so that nobody can see it");
                         user.Actions.Add(new UserAction(ActionType.PASSWORD_RESET, null));
                         await Services.Db.SaveChangesAsync();
 
-                        LayoutModel.Messages.Add("New password has been sent to your E-Mail");
+                        LayoutModel.AddMessage("New password has been sent to your E-Mail");
 
                         return RedirectToPage("/Account/Login");
                     }
@@ -149,7 +148,7 @@ Please delete this message so that nobody can see it");
 
         IActionResult reportError(string message)
         {
-            LayoutModel.Messages.Add(message);
+            LayoutModel.AddMessage(message);
 
             return RedirectToPage("/Index");
         }

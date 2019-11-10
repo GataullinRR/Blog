@@ -19,8 +19,6 @@ namespace Blog.Controllers
         public ReportingController(ServicesProvider serviceProvider) : base(serviceProvider)
         {
             _reportViewConfirmationTokens = Services.ServiceProvider.GetService<ReportViewConfirmationTokenProvider>();
-
-            PersistLayoutModel = true;
         }
 
         public async Task<IActionResult> ReportProfileAsync([Required]int id)
@@ -107,7 +105,7 @@ namespace Blog.Controllers
             }
             await Services.Db.SaveChangesAsync();
 
-            LayoutModel.Messages.Add("Report has been submitted");
+            LayoutModel.AddMessage("Report has been submitted");
 
             return Redirect(Services.History.GetLastURL());
         }

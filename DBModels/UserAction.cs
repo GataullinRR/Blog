@@ -26,7 +26,7 @@ namespace DBModels
         SIGNED_IN = 1100,
         SIGNED_OUT = 1200,
         SIGN_IN_FAIL = 1300,
-
+        
         REPORT_CHECKED = 1400
     }
 

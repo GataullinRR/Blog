@@ -36,7 +36,7 @@
     @foreach (var message in model.Messages)
     {
         <div>
-            <span>@message</span>
+            <span>@message.Text</span>
             <button onclick="removeParent(this)">Close</button>
         </div>
     }
