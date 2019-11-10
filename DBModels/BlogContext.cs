@@ -54,6 +54,10 @@ namespace DBModels
                 .HasOne(p => p.ViewStatistic)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<User>()
+                .HasOne(p => p.Profile)
+                .WithOne(i => i.Author)
+                .HasForeignKey<Profile>(b => b.AuthorForeignKey);
         }
     }
 }

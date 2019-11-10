@@ -15,12 +15,13 @@ namespace Blog.Services
 
         public bool ShouldHide(Commentary commentary)
         {
-            return commentary.ViewStatistic.TotalViews > 10
-                && (commentary.Reports.Count() + 1) / (double)commentary.ViewStatistic.TotalViews > 0.1;
+            return ShouldReportToModerator(commentary);
         }
-        public bool ShouldReportToModerator(Commentary commentary)
+
+        public bool ShouldReportToModerator(IReportObject reportObject)
         {
-            return commentary.IsHidden;
+            return reportObject.ViewStatistic.TotalViews >= 10
+                && (reportObject.Reports.Count()) / (double)reportObject.ViewStatistic.TotalViews > 0.099;
         }
     }
 }

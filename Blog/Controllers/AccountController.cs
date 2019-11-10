@@ -23,6 +23,12 @@ namespace Blog.Controllers
         }
 
         [HttpGet()]
+        public async Task CheckIfAuthentificated()
+        {
+            await GetCurrentUserModelOrThrowAsync();
+        }
+
+        [HttpGet()]
         public async Task<IActionResult> Logout()
         {
             await Services.Permissions.ValidateLogoutAsync();

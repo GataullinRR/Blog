@@ -30,26 +30,34 @@ using Xunit.Abstractions;
 
 namespace BlogTests
 {
-    public class BasicAccessTests : SingleContextTestsBase
+    public class BasicAccessTests : SingleContextTestsBase, IClassFixture<CustomWebApplicationFactory>
     {
         const string TEST_USER_NAME = "Test";
         const string TEST_USER_PASSWORD = "test@doesnotexists.ru";
 
-        static readonly CustomWebApplicationFactory<Startup> _factory;
-        static HttpClient _client;
-
-        static BasicAccessTests()
-        {
-            _factory = instantiateApplication();
-            _client = _factory.CreateClient();
+        static HttpClient _testsCommonClient;
+        protected override HttpClient currentClient 
+        { 
+            get => base.currentClient;
+            set
+            {
+                base.currentClient = value;
+                _testsCommonClient = value;
+            }
         }
 
-        protected override CustomWebApplicationFactory<Startup> factory => _factory;
-        protected override HttpClient currentClient => _client;
-
-        public BasicAccessTests(ITestOutputHelper output) : base(output)
+        public BasicAccessTests(CustomWebApplicationFactory factory, ITestOutputHelper output) 
+            : base(factory, output)
         {
-
+            if (_testsCommonClient == null)
+            {
+                initializeApplication();
+                currentClient = _factory.CreateClient();
+            }
+            else
+            {
+                currentClient = _testsCommonClient;
+            }
         }
 
         [Fact, Order(0)]
@@ -72,11 +80,11 @@ namespace BlogTests
 
                 foreach (var uri in authorizedUris)
                 {
-                    await assertEndpointAccessible(uri);
+                    await assertGetWithNoErrorOfAnyKindAsync(uri);
                 }
             }
 
-            _client = _factory.CreateClient();
+            currentClient = _factory.CreateClient();
         }
 
         [Fact, Order(100)]
@@ -91,14 +99,14 @@ namespace BlogTests
                 { "EMail", "test@doesnotexists.ru" },
                 { "Password", TEST_USER_PASSWORD },
                 { "ConfirmPassword", TEST_USER_PASSWORD },
-                { "__RequestVerificationToken", await ensureAntiforgeryTokenAsync(_client, uri) }
+                { "__RequestVerificationToken", await ensureAntiforgeryTokenAsync(currentClient, uri) }
             };
 
             // Act
-            var response = await _client.PostAsync(uri, new FormUrlEncodedContent(formData));
+            var response = await currentClient.PostAsync(uri, new FormUrlEncodedContent(formData));
 
             // Assert
-            ensureOkResponse(response);
+            assertResponseWithNoErrorOfAnyKind(response);
             using (getServices(out var services))
             {
                 var newUser = await services.Db.Users.FirstOrDefaultAsync(u => u.UserName == userName);
@@ -129,6 +137,7 @@ namespace BlogTests
                     $"/Account/Profile?id={testUser.Id}",
                     //"/Account/Logout",
                     $"/Account/ProfileEdit?id={testUser.Id}",
+                    "/Account/CheckIfAuthentificated",
                     $"/Reporting/ReportProfileAsync?id={services.Db.Users.FirstItem().Profile.Id}",
                     $"/Reporting/ReportPostAsync?id={services.Db.Posts.FirstItem().Id}",
                     $"/Reporting/ReportCommentaryAsync?id={services.Db.Commentaries.FirstItem().Id}",
@@ -143,7 +152,7 @@ namespace BlogTests
 
                 foreach (var uri in authorizedUris)
                 {
-                    await assertEndpointAccessible(uri);
+                    await assertGetWithNoErrorOfAnyKindAsync(uri);
                 }
                 foreach (var uri in unauthorizedUris)
                 {
@@ -160,6 +169,9 @@ namespace BlogTests
                 // Arrange
                 var testUser = await services.Db.Users.FirstAsync(u => u.UserName == TEST_USER_NAME);
                 testUser.Status.State = ProfileState.ACTIVE;
+                testUser.EmailConfirmed = true;
+                var testPost = new Post(DateTime.UtcNow, testUser, "1", "2");
+                services.Db.Posts.Add(testPost);
                 await services.Db.SaveChangesAsync();
 
                 var authorizedUris = new string[]
@@ -172,25 +184,25 @@ namespace BlogTests
 
                     "/Account/Profile",
                     $"/Account/Profile?id={testUser.Id}",
-                    //"/Account/Logout",
                     $"/Account/ProfileEdit?id={testUser.Id}",
-                    $"/Reporting/ReportProfileAsync?id={services.Db.Users.FirstItem().Profile.Id}",
-                    $"/Reporting/ReportPostAsync?id={services.Db.Posts.FirstItem().Id}",
-                    $"/Reporting/ReportCommentaryAsync?id={services.Db.Commentaries.FirstItem().Id}",
+                    "/Account/CheckIfAuthentificated",
 
                     "/PostCreate",
-                    $"/PostEdit?id={services.Db.Posts.FirstItem().Id}",
+                    $"/PostEdit?id={testPost.Id}",
                     $"/Account/PasswordChange?id={testUser.Id}",
                 };
                 var unauthorizedUris = new Dictionary<string, HttpStatusCode>
                 {
+                    { $"/Reporting/ReportProfileAsync?id={services.Db.Users.FirstItem().Profile.Id}", HttpStatusCode.Unauthorized },
+                    { $"/Reporting/ReportPostAsync?id={services.Db.Posts.FirstItem().Id}", HttpStatusCode.Unauthorized },
+                    { $"/Reporting/ReportCommentaryAsync?id={services.Db.Commentaries.FirstItem().Id}", HttpStatusCode.Unauthorized },
                     { "/ModeratorPanel", HttpStatusCode.Unauthorized },
                 };
                 disposer.Dispose();
 
                 foreach (var uri in authorizedUris)
                 {
-                    await assertEndpointAccessible(uri);
+                    await assertGetWithNoErrorOfAnyKindAsync(uri);
                 }
                 foreach (var uri in unauthorizedUris)
                 {
@@ -207,8 +219,8 @@ namespace BlogTests
             using (getServices(out var services))
             {
                 // Act
-                await assertEndpointAccessible(testEndpoint);
-                await assertEndpointAccessible("/Account/Logout");
+                await assertGetWithNoErrorOfAnyKindAsync(testEndpoint);
+                await assertGetWithNoErrorOfAnyKindAsync("/Account/Logout");
 
                 // Assert
                 await assertEndpointReturnsErrorPage(testEndpoint, HttpStatusCode.InternalServerError);
@@ -219,21 +231,7 @@ namespace BlogTests
         public async Task LogIn()
         {
             // Arrange
-            _client = _factory.CreateClient();
-            var uri = "/Account/Login";
-            var formData = new Dictionary<string, string>
-            {
-                { "Login", TEST_USER_NAME },
-                { "Password", TEST_USER_PASSWORD },
-                { "__RequestVerificationToken", await ensureAntiforgeryTokenAsync(_client, uri) }
-            };
-
-            // Act
-            var response = await _client.PostAsync(uri, new FormUrlEncodedContent(formData));
-
-            // Assert
-            ensureOkResponse(response);
-            await CheckEndpoints_NotRestrictedAuthorizedUser();
+            await loginAsync(TEST_USER_NAME, TEST_USER_PASSWORD);
         }
     }
 }

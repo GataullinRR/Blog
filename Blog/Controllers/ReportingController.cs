@@ -80,14 +80,6 @@ namespace Blog.Controllers
                 commentary.IsHidden = commentary.IsHidden 
                     ? true 
                     : Services.Decisions.ShouldHide(commentary);
-                if (Services.Decisions.ShouldReportToModerator(commentary))
-                {
-                    await Services.DbUpdator.EnsureHasEnoughModeratorsInChargeAsync(commentary.Author);
-                    foreach (var moderator in commentary.Author.ModeratorsInCharge)
-                    {
-                        moderator.ModeratorPanel.CommentariesToCheck.Add(new EntityToCheck<Commentary>(commentary));
-                    }
-                }
             }
             else
             {
@@ -96,6 +88,23 @@ namespace Blog.Controllers
 
             Services.Db.Reports.Add(report);
             reportingUser.Actions.Add(new UserAction(ActionType.REPORT, reportObject));
+            if (Services.Decisions.ShouldReportToModerator(reportObject))
+            {
+                await Services.DbUpdator.EnsureHasEnoughModeratorsInChargeAsync(reportObject.Author);
+                foreach (var moderator in reportObject.Author.ModeratorsInCharge)
+                {
+                    var alreadyAdded = moderator.ModeratorPanel.EntitiesToCheck
+                        .FirstOrDefault(e => e.Entity == reportObject);
+                    if (alreadyAdded == null)
+                    {
+                        moderator.ModeratorPanel.AddEntityToCheck(reportObject);
+                    }
+                    else
+                    {
+                        alreadyAdded.AddTime = DateTime.UtcNow;
+                    }
+                }
+            }
             await Services.Db.SaveChangesAsync();
 
             LayoutModel.Messages.Add("Report has been submitted");

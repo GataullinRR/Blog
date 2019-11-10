@@ -46,7 +46,7 @@
     {
         <li>
             @{ await Html.RenderPartialAsync("_EntityToCheck", entity); }
-            <a asp-page-handler="Check" asp-route-id="@entity.Id">Mark as resolved</a>
+            | <a asp-page-handler="Check" asp-route-id="@entity.Id">mark as resolved</a>
         </li>
     }
 </ul>
@@ -58,7 +58,7 @@
     <form method="post" asp-page-handler="Assign">
         <div class="form-group">
             <label>Number of entities to assign</label>
-            <input asp-for="NumOfEntitiesToAssign" />
+            <input asp-for="NumOfEntitiesToAssign" type="number"/>
             <span asp-validation-for="NumOfEntitiesToAssign"></span>
         </div>
 

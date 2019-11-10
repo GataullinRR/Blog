@@ -10,10 +10,11 @@ using Blog;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Proxies;
+using Microsoft.AspNetCore.Http;
 
 namespace BlogTests
 {
-    public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
+    public class CustomWebApplicationFactory : WebApplicationFactory<Startup>
     {
         public IServiceProvider Services { get; private set; }
 
@@ -33,6 +34,7 @@ namespace BlogTests
                 services.AddDbContext<BlogContext>(options => options
                         .UseLazyLoadingProxies()
                         .UseSqlServer(connection));
+                services.AddScoped<DefaultHttpContext>();
 
                 // Build the service provider.
                 var sp = services.BuildServiceProvider();
@@ -43,7 +45,7 @@ namespace BlogTests
                     var scopedServices = scope.ServiceProvider;
                     var db = scopedServices.GetRequiredService<BlogContext>();
                     var logger = scopedServices
-                        .GetRequiredService<ILogger<CustomWebApplicationFactory<TStartup>>>();
+                        .GetRequiredService<ILogger<CustomWebApplicationFactory>>();
 
                     db.Database.EnsureDeleted();
                     db.Database.EnsureCreated();

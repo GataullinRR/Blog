@@ -12,49 +12,89 @@ using DBModels;
 using Microsoft.AspNetCore.Identity;
 using Xunit.Abstractions;
 using System.Threading.Tasks;
+using System.Linq;
+using Blog.Controllers;
+using Blog.Pages.Account;
 
 namespace BlogTests
 {
-    public class ModeratorPanelTests : SingleContextTestsBase
+    public class ModeratorPanelTests : SingleContextTestsBase, IClassFixture<CustomWebApplicationFactory>
     {
-        static readonly CustomWebApplicationFactory<Startup> _factory;
-        static HttpClient _client;
-
-        static ModeratorPanelTests()
+        static HttpClient _testsCommonClient;
+        protected override HttpClient currentClient
         {
-            _factory = instantiateApplication();
-            _client = _factory.CreateClient();
+            get => base.currentClient;
+            set
+            {
+                base.currentClient = value;
+                _testsCommonClient = value;
+            }
         }
 
-        protected override CustomWebApplicationFactory<Startup> factory => _factory;
-        protected override HttpClient currentClient => _client;
 
-        public ModeratorPanelTests(ITestOutputHelper output) : base(output)
+        public ModeratorPanelTests(CustomWebApplicationFactory factory, ITestOutputHelper output) 
+            : base(factory, output)
         {
-
+            if (_testsCommonClient == null)
+            {
+                initializeApplication();
+                currentClient = _factory.CreateClient();
+            }
+            else
+            {
+                currentClient = _testsCommonClient;
+            }
         }
 
-        //[Fact]
-        //public async Task ass()
-        //{
-        //    using (getServices(out var services))
-        //    {
-        //        var moderator = await services.UserManager.FindByNameAsync("Oleg");
-        //        await loginAsync(moderator.UserName, "");
-        //        var targetCommentary = services.Db.Commentaries.FirstItem();
-        //        targetCommentary.Reports.Add(new Report(await services.UserManager.FindByNameAsync("_KSY_"), targetCommentary.Author, targetCommentary));
-        //        await services.Db.SaveChangesAsync();
-        //        for (int i = 0; i < 10; i++)
-        //        {
-        //            await _client.GetAsync($"/Commentary?id={targetCommentary.Id}");
-        //        }
-        //        await _client.GetAsync($"/Account/ReportCommentary?id={targetCommentary.Id}");
-        //    }
-        //}
+        [Theory(), Order(0)]
+        [InlineData("Commentary")]
+        [InlineData("Post")]
+        [InlineData("Profile")]
+        public async Task CommentaryReport(string testingEntity)
+        {
+            using (getServices(out var services))
+            {
+                var moderator = await services.UserManager.GetUsersInRoleAsync(Roles.MODERATOR).ThenDo(ms => ms.Single());
+                var target = testingEntity.Select<IEnumerable<IReportObject>>(
+                    (te => (string)te == "Commentary", services.Db.Commentaries),
+                    (te => (string)te == "Post", services.Db.Posts),
+                    (te => (string)te == "Profile", services.Db.ProfilesInfos))
+                    .Single().Where(c => c.Author != moderator).FirstItem();
+                target.ViewStatistic.TotalViews = 10;
+                await services.Db.SaveChangesAsync();
+                var reporters = new[] 
+                {
+                    await services.UserManager.FindByNameAsync("_KSY_"),
+                    await services.UserManager.FindByNameAsync("QTU100")
+                };
+                foreach (var reporter in reporters)
+                {
+                    using (await loggedUserScope(reporter.UserName))
+                    {
+                        await assertGetWithNoErrorOfAnyKindAsync($"/Reporting/Report{testingEntity}Async?id={target.Id}");
+                    }
+                }
+                await services.Db.SaveChangesAsync();
+                await services.Db.Entry(target).ReloadAsync();
+                await services.Db.Entry(moderator).ReloadAsync();
+                Assert.Equal(reporters.Length, target.Reports.Count());
+                if (target is Commentary commentary)
+                {
+                    Assert.True(commentary.IsHidden);
+                }
+                Assert.Equal(target.Id, moderator.ModeratorPanel.EntitiesToCheck.LastItem().Entity.To<IDbEntity>().Id);
+                Assert.Equal(moderator, target.Author.ModeratorsInCharge.Single());
+                Assert.Empty(moderator.ModeratorsInCharge);
 
-        //protected async Task loginAsync(string login, string password)
-        //{
-
-        //}
+                async Task<IDisposable> loggedUserScope(string userName)
+                {
+                    await loginAsync(userName, "QTU100@yandex.ru");
+                    return new DisposingAction(() =>
+                    {
+                        logoutAsync().GetAwaiter().GetResult();
+                    });
+                }
+            }
+        }
     }
 }

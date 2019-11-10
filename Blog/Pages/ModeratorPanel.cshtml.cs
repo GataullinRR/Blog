@@ -20,7 +20,7 @@ namespace Blog.Pages
         public IEnumerable<User> TargetUsers { get; private set; }
 
         [Required, BindProperty, Range(0, 100)]
-        public int NumOfEntitiesToAssign { get; }
+        public int NumOfEntitiesToAssign { get; set; }
 
         public ModeratorPanelModel(ServicesProvider services) : base(services)
         {
@@ -64,8 +64,8 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
+                await OnGet();
                 Panel.EntitiesToCheck.First(e => e.Id == id).ResolvingTime = DateTime.UtcNow;
-
                 await Services.Db.SaveChangesAsync();
 
                 return Page();

@@ -106,7 +106,7 @@ namespace Blog
             app.UseAuthentication();
             app.UseStaticFiles();
             app.UseSession();
-            app.UseMiddleware<UnathorizedExceptionToStatusMiddleware>();
+            app.UseMiddleware<ExceptionToStatusCodeMiddleware>();
             //app.Use(async (ctx, next) =>
             //{
             //    await next();

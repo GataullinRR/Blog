@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Linq;
+using System.Security.Authentication;
+using System.Threading.Tasks;
 using Utilities.Extensions;
 
 namespace Blog.Controllers
@@ -43,6 +45,19 @@ namespace Blog.Controllers
                 : LayoutModel;
 
             base.OnActionExecuting(context);
+        }
+
+        public async Task<User> GetCurrentUserModelOrThrowAsync()
+        {
+            var user = await Services.UserManager.GetUserAsync(User);
+            if (user == null)
+            {
+                throw new AuthenticationException();
+            }
+            else
+            {
+                return user;
+            }
         }
     }
 }

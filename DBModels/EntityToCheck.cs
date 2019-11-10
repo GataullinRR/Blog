@@ -12,7 +12,7 @@ namespace DBModels
     public interface IEntityToCheck : IDbEntity
     {
         object Entity { get; }
-        DateTime AddTime { get; }
+        DateTime AddTime { get; set; }
         DateTime? AssignationTime { get; set; }
         DateTime? ResolvingTime { get; set; }
         bool IsResolved { get; }

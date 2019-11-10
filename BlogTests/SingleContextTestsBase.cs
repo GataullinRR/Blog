@@ -22,11 +22,20 @@ namespace BlogTests
     [TestCaseOrderer(CustomTestCaseOrderer.TypeName, CustomTestCaseOrderer.AssembyName)]
     public abstract class SingleContextTestsBase
     {
-        protected static CustomWebApplicationFactory<Startup> instantiateApplication()
+        protected readonly ITestOutputHelper _output;
+        protected CustomWebApplicationFactory _factory;
+        protected virtual HttpClient currentClient { get; set; }
+
+        public SingleContextTestsBase(CustomWebApplicationFactory factory, ITestOutputHelper output)
         {
-            var factory = new CustomWebApplicationFactory<Startup>();
-            factory.CreateClient(); // It'll initialize the server
-            using (var scope = factory.Server.Host.Services.CreateScope())
+            _output = output;
+            _factory = factory;
+        }
+
+        protected void initializeApplication()
+        {
+            _factory.CreateClient(); // It'll initialize the server
+            using (var scope = _factory.Server.Host.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<BlogContext>();
 
@@ -35,28 +44,32 @@ namespace BlogTests
                     scope.ServiceProvider.GetRequiredService<UserManager<User>>(),
                     scope.ServiceProvider.GetRequiredService<SignInManager<User>>());
             }
-
-            return factory;
         }
 
-        protected readonly ITestOutputHelper _output;
-        protected abstract HttpClient currentClient { get; }
-        protected abstract CustomWebApplicationFactory<Startup> factory { get; }
-
-        public SingleContextTestsBase(ITestOutputHelper output)
+        protected async Task assertFormPostWithNoErrorOfAnyKindAsync(string url, Dictionary<string, string> formValues)
         {
-            this._output = output;
+            _output.WriteLine($"Form post: {url}");
+
+            // Arrange
+            var formData = new Dictionary<string, string>();
+            formData.AddRange(formValues);
+            formData.Add("__RequestVerificationToken", await ensureAntiforgeryTokenAsync(currentClient, url));
+
+            // Act
+            var response = await currentClient.PostAsync(url, new FormUrlEncodedContent(formData));
+
+            // Assert
+            assertResponseWithNoErrorOfAnyKind(response);
         }
-
-        protected async Task assertEndpointAccessible(string url)
+        protected async Task assertGetWithNoErrorOfAnyKindAsync(string url)
         {
-            _output.WriteLine(url);
+            _output.WriteLine($"Get: {url}");
 
             // Act
             var response = await currentClient.GetAsync(url);
-
+            
             // Assert
-            ensureOkResponse(response);
+            assertResponseWithNoErrorOfAnyKind(response);
         }
         protected async Task assertEndpointReturnsErrorPage(string url, HttpStatusCode statusCode)
         {
@@ -65,22 +78,67 @@ namespace BlogTests
             // Act
             var response = await currentClient.GetAsync(url);
 
-            ensureOkResponse(response);
+            response.EnsureSuccessStatusCode(); // Status Code 200-299
             Assert.NotNull(response?.RequestMessage?.RequestUri?.AbsoluteUri);
             Assert.EndsWith($"code={(int)statusCode}", response.RequestMessage.RequestUri.AbsoluteUri);
         }
-        protected void ensureOkResponse(HttpResponseMessage response)
+        protected void assertResponseWithNoErrorOfAnyKind(HttpResponseMessage response)
         {
             response.EnsureSuccessStatusCode(); // Status Code 200-299
-            Assert.Equal("text/html; charset=utf-8", response.Content.Headers.ContentType.ToString());
+            Assert.NotNull(response?.RequestMessage?.RequestUri?.AbsoluteUri);
+            Assert.DoesNotContain("/Error?code=", response.RequestMessage.RequestUri.AbsoluteUri);
         }
 
         protected IDisposable getServices(out ServicesProvider services)
         {
-            var scope = factory.Server.Host.Services.CreateScope();
+            var scope = _factory.Server.Host.Services.CreateScope();
             services = scope.ServiceProvider.GetRequiredService<ServicesProvider>();
 
             return scope;
+        }
+
+        protected async Task loginAsync(string userName, string password)
+        {
+            var uri = "/Account/Login";
+            var formData = new Dictionary<string, string>
+            {
+                { "Login", userName },
+                { "Password", password },
+            };
+
+            await assertFormPostWithNoErrorOfAnyKindAsync(uri, formData);
+            await assertGetWithNoErrorOfAnyKindAsync("/Account/CheckIfAuthentificated");
+
+            //// Arrange
+            //var uri = "/Account/Login";
+            //var formData = new Dictionary<string, string>
+            //{
+            //    { "Login", userName },
+            //    { "Password", password },
+            //    { "__RequestVerificationToken", await ensureAntiforgeryTokenAsync(currentClient, uri) }
+            //};
+
+            //// Act
+            //var response = await currentClient.PostAsync(uri, new FormUrlEncodedContent(formData));
+
+            //// Assert
+            //assertResponseWithNoErrorOfAnyKind(response);
+
+        }
+
+        protected async Task logoutAsync()
+        {
+            // Arrange
+            var testEndpoint = "/Account/CheckIfAuthentificated";
+            using (getServices(out var services))
+            {
+                // Act
+                await assertGetWithNoErrorOfAnyKindAsync(testEndpoint);
+                await assertGetWithNoErrorOfAnyKindAsync("/Account/Logout");
+
+                // Assert
+                await assertEndpointReturnsErrorPage(testEndpoint, HttpStatusCode.Unauthorized);
+            }
         }
 
         static SetCookieHeaderValue _antiforgeryCookie;
@@ -88,10 +146,10 @@ namespace BlogTests
         static readonly Regex AntiforgeryFormFieldRegex = new Regex(@"\<input name=""__RequestVerificationToken"" type=""hidden"" value=""([^""]+)"" \/\>");
         protected static async Task<string> ensureAntiforgeryTokenAsync(HttpClient client, string uri)
         {
-            //if (_antiforgeryToken != null)
-            //{
-            //    return _antiforgeryToken;
-            //}
+            if (_antiforgeryToken != null)
+            {
+                return _antiforgeryToken;
+            }
 
             _antiforgeryCookie = null;
             _antiforgeryToken = null;

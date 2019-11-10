@@ -24,5 +24,13 @@ namespace DBModels
             PostsToCheck,
             ProfilesToCheck
         };
+
+        public void AddEntityToCheck(IReportObject reportObject)
+        {
+            add((dynamic)reportObject);
+        }
+        void add(Commentary commentary) => CommentariesToCheck.Add(new EntityToCheck<Commentary>(commentary));
+        void add(Post post) => PostsToCheck.Add(new EntityToCheck<Post>(post));
+        void add(Profile profile) => ProfilesToCheck.Add(new EntityToCheck<Profile>(profile));
     }
 }

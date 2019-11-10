@@ -16,6 +16,8 @@ namespace DBModels
         [Required] public virtual ViewStatistic ViewStatistic { get; set; }
         [InverseProperty(nameof(Report.ProfileObject))]
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
+        public string AuthorForeignKey { get; set; }
+        public virtual User Author { get; set; }
 
         public Profile() { }
 
