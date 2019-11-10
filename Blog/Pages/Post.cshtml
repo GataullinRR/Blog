@@ -31,7 +31,11 @@
 <h3>Commentaries</h3>
 
 @{ var count = 0; }
-@foreach (var commentary in Model.Commentaries.OrderByDescending(c => c.CreationTime).Take(100).Select(c => Html.PartialAsync("_CommentaryContainer", c)).ToArray())
+@foreach (var commentary in Model.Commentaries
+    .OrderByDescending(c => c.CreationTime)
+    .Take(100)
+    .Select(c => Html.PartialAsync("_CommentaryContainer", c))
+    .ToArray())
 {
     @await commentary;
 

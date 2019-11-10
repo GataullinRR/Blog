@@ -97,12 +97,35 @@ namespace Blog.Services
             }
             else
             {
-                return (!comment.IsHidden
-                        && user.UserName == comment.Author.UserName
-                        && user.Status.State == ProfileState.ACTIVE
-                        && comment.CreationTime - DateTime.Now < TimeSpan.FromDays(1)
-                        && comment.Edits.Count(e => e.EditAuthor == user) < 1)
-                     || await Services.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));  
+                return  !comment.IsDeleted
+                            && ((!comment.IsHidden
+                                && !comment.IsDeleted
+                                && user.UserName == comment.Author.UserName
+                                && user.Status.State == ProfileState.ACTIVE
+                                && comment.CreationTime - DateTime.Now < TimeSpan.FromDays(1)
+                                && comment.Edits.Count(e => e.EditAuthor == user) < 1)
+                            || await Services.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR)));  
+            }
+        }
+
+        public async Task ValidateDeleteCommentaryAsync(Commentary comment)
+        {
+            if (!await CanDeleteCommentaryAsync(comment))
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanDeleteCommentaryAsync(Commentary comment)
+        {
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null)
+            {
+                return false;
+            }
+            else
+            {
+                return !comment.IsDeleted
+                     && await Services.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
             }
         }
 
@@ -269,7 +292,8 @@ namespace Blog.Services
             }
             else
             {
-                return !reportObject.Reports.Any(r => r.Reporter.Id == currentUser.Id);
+                return !reportObject.Reports.Any(r => r.Reporter.Id == currentUser.Id)
+                    && !(reportObject.As<Commentary>()?.IsDeleted).NullToFalse();
             }
         }
 

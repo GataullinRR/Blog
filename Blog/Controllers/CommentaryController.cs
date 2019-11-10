@@ -76,5 +76,26 @@ namespace Blog.Controllers
                 throw new Exception();
             }
         }
+
+        [HttpGet()]
+        public async Task<IActionResult> DeleteCommentaryAsync([Required]int id)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await GetCurrentUserModelOrThrowAsync();
+                var commentary = await Services.Db.Commentaries.FirstOrDefaultByIdAsync(id);
+                await Services.Permissions.ValidateDeleteCommentaryAsync(commentary);
+                
+                user.Actions.Add(new UserAction(ActionType.COMMENTARY_DELETE, commentary));
+                commentary.IsDeleted = true;
+                await Services.Db.SaveChangesAsync();
+
+                return Redirect(Services.History.GetLastURL());
+            }
+            else
+            {
+                throw new Exception();
+            }
+        }
     }
 }
