@@ -69,70 +69,26 @@ namespace Blog.Controllers
             }
         }
 
-        [HttpGet(), Authorize()]
-        public async Task<IActionResult> ConfirmEMailByTokenAsync([Required]string confirmationToken)
-        {
-            if (ModelState.IsValid)
-            {
-                var user = await Services.UserManager.GetUserAsync(HttpContext.User);
-                var expectedToken = Services.ConfirmationTokens.GetToken(user, AccountOperation.EMAIL_CONFIRMATION);
-                if (confirmationToken == expectedToken)
-                {
-                    if (user.EmailConfirmed)
-                    {
-                        return RedirectToPage("/Index");
-                    }
-                    else
-                    {
-                        user.EmailConfirmed = true;
-                        await Services.UserManager.AddToRoleAsync(user, Roles.USER);
-                        user.Actions.Add(new UserAction(ActionType.EMAIL_CONFIRMATION, user));
-                        await Services.Db.SaveChangesAsync();
-
-                        return RedirectToPage("/Account/ConfirmEMail"); // Will show greeting
-                    }
-                }
-                else
-                {
-                    throw new Exception("Bad E-Mail confirmation token");
-                }
-            }
-            else
-            {
-                throw new Exception();
-            }
-        }
-
         [HttpGet()]
-        public async Task<IActionResult> ConfirmPasswordResetAsync([Required]string userId, [Required]string confirmationToken)
+        public async Task<IActionResult> ConfirmAsync([Required]string userId, [Required]string token, [Required]AccountOperation operation, string arguments)
         {
             if (ModelState.IsValid)
             {
                 var user = await Services.UserManager.FindByIdAsync(userId);
-#warning add something similar
-                //_permissions.ValidateResetPassword(User, user);
-
-                var expectedToken = Services.ConfirmationTokens.GetToken(user, AccountOperation.PASSWORD_RESET);
-                if (confirmationToken == expectedToken)
+                var isVerified = await Services.Confirmation.VerifyTokenAsync(user, operation, token);
+                if (isVerified)
                 {
-                    var newPassword = 3.Times(_ => Global.Random.NextENWord().Capitalize()).Aggregate("");
-                    var isSent = await Services.EMail.TrySendMessageAsync(user, "Password reset", "New password", $@"Your new password is: {newPassword}
-Please delete this message so that nobody can see it");
-                    if (isSent)
+                    switch (operation)
                     {
-                        user.PasswordHash = Services.UserManager.PasswordHasher.HashPassword(user, newPassword);
-                        var result = await Services.UserManager.UpdateAsync(user);
-                        await Services.SignInManager.SignOutAsync();
-                        user.Actions.Add(new UserAction(ActionType.PASSWORD_RESET, null));
-                        await Services.Db.SaveChangesAsync();
+                        case AccountOperation.EMAIL_CONFIRMATION:
+                            return await confirmEmail(user);
+                        case AccountOperation.PASSWORD_RESET:
+                            return await generateAndSendNewPasswordAsync(user);
+                        case AccountOperation.EMAIL_CHANGE:
+                            return await changeEMail(user, arguments);
 
-                        LayoutModel.AddMessage("New password has been sent to your E-Mail");
-
-                        return RedirectToPage("/Account/Login");
-                    }
-                    else
-                    {
-                        return reportError("Could not send an E-Mail");
+                        default:
+                            throw new NotSupportedException();
                     }
                 }
                 else
@@ -142,10 +98,75 @@ Please delete this message so that nobody can see it");
             }
             else
             {
-                throw new Exception();
+                return reportError("Bad arguments");
             }
         }
+        async Task<IActionResult> changeEMail(User user, string arguments)
+        {
+            if (arguments == null)
+            {
+                return reportError("Bad arguments");
+            }
+            else if (await GetCurrentUserModelOrThrowAsync() != user)
+            {
+                return reportError("You should log in in order this link to work");
+            }
+            else
+            {
+                var newEmail = arguments;
+                user.Email = newEmail;
+                user.Actions.Add(new DBModels.UserAction(DBModels.ActionType.EMAIL_CHANGED, user));
+                await Services.Db.SaveChangesAsync();
 
+                LayoutModel.AddMessage($"Email has been changed to {newEmail}");
+
+                return RedirectToPage("/Account/Profile");
+            }
+        }
+        async Task<IActionResult> confirmEmail(User user)
+        {
+            if (user.EmailConfirmed)
+            {
+                return RedirectToPage("/Index");
+            }
+            else if (await GetCurrentUserModelOrThrowAsync() != user)
+            {
+                return reportError("You should log in in order this link to work");
+            }
+            else
+            {
+                user.EmailConfirmed = true;
+                await Services.UserManager.AddToRoleAsync(user, Roles.USER);
+                user.Actions.Add(new UserAction(ActionType.EMAIL_CONFIRMED, user));
+                await Services.Db.SaveChangesAsync();
+
+                LayoutModel.AddMessage("Email has been confirmed!");
+
+                return RedirectToPage("/Index");
+            }
+        }
+        async Task<IActionResult> generateAndSendNewPasswordAsync(User user)
+        {
+            var newPassword = 3.Times(_ => Global.Random.NextENWord().Capitalize()).Aggregate("");
+            var isSent = await Services.EMail.TrySendMessageAsync(user, "Password reset", "New password", $@"Your new password is: {newPassword}
+Please delete this message so that nobody can see it");
+            if (isSent)
+            {
+                user.PasswordHash = Services.UserManager.PasswordHasher.HashPassword(user, newPassword);
+                var result = await Services.UserManager.UpdateAsync(user);
+                await Services.SignInManager.SignOutAsync();
+                user.Actions.Add(new UserAction(ActionType.PASSWORD_RESET, null));
+                await Services.Db.SaveChangesAsync();
+
+                LayoutModel.AddMessage("New password has been sent to your E-Mail");
+
+                return RedirectToPage("/Account/Login");
+            }
+            else
+            {
+                return reportError("Could not send the E-Mail");
+            }
+        }
         IActionResult reportError(string message)
         {
             LayoutModel.AddMessage(message);

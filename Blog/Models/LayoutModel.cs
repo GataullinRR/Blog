@@ -19,10 +19,10 @@ namespace Blog.Models
 
         public void UpdateMessages()
         {
-            Messages.RemoveAll(m => !m.JustCreated);
+            Messages.RemoveAll(m => m.Stage >= CreationStage.RENDERED);
             foreach (var message in Messages)
             {
-                message.JustCreated = false;
+                message.Stage++;
             }
         }
 

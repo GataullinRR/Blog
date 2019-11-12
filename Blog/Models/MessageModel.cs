@@ -2,6 +2,13 @@
 
 namespace Blog.Models
 {
+    public enum CreationStage
+    {
+        JUST_CREATED = 0,
+        GOING_TO_RENDER = 1,
+        RENDERED = 2
+    }
+
     [Serializable]
     public class MessageModel
     {
@@ -11,6 +18,6 @@ namespace Blog.Models
         }
 
         public string Text { get; }
-        public bool JustCreated { get; set; } = true;
+        internal CreationStage Stage { get; set; } = CreationStage.JUST_CREATED;
     }
 }

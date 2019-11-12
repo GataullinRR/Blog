@@ -176,6 +176,18 @@ namespace Blog.Services
             }
         }
 
+        public async Task ValidateChangeEmailAsync(User targetUser)
+        {
+            if (!await CanChangeEmailAsync(targetUser))
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanChangeEmailAsync(User targetUser)
+        {
+            return await CanChangePasswordAsync(targetUser);
+        }
+
         public async Task ValidateBanUserAsync(User targetUser)
         {
             if (!await CanBanUserAsync(targetUser))

@@ -24,6 +24,7 @@ namespace Blog.Models
 
         public PermissionsService Permissions => Services.Permissions;
         public LayoutModel LayoutModel { get; private set; }
+        protected bool autoSaveDbChanges = false;
 
         public PageModelBase(ServicesProvider services)
         {
@@ -42,6 +43,10 @@ namespace Blog.Models
             LayoutModel.UpdateMessages();
             LayoutModel.Save(HttpContext.Session);
             Services.History.SaveCurrentURL();
+            if (autoSaveDbChanges)
+            {
+                Services.Db.SaveChanges();
+            }
 
             base.OnPageHandlerExecuted(context);
         }

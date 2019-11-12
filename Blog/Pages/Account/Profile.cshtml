@@ -43,6 +43,10 @@
     {
         <div><a asp-page="/Account/PasswordChange" asp-route-id="@targetUser.Id">Change password</a></div>
     }
+    if (await Model.Permissions.CanChangeEmailAsync(targetUser))
+    {
+        <div><a asp-page="/Account/EmailChange" asp-route-id="@targetUser.Id">Change e-mail</a></div>
+    }
 }
 else
 {
@@ -145,17 +149,17 @@ else
     <ul>
         @foreach (var action in targetUser.Actions.OrderByDescending(r => r.ActionDate))
         {
-        <li>
-            <span>@action.ActionType.ToString() at @action.ActionDate.ToString("hh:mm dd.MM.yyyy"). Object: </span>
-            @if (action.ReportObject != null)
-            {
-                await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(action.ReportObject));
-            }
-            else
-            {
-                <span>unknown</span>
-            }
-        </li>
+            <li>
+                <span>@action.ActionType.ToString() at @action.ActionDate.ToString("hh:mm dd.MM.yyyy"). Object: </span>
+                @if (action.ReportObject != null)
+                {
+                    await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(action.ReportObject));
+                }
+                else
+                {
+                    <span>unknown</span>
+                }
+            </li>
         }
     </ul>
 }

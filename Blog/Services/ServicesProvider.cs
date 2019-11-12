@@ -1,6 +1,7 @@
 ﻿using DBModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +17,13 @@ namespace Blog.Services
         readonly Lazy<RoleManager<User>> _roleManager;
         readonly Lazy<SignInManager<User>> _signInManager;
         readonly Lazy<EMailService> _eMail;
-        readonly Lazy<ConfirmationTokenService> _confirmationToken;
+        readonly Lazy<ConfirmationLinksGeneratorService> _confirmationToken;
         readonly Lazy<HistoryService> _history;
         readonly Lazy<DecisionsService> _decisions;
         readonly Lazy<DbEntitiesUpdateService> _dbUpdator;
         readonly Lazy<IHttpContextAccessor> _httpContext;
+        readonly Lazy<IUrlHelper> _urlHelper;
+        readonly Lazy<LinkBuilderService> _linkBuilder;
 
         public IServiceProvider ServiceProvider { get; }
         public BlogContext Db => _db.Value;
@@ -28,12 +31,14 @@ namespace Blog.Services
         public RoleManager<User> RoleManager => _roleManager.Value;
         public SignInManager<User> SignInManager => _signInManager.Value;
         public EMailService EMail => _eMail.Value;
-        public ConfirmationTokenService ConfirmationTokens => _confirmationToken.Value;
+        public ConfirmationLinksGeneratorService Confirmation => _confirmationToken.Value;
         public HistoryService History => _history.Value;
         public DecisionsService Decisions => _decisions.Value;
         public PermissionsService Permissions => _permissions.Value;
         public DbEntitiesUpdateService DbUpdator => _dbUpdator.Value;
         public HttpContext HttpContext => _httpContext.Value.HttpContext;
+        public IUrlHelper UrlHelper => _urlHelper.Value;
+        public LinkBuilderService LinkBuilder => _linkBuilder.Value;
 
         public ServicesProvider(IServiceProvider serviceProvider)
         {
@@ -45,11 +50,13 @@ namespace Blog.Services
             _roleManager = ServiceProvider.GetLazyService<RoleManager<User>>();
             _signInManager = ServiceProvider.GetLazyService<SignInManager<User>>();
             _eMail = ServiceProvider.GetLazyService<EMailService>();
-            _confirmationToken = ServiceProvider.GetLazyService<ConfirmationTokenService>();
+            _confirmationToken = ServiceProvider.GetLazyService<ConfirmationLinksGeneratorService>();
             _history = ServiceProvider.GetLazyService<HistoryService>();
             _decisions = ServiceProvider.GetLazyService<DecisionsService>();
             _dbUpdator = ServiceProvider.GetLazyService<DbEntitiesUpdateService>();
             _httpContext = ServiceProvider.GetLazyService<IHttpContextAccessor>();
+            _urlHelper = ServiceProvider.GetLazyService<IUrlHelper>();
+            _linkBuilder = ServiceProvider.GetLazyService<LinkBuilderService>();
         }
     }
 }

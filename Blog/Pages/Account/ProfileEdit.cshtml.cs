@@ -74,7 +74,7 @@ namespace Blog.Pages.Account
                     editingUser.Profile.Image = serverLocalPath;
                 }
                 editingUser.Profile.About = About;
-                currentUser.Actions.Add(new UserAction(ActionType.PROFILE_EDIT, editingUser.Id));
+                currentUser.Actions.Add(new UserAction(ActionType.PROFILE_EDIT, editingUser));
                 await Services.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Account/Profile", new { id = editingUser.Id });

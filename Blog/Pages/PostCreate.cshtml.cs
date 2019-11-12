@@ -44,7 +44,7 @@ namespace Blog.Pages
                     var post = new Post(DateTime.UtcNow, author, Title, Body);
                     Services.Db.Posts.Add(post);
                     await Services.Db.SaveChangesAsync();
-                    author.Actions.Add(new UserAction(ActionType.POST_CREATE, post.Id.ToString()));
+                    author.Actions.Add(new UserAction(ActionType.POST_CREATE, post));
                     await Services.Db.SaveChangesAsync();
 
                     return RedirectToPage("/Post", new { id = post.Id });

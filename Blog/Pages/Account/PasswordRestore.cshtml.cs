@@ -19,16 +19,16 @@ namespace Blog.Pages.Account
     public class PasswordRestoreModel : PageModelBase
     {
         readonly EMailService _email;
-        readonly ConfirmationTokenService _confirmation;
+        readonly ConfirmationLinksGeneratorService _confirmation;
 
-        public PasswordRestoreModel(EMailService email, ConfirmationTokenService confirmation, ServicesProvider serviceProvider) : base(serviceProvider)
+        [BindProperty(), Required()]
+        public string UserName { get; set; }
+
+        public PasswordRestoreModel(EMailService email, ConfirmationLinksGeneratorService confirmation, ServicesProvider serviceProvider) : base(serviceProvider)
         {
             _email = email ?? throw new ArgumentNullException(nameof(email));
             _confirmation = confirmation ?? throw new ArgumentNullException(nameof(confirmation));
         }
-
-        [BindProperty(), Required()]
-        public string UserName { get; set; }
 
         public async Task<IActionResult> OnPostAsync()
         {
@@ -44,10 +44,9 @@ namespace Blog.Pages.Account
                 else
                 {
                     await Services.Permissions.ValidateResetPasswordAsync(user);
+                    user.Actions.Add(new UserAction(ActionType.PASSWORD_RESETING, user));
 
-                    var token = _confirmation.GetToken(user, AccountOperation.PASSWORD_RESET);
-                    var link = _confirmation.GenerateLink(HttpContext, token, nameof(AccountController), nameof(AccountController.ConfirmPasswordResetAsync), new { userId = user.Id });
-                    var newPassword = Global.Random.NextENWord() + Global.Random.NextENWord() + Global.Random.NextENWord();
+                    var link = await _confirmation.GetPasswordResetConfirmationLinkAsync(user);
                     var isSent = await _email.TrySendMessageAsync(user, "Password reset", "Confirmation", $@"If you want to continue password reset, follow this link: {link}
 After openning the link, new password will be sent to this E-Mail");
                     if (isSent)

@@ -37,7 +37,9 @@ namespace Blog.Pages.Account
             {
                 if (NewPassword == NewPasswordConfirmation)
                 {
-                    var user = await Services.UserManager.GetUserAsync(User);
+                    var user = await GetCurrentUserModelOrThrowAsync();
+                    await Services.Permissions.ValidateChangePasswordAsync(user);
+                    user.Actions.Add(new UserAction(ActionType.PASSWORD_CHANGING, user));
                     var result = await Services.UserManager.ChangePasswordAsync(user, CurrentPassword, NewPassword);
                     if (result.Succeeded)
                     {

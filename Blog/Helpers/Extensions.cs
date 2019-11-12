@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Utilities.Extensions;
+using Utilities.Types;
 
 namespace Blog
 {
@@ -116,6 +117,11 @@ namespace Blog
             {
                 return $"{span.TotalDays.Round()} days ago";
             }
+        }
+
+        public static IDisposable SaveChangesMode(this BlogContext db)
+        {
+            return new DisposingAction(() => db.SaveChanges());
         }
     }
 }

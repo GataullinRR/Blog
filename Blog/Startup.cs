@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using AspNetCore.IServiceCollection.AddIUrlHelper;
 using Blog.Middlewares;
+using Blog.Misc;
 using Blog.Pages.Account;
 using Blog.Services;
 using DBModels;
@@ -47,7 +48,7 @@ namespace Blog
                             typeof(ReportViewConfirmationTokenProvider)));
                     })
                     .AddEntityFrameworkStores<BlogContext>()
-                    .AddDefaultTokenProviders();
+                    .AddTokenProvider<BasicTokenProvider>(nameof(BasicTokenProvider));
             services.AddTransient<ReportViewConfirmationTokenProvider>();
 
             services.Configure<IdentityOptions>(options =>
@@ -77,12 +78,13 @@ namespace Blog
             services.AddMemoryCache();
             services.AddUrlHelper();
             services.AddScoped<EMailService>();
-            services.AddScoped<ConfirmationTokenService>();
+            services.AddScoped<ConfirmationLinksGeneratorService>();
             services.AddScoped<PermissionsService>();
             services.AddScoped<HistoryService>();
             services.AddSingleton<AutounbanService>();
             services.AddScoped<DecisionsService>();
             services.AddScoped<DbEntitiesUpdateService>();
+            services.AddScoped<LinkBuilderService>();
             services.AddScoped<ServicesProvider>();
         }
 

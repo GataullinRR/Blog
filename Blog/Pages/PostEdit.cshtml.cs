@@ -56,7 +56,7 @@ namespace Blog.Pages
                     editingPost.Title = Title;
                 }
                 editingPost.Edits.Add(new PostEdit(author, EditReason, DateTime.UtcNow));
-                author.Actions.Add(new UserAction(ActionType.POST_EDIT, editingPost.Id.ToString()));
+                author.Actions.Add(new UserAction(ActionType.POST_EDIT, editingPost));
                 await Services.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Post", new { id = editingPost.Id });

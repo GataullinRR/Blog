@@ -63,7 +63,7 @@ namespace Blog.Pages
                         commentBody);
                     Services.Db.Commentaries.Add(comment);
                     await Services.Db.SaveChangesAsync();
-                    currentUser.Actions.Add(new UserAction(ActionType.ADD_COMMENTARY, comment.Id.ToString()));
+                    currentUser.Actions.Add(new UserAction(ActionType.ADD_COMMENTARY, comment));
                     await Services.Db.SaveChangesAsync();
                 }
             }
