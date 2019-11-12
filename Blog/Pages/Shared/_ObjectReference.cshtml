@@ -14,5 +14,5 @@ else if (Model.Object is User user)
 }
 else if (Model.Object is Profile profile)
 {
-    <span>profile</span>
+    <a asp-page="/Account/Profile" asp-route-id="@profile.Author.Id">profile</a>
 }
