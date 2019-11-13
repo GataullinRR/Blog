@@ -16,25 +16,76 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Utilities;
 using System.ComponentModel;
-using Blog.Misc;
+using System.IO;
+using System.Globalization;
+using Microsoft.AspNetCore.DataProtection;
+using System.IO.Compression;
 
 namespace Blog.Services
 {
-    public enum AccountOperation
+    public enum AccountOperation : byte
     {
         [Description("EMailConfirmation")]
-        EMAIL_CONFIRMATION = 100,
+        EMAIL_CONFIRMATION = 0,
         [Description("PasswordReset")]
-        PASSWORD_RESET = 200,
+        PASSWORD_RESET = 100,
         [Description("EMailChange")]
-        EMAIL_CHANGE = 300,
+        EMAIL_CHANGE = 200,
+    }
+    
+    public class TokenData
+    {
+        public TokenData(string userId, AccountOperation operation, DateTime creationTime, string argument, bool isValid)
+        {
+            UserId = userId ?? throw new ArgumentNullException(nameof(userId));
+            Operation = operation;
+            CreationTime = creationTime;
+            Argument = argument ?? throw new ArgumentNullException(nameof(argument));
+            IsValid = isValid;
+        }
+
+        public string UserId { get; }
+        public AccountOperation Operation { get; }
+        public DateTime CreationTime { get; }
+        public string Argument { get; }
+        public bool IsValid { get; }
+    }
+
+    // Based on Levi's authentication sample
+    internal static class StreamExtensions
+    {
+        internal static readonly Encoding DefaultEncoding = new UTF8Encoding(false, true);
+
+        public static BinaryReader CreateReader(this Stream stream)
+        {
+            return new BinaryReader(stream, DefaultEncoding, true);
+        }
+
+        public static BinaryWriter CreateWriter(this Stream stream)
+        {
+            return new BinaryWriter(stream, DefaultEncoding, true);
+        }
+
+        public static DateTimeOffset ReadDateTimeOffset(this BinaryReader reader)
+        {
+            return new DateTimeOffset(reader.ReadInt64(), TimeSpan.Zero);
+        }
+
+        public static void Write(this BinaryWriter writer, DateTimeOffset value)
+        {
+            writer.Write(value.UtcTicks);
+        }
     }
 
     public class ConfirmationLinksGeneratorService : ServiceBase
     {
-        public ConfirmationLinksGeneratorService(ServicesProvider services) : base(services)
-        {
+        readonly static TimeSpan TokenLifespan = TimeSpan.FromMinutes(30);
 
+        readonly IDataProtector _protector;
+
+        public ConfirmationLinksGeneratorService(ServicesProvider services, IDataProtectionProvider protector) : base(services)
+        {
+            _protector = protector.CreateProtector("ConfirmationTokens");
         }
 
         public async Task<string> GetEMailChangeConfirmationLinkAsync(User user, string newEMail)
@@ -51,40 +102,61 @@ namespace Blog.Services
         }
         async Task<string> getConfirmationLinkAsync(User user, AccountOperation accountOperation, string arguments = "")
         {
-            var purpose = accountOperation.GetEnumValueDescription();
-            var token = await Services.UserManager.GenerateUserTokenAsync(user, nameof(BasicTokenProvider), purpose);
+            var token = await generateAsync();
             return Services.LinkBuilder.GenerateLink(
                 nameof(AccountController),
                 nameof(AccountController.ConfirmAsync),
-                new { token = token, userId = user.Id, operation = (int)accountOperation, arguments = arguments });
-        }
+                new { token = token });
 
-        public async Task<bool> VerifyTokenAsync(User user, AccountOperation accountOperation, string token)
-        {
-            var purpose = accountOperation.GetEnumValueDescription();
-
-            return await Services.UserManager.VerifyUserTokenAsync(user, nameof(BasicTokenProvider), purpose, token);
-        }
-
-        static class ObjectExtensions
-        {
-            public static IDictionary<string, object> AddProperty(object obj, string name, object value)
+            async Task<string> generateAsync()
             {
-                var dictionary = ToDictionary(obj);
-                dictionary.Add(name, value);
-                return dictionary;
-            }
-
-            // helper
-            public static IDictionary<string, object> ToDictionary(object obj)
-            {
-                IDictionary<string, object> result = new Dictionary<string, object>();
-                PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(obj);
-                foreach (PropertyDescriptor property in properties)
+                if (user == null)
                 {
-                    result.Add(property.Name, property.GetValue(obj));
+                    throw new ArgumentNullException("user");
                 }
-                return result;
+                var ms = new MemoryStream();
+                using (var writer = ms.CreateWriter())
+                {
+                    writer.Write(DateTimeOffset.UtcNow);
+                    writer.Write((byte)accountOperation);
+                    writer.Write(Convert.ToString(user.Id, CultureInfo.InvariantCulture));
+                    writer.Write(arguments ?? "");
+                    string stamp = await Services.UserManager.GetSecurityStampAsync(user);
+                    writer.Write(stamp);
+                }
+                var protectedBytes = _protector.Protect(ms.ToArray());
+                return Convert.ToBase64String(protectedBytes);
+            }
+        }
+
+        public async Task<TokenData> ParseAsync(string token)
+        {
+            var isValid = true;
+            var unprotectedData = _protector.Unprotect(Convert.FromBase64String(token));
+            var ms = new MemoryStream(unprotectedData);
+            using (var reader = ms.CreateReader())
+            {
+                var creationTime = reader.ReadDateTimeOffset();
+                var operation = (AccountOperation)reader.ReadByte();
+                var expirationTime = creationTime + TokenLifespan;
+                if (expirationTime < DateTimeOffset.UtcNow)
+                {
+                    isValid &= false;
+                }
+
+                var userId = reader.ReadString();
+                var argument = reader.ReadString();
+                var stamp = reader.ReadString();
+                if (reader.PeekChar() != -1)
+                {
+                    isValid &= false;
+                }
+
+                var user = await Services.UserManager.FindByIdAsync(userId);
+                var expectedStamp = await Services.UserManager.GetSecurityStampAsync(user);
+                isValid &= stamp == expectedStamp;
+
+                return new TokenData(userId, operation, creationTime.UtcDateTime, argument, isValid);
             }
         }
     }

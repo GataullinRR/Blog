@@ -5,7 +5,6 @@ using System.Net;
 using System.Threading.Tasks;
 using AspNetCore.IServiceCollection.AddIUrlHelper;
 using Blog.Middlewares;
-using Blog.Misc;
 using Blog.Pages.Account;
 using Blog.Services;
 using DBModels;
@@ -47,8 +46,7 @@ namespace Blog
                         options.Tokens.ProviderMap.Add("CustomEmailConfirmation", new TokenProviderDescriptor(
                             typeof(ReportViewConfirmationTokenProvider)));
                     })
-                    .AddEntityFrameworkStores<BlogContext>()
-                    .AddTokenProvider<BasicTokenProvider>(nameof(BasicTokenProvider));
+                    .AddEntityFrameworkStores<BlogContext>();
             services.AddTransient<ReportViewConfirmationTokenProvider>();
 
             services.Configure<IdentityOptions>(options =>

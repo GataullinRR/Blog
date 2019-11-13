@@ -70,30 +70,27 @@ namespace Blog.Controllers
         }
 
         [HttpGet()]
-        public async Task<IActionResult> ConfirmAsync([Required]string userId, [Required]string token, [Required]AccountOperation operation, string arguments)
+        public async Task<IActionResult> ConfirmAsync([Required]string token)
         {
             if (ModelState.IsValid)
             {
-                var user = await Services.UserManager.FindByIdAsync(userId);
-                var isVerified = await Services.Confirmation.VerifyTokenAsync(user, operation, token);
-                if (isVerified)
-                {
-                    switch (operation)
-                    {
-                        case AccountOperation.EMAIL_CONFIRMATION:
-                            return await confirmEmail(user);
-                        case AccountOperation.PASSWORD_RESET:
-                            return await generateAndSendNewPasswordAsync(user);
-                        case AccountOperation.EMAIL_CHANGE:
-                            return await changeEMail(user, arguments);
-
-                        default:
-                            throw new NotSupportedException();
-                    }
-                }
-                else
+                var tokenData = await Services.Confirmation.ParseAsync(token);
+                if (!tokenData.IsValid)
                 {
                     return reportError("Bad confirmation token");
+                }
+                var user = await Services.UserManager.FindByIdAsync(tokenData.UserId);
+                switch (tokenData.Operation)
+                {
+                    case AccountOperation.EMAIL_CONFIRMATION:
+                        return await confirmEmail(user);
+                    case AccountOperation.PASSWORD_RESET:
+                        return await generateAndSendNewPasswordAsync(user);
+                    case AccountOperation.EMAIL_CHANGE:
+                        return await changeEMail(user, tokenData.Argument);
+
+                    default:
+                        throw new NotSupportedException();
                 }
             }
             else
