@@ -31,6 +31,7 @@ namespace Blog.Pages.Account
         // Compare does not seem to work with BindPropertyAttr
         [DataType(DataType.Password), BindProperty]
         public string ConfirmPassword { get; set; }
+        public string RegistrationRole { get; private set; }
 
         public RegisterModel(ServicesProvider services) : base(services)
         {
@@ -45,6 +46,7 @@ namespace Blog.Pages.Account
             }
             else
             {
+                RegistrationRole = Services.MutatorsManager.RegistrationRole;
                 return Page();
             }
         }

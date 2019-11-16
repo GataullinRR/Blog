@@ -23,27 +23,5 @@ namespace Blog.Services
                 values, 
                 Services.HttpContext.Request.Scheme);
         }
-
-        //static class ObjectExtensions
-        //{
-        //    public static IDictionary<string, object> AddProperty(object obj, string name, object value)
-        //    {
-        //        var dictionary = ToDictionary(obj);
-        //        dictionary.Add(name, value);
-        //        return dictionary;
-        //    }
-
-        //    // helper
-        //    public static IDictionary<string, object> ToDictionary(object obj)
-        //    {
-        //        IDictionary<string, object> result = new Dictionary<string, object>();
-        //        PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(obj);
-        //        foreach (PropertyDescriptor property in properties)
-        //        {
-        //            result.Add(property.Name, property.GetValue(obj));
-        //        }
-        //        return result;
-        //    }
-        //}
     }
 }

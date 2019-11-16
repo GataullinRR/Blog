@@ -14,11 +14,9 @@ namespace Blog.Controllers
 {
     public class ReportingController : ControllerBase
     {
-        readonly ReportViewConfirmationTokenProvider _reportViewConfirmationTokens;
-
         public ReportingController(ServicesProvider serviceProvider) : base(serviceProvider)
         {
-            _reportViewConfirmationTokens = Services.ServiceProvider.GetService<ReportViewConfirmationTokenProvider>();
+
         }
 
         public async Task<IActionResult> ReportProfileAsync([Required]int id)

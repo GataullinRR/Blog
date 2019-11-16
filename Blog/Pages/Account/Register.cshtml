@@ -5,28 +5,33 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-<h2>Register</h2>
+    <h2>Registration</h2>
+
+@if (Model.RegistrationRole != Roles.USER)
+{
+    <span>You will be registered as @Model.RegistrationRole</span>
+}
 
 <form method="post">
-    <div>
+    <div class="form-group">
         <label asp-for="Username"></label>
         <input asp-for="Username" />
         <span asp-validation-for="Username"></span>
     </div>
 
-    <div>
+    <div class="form-group">
         <label asp-for="EMail"></label>
         <input asp-for="EMail" />
         <span asp-validation-for="EMail"></span>
     </div>
 
-    <div>
+    <div class="form-group">
         <label asp-for="Password"></label>
         <input asp-for="Password" />
         <span asp-validation-for="Password"></span>
     </div>
 
-    <div>
+    <div class="form-group">
         <label asp-for="ConfirmPassword"></label>
         <input asp-for="ConfirmPassword" />
         <span asp-validation-for="ConfirmPassword"></span>
@@ -34,8 +39,8 @@
 
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    <div>
-        <input type="submit" value="Register" />
+    <div class="form-group">
+        <input class="btn btn-primary" type="submit" value="Register" />
     </div>
 </form>
 

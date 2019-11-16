@@ -3,12 +3,18 @@
     <h4 id="#@Model.Commentary.Id">
         <a asp-page="/Commentary" asp-route-id="@Model.Commentary.Id">#@Model.Commentary.Id</a>
         <a asp-page="/Account/Profile" asp-route-id="@Model.Commentary.Author.Id">@Model.Commentary.Author.UserName</a> - @Model.Commentary.CreationTime.ToString("hh:mm dd.MM.yyyy")
-        @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Delete", nameof(CommentaryController), nameof(CommentaryController.DeleteCommentaryAsync), "id", Model.Commentary.Id, await Model.Permissions.CanDeleteCommentaryAsync(Model.Commentary)))
+        @await Html.PartialAsync("_Anchor", AnchorModel.ToController(
+            "Delete", nameof(CommentaryController), nameof(CommentaryController.DeleteCommentaryAsync), 
+            "id", Model.Commentary.Id, 
+            await Model.Permissions.CanDeleteCommentaryAsync(Model.Commentary)))
         @if (await Model.Permissions.CanEditCommentaryAsync(Model.Commentary))
         {
             <button class="commentary-edit-button">Edit</button>
         }
-        @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportCommentaryAsync), "id", Model.Commentary.Id, await Model.Permissions.CanReportAsync(Model.Commentary)))
+        @await Html.PartialAsync("_Anchor", AnchorModel.ToController(
+           "Report", nameof(ReportingController), nameof(ReportingController.ReportCommentaryAsync), 
+           "id", Model.Commentary.Id, 
+           await Model.Permissions.CanReportAsync(Model.Commentary)))
     </h4>
 
 @await Html.PartialAsync("_ProfileImage", Model.Commentary.Author)

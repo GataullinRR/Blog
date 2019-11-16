@@ -1,0 +1,22 @@
+﻿@page
+@model Blog.Pages.BlogControlPanelModel
+@{
+    ViewData["Title"] = "Blog control";
+}
+
+<h2>Blog control</h2>
+
+
+<a asp-page-handler="ModeratorInvitationLink">Invite</a> new moderator
+<a asp-page-handler="OwnerInvitationLink">Invite</a> new owner
+
+<h3>Currently active moderators</h3>
+
+<ul>
+    @foreach (var moderator in Model.Moderators.Where(m => m.Status.State == ProfileState.ACTIVE))
+    {
+        <li>
+            <a asp-page="/Account/Profile" asp-route-id="@moderator.Id">@moderator.UserName</a>, <a asp-page="/ModeratorPanel">pannel</a>, last action was @((moderator.Actions.LastElement().ActionDate - DateTime.UtcNow).ToCurrentTimeRelativeString()) ago
+        </li>
+    }
+</ul>

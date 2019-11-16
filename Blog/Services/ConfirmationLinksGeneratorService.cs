@@ -20,6 +20,7 @@ using System.IO;
 using System.Globalization;
 using Microsoft.AspNetCore.DataProtection;
 using System.IO.Compression;
+using Blog.Services.Models;
 
 namespace Blog.Services
 {
@@ -33,22 +34,18 @@ namespace Blog.Services
         EMAIL_CHANGE = 200,
     }
     
-    public class TokenData
+    public class ConfirmationToken
     {
-        public TokenData(string userId, AccountOperation operation, DateTime creationTime, string argument, bool isValid)
-        {
-            UserId = userId ?? throw new ArgumentNullException(nameof(userId));
-            Operation = operation;
-            CreationTime = creationTime;
-            Argument = argument ?? throw new ArgumentNullException(nameof(argument));
-            IsValid = isValid;
-        }
-
-        public string UserId { get; }
+        public User Target { get; }
         public AccountOperation Operation { get; }
-        public DateTime CreationTime { get; }
         public string Argument { get; }
-        public bool IsValid { get; }
+
+        public ConfirmationToken(User target, AccountOperation operation, string argument)
+        {
+            Target = target ?? throw new ArgumentNullException(nameof(target));
+            Operation = operation;
+            Argument = argument ?? throw new ArgumentNullException(nameof(argument));
+        }
     }
 
     // Based on Levi's authentication sample
@@ -77,15 +74,17 @@ namespace Blog.Services
         }
     }
 
-    public class ConfirmationLinksGeneratorService : ServiceBase
+    public class ConfirmationLinksGeneratorService : TokensBaseService
     {
-        readonly static TimeSpan TokenLifespan = TimeSpan.FromMinutes(30);
+        protected override TimeSpan _tokenLifespan { get; } = TimeSpan.FromMinutes(30);
+        protected override ControllerAction _targetAction { get; } 
+            = new ControllerAction(nameof(AccountController), nameof(AccountController.ConfirmAsync));
 
-        readonly IDataProtector _protector;
-
-        public ConfirmationLinksGeneratorService(ServicesProvider services, IDataProtectionProvider protector) : base(services)
+        public ConfirmationLinksGeneratorService(ServicesProvider services, IDataProtectionProvider protector) : base(
+            services, 
+            protector.CreateProtector("ConfirmationTokens"))
         {
-            _protector = protector.CreateProtector("ConfirmationTokens");
+
         }
 
         public async Task<string> GetEMailChangeConfirmationLinkAsync(User user, string newEMail)
@@ -100,64 +99,31 @@ namespace Blog.Services
         {
             return await getConfirmationLinkAsync(user, AccountOperation.PASSWORD_RESET);
         }
-        async Task<string> getConfirmationLinkAsync(User user, AccountOperation accountOperation, string arguments = "")
+        async Task<string> getConfirmationLinkAsync(User target, AccountOperation accountOperation, string arguments = "")
         {
-            var token = await generateAsync();
-            return Services.LinkBuilder.GenerateLink(
-                nameof(AccountController),
-                nameof(AccountController.ConfirmAsync),
-                new { token = token });
-
-            async Task<string> generateAsync()
+            if (target == null)
             {
-                if (user == null)
-                {
-                    throw new ArgumentNullException("user");
-                }
-                var ms = new MemoryStream();
-                using (var writer = ms.CreateWriter())
-                {
-                    writer.Write(DateTimeOffset.UtcNow);
-                    writer.Write((byte)accountOperation);
-                    writer.Write(Convert.ToString(user.Id, CultureInfo.InvariantCulture));
-                    writer.Write(arguments ?? "");
-                    string stamp = await Services.UserManager.GetSecurityStampAsync(user);
-                    writer.Write(stamp);
-                }
-                var protectedBytes = _protector.Protect(ms.ToArray());
-                return Convert.ToBase64String(protectedBytes);
+                throw new ArgumentNullException("user");
             }
+
+            return await getTokenedLinkAsync(target, writer =>
+            {
+                writer.Write(accountOperation.To<byte>());
+                writer.Write(arguments ?? "");
+
+                return Task.CompletedTask;
+            });
         }
 
-        public async Task<TokenData> ParseAsync(string token)
+        public async Task<(ConfirmationToken Data, TokenValidity Validity)> ParseAsync(string token)
         {
-            var isValid = true;
-            var unprotectedData = _protector.Unprotect(Convert.FromBase64String(token));
-            var ms = new MemoryStream(unprotectedData);
-            using (var reader = ms.CreateReader())
+            return await parseAsync(token, async (reader, data) =>
             {
-                var creationTime = reader.ReadDateTimeOffset();
-                var operation = (AccountOperation)reader.ReadByte();
-                var expirationTime = creationTime + TokenLifespan;
-                if (expirationTime < DateTimeOffset.UtcNow)
-                {
-                    isValid &= false;
-                }
-
-                var userId = reader.ReadString();
+                var operation = EnumUtils.CastSafe<AccountOperation>(reader.ReadByte());
                 var argument = reader.ReadString();
-                var stamp = reader.ReadString();
-                if (reader.PeekChar() != -1)
-                {
-                    isValid &= false;
-                }
 
-                var user = await Services.UserManager.FindByIdAsync(userId);
-                var expectedStamp = await Services.UserManager.GetSecurityStampAsync(user);
-                isValid &= stamp == expectedStamp;
-
-                return new TokenData(userId, operation, creationTime.UtcDateTime, argument, isValid);
-            }
+                return await Task.FromResult<ConfirmationToken>(new ConfirmationToken(data.ProvderOrTarget, operation, argument));
+            });
         }
     }
 }

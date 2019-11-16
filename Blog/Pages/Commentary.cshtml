@@ -4,8 +4,6 @@
     ViewData["Title"] = "Commentary";
 }
 
-<h4>Commentary</h4>
-
 @{ await Html.RenderPartialAsync("_CommentaryContainer", Model.Commentary); }
 
 @if (await Model.Permissions.CanSeeServiceInformationAsync())

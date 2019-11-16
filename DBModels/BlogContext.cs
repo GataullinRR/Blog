@@ -20,6 +20,7 @@ namespace DBModels
         public DbSet<ViewStatistic> ViewStatistics { get; set; }
         public DbSet<UserAction> UsersActions { get; set; }
         public DbSet<ModeratorPannel> ModeratorsPannels { get; set; }
+        public DbSet<TokenMetadata> TokenMetadatas { get; set; }
 
         public BlogContext(DbContextOptions<BlogContext> options)
             : base(options)

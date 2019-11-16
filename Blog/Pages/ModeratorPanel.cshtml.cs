@@ -16,35 +16,41 @@ namespace Blog.Pages
     {
         public ModeratorPannel Panel { get; private set; }
         public IEnumerable<IEntityToCheck> Entities { get; private set; }
-        public User Moderator { get; private set; }
+        public User Owner { get; private set; }
         public IEnumerable<User> TargetUsers { get; private set; }
 
         [Required, BindProperty, Range(0, 100)]
         public int NumOfEntitiesToAssign { get; set; }
+        public bool ReadOnlyAccess { get; private set; }
+        [BindProperty]
+        public string TargetModeratorId { get; set; }
 
         public ModeratorPanelModel(ServicesProvider services) : base(services)
         {
         }
 
-        public async Task OnGet()
+        public async Task OnGet(string id)
         {
-            await Services.Permissions.ValidateAccessModeratorsPanelAsync();
+            TargetModeratorId = id;
+            var currentUser = await GetCurrentUserModelOrThrowAsync();
+            Owner = await FindUserByIdOrGetCurrentOrThrowAsync(id);
+            await Services.Permissions.ValidateAccessModeratorsPanelAsync(Owner);
+            ReadOnlyAccess = Owner != currentUser;
 
-            Moderator = await GetCurrentUserModelOrThrowAsync();
-            Panel = Moderator.ModeratorPanel;
+            Panel = Owner.ModeratorPanel;
             Entities = Panel.EntitiesToCheck.Where(e => !e.IsResolved).OrderBy(e => e.AddTime);
-            TargetUsers = Services.Db.Users.Where(u => u.ModeratorsInCharge.Contains(Moderator));
+            TargetUsers = Services.Db.Users.Where(u => u.ModeratorsInCharge.Contains(Owner));
         }
 
         public async Task<IActionResult> OnPostAssign()
         {
             if (ModelState.IsValid)
             {
-                await OnGet();
+                await OnGet(TargetModeratorId);
                 var entities = Entities.Where(e => !e.IsResolved).Take(NumOfEntitiesToAssign).ToArray();
                 foreach (var entity in entities)
                 {
-                    entity.AssignedModerator = Moderator;
+                    entity.AssignedModerator = Owner;
                     entity.AssignationTime = DateTime.UtcNow;
                 }
                 await Services.Db.SaveChangesAsync();
@@ -63,10 +69,10 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                await OnGet();
+                await OnGet(TargetModeratorId);
                 var entity = Panel.EntitiesToCheck.First(e => e.Id == id);
                 entity.ResolvingTime = DateTime.UtcNow;
-                Moderator.Actions.Add(new UserAction(ActionType.REPORT_CHECKED, entity));
+                Owner.Actions.Add(new UserAction(ActionType.REPORT_CHECKED, entity));
 
                 await Services.Db.SaveChangesAsync();
 

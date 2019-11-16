@@ -1,7 +1,9 @@
 ﻿@{
     var model = (Model as ILayoutModelProvider)?.LayoutModel ?? new LayoutModel();
+    var currentUser = await UserManager.GetUserAsync(User);
 }
 @inject Blog.Services.PermissionsService Permissions
+@inject Microsoft.AspNetCore.Identity.UserManager<User> UserManager
 
 <!DOCTYPE html>
 
@@ -27,9 +29,13 @@
         <a asp-page="/Account/Login">Login</a>
         <a asp-page="/Account/Register">Register</a>
     }
-    @if (await Permissions.CanAccessModeratorsPanelAsync())
+    @if (await Permissions.CanAccessModeratorsPanelAsync(currentUser))
     {
         <a asp-page="/ModeratorPanel">Moderator panel</a>
+    }
+    @if (await Permissions.CanAccessBlogControlPanelAsync())
+    {
+        <a asp-page="/BlogControlPanel">Control panel</a>
     }
     <hr />
 

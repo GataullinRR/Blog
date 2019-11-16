@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -304,19 +305,20 @@ namespace Blog.Services
             }
             else
             {
+                Debug.Print($"{reportObject.As<Commentary>()?.Reports?.Count()}");
                 return !reportObject.Reports.Any(r => r.Reporter.Id == currentUser.Id)
                     && !(reportObject.As<Commentary>()?.IsDeleted).NullToFalse();
             }
         }
 
-        public async Task ValidateAccessModeratorsPanelAsync()
+        public async Task ValidateAccessModeratorsPanelAsync(User target)
         {
-            if (!await CanAccessModeratorsPanelAsync())
+            if (!await CanAccessModeratorsPanelAsync(target))
             {
                 throw buildException();
             }
         }
-        public async Task<bool> CanAccessModeratorsPanelAsync()
+        public async Task<bool> CanAccessModeratorsPanelAsync(User target)
         {
             var currentUser = await getCurrentUserOrNullAsync();
             if (currentUser == null)
@@ -325,7 +327,31 @@ namespace Blog.Services
             }
             else
             {
-                return await Services.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.MODERATOR);
+                return (await Services.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.OWNER)) 
+                        && currentUser != target)
+                    || (await Services.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.MODERATOR)
+                        && currentUser == target);
+            }
+        }
+
+        public async Task ValidateAccessBlogControlPanelAsync()
+        {
+            if (!await CanAccessBlogControlPanelAsync())
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanAccessBlogControlPanelAsync()
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null)
+            {
+                return false;
+            }
+            else
+            {
+                return await Services.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.OWNER)
+                    && currentUser.Status.State == ProfileState.ACTIVE;
             }
         }
 

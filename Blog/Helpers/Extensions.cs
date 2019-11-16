@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Utilities.Extensions;
 using Utilities.Types;
@@ -122,6 +123,15 @@ namespace Blog
         public static IDisposable SaveChangesMode(this BlogContext db)
         {
             return new DisposingAction(() => db.SaveChanges());
+        }
+
+        public static string GetStringOrDefault(this ISession session, string key, string defaultValue = null)
+        {
+            var has = session.TryGetValue(key, out byte[] ddd);
+         
+            return has
+                ? Encoding.UTF8.GetString(ddd)
+                : defaultValue;
         }
     }
 }

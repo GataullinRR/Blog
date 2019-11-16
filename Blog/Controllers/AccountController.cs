@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Blog.Models;
 using Blog.Pages.Account;
@@ -68,30 +69,77 @@ namespace Blog.Controllers
                 throw new Exception();
             }
         }
+        
+        [HttpGet()]
+        public async Task<IActionResult> ApplyActivationLinkAsync([Required]string token)
+        {
+            if (ModelState.IsValid)
+            {
+                var tokenData = await Services.ActivationLinks.ParseAsync(token);
+                if (tokenData.Validity != TokenValidity.VALID)
+                {
+                    return reportError(tokenData.Validity.GetEnumValueDescription());
+                }
+
+                var role = "";
+                switch (tokenData.Data.Action)
+                {
+                    case ActivationLinkAction.REGISTER_AS_OWNER:
+                        role = Roles.OWNER;
+                        break;
+                    case ActivationLinkAction.REGISTER_AS_MODERATOR:
+                        role = Roles.MODERATOR;
+                        break;
+
+                    default:
+                        throw new NotSupportedException();
+                }
+
+                if (User.Identity.IsAuthenticated)
+                {
+                    await Logout();
+                }
+                Services.MutatorsManager.RegistrationRole = role;
+                await Services.ActivationLinks.MarkAsUsedOrExpiredAsync(token);
+                return RedirectToPage("/Account/Registration");
+            }
+            else
+            {
+                return reportError("Bad arguments");
+            }
+        }
 
         [HttpGet()]
         public async Task<IActionResult> ConfirmAsync([Required]string token)
         {
             if (ModelState.IsValid)
             {
-                var tokenData = await Services.Confirmation.ParseAsync(token);
-                if (!tokenData.IsValid)
+                var tokenData = await Services.ConfirmationLinks.ParseAsync(token);
+                if (tokenData.Validity != TokenValidity.VALID)
                 {
-                    return reportError("Bad confirmation token");
+                    return reportError(tokenData.Validity.GetEnumValueDescription());
                 }
-                var user = await Services.UserManager.FindByIdAsync(tokenData.UserId);
-                switch (tokenData.Operation)
+
+                IActionResult view = null;
+                switch (tokenData.Data.Operation)
                 {
                     case AccountOperation.EMAIL_CONFIRMATION:
-                        return await confirmEmail(user);
+                        view = await confirmEmail(tokenData.Data.Target);
+                        break;
                     case AccountOperation.PASSWORD_RESET:
-                        return await generateAndSendNewPasswordAsync(user);
+                        view = await generateAndSendNewPasswordAsync(tokenData.Data.Target);
+                        break;
                     case AccountOperation.EMAIL_CHANGE:
-                        return await changeEMail(user, tokenData.Argument);
+                        view = await changeEMail(tokenData.Data.Target, tokenData.Data.Argument);
+                        break;
 
                     default:
                         throw new NotSupportedException();
                 }
+
+                await Services.ConfirmationLinks.MarkAsUsedOrExpiredAsync(token);
+                
+                return view;
             }
             else
             {

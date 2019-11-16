@@ -35,7 +35,7 @@ namespace Blog.Pages.Account
             }
             else
             {
-                var confirmationUrl = await Services.Confirmation.GetEMailConfirmationLinkAsync(UserModel);
+                var confirmationUrl = await Services.ConfirmationLinks.GetEMailConfirmationLinkAsync(UserModel);
                 var message = $@"Hi {UserModel.UserName}!
 
 Please follow this link to complete the registration: {confirmationUrl}";

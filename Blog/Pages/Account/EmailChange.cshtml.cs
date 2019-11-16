@@ -55,7 +55,7 @@ namespace Blog.Pages.Account
                     return Page();
                 }
 
-                var confirmationLink = await Services.Confirmation.GetEMailChangeConfirmationLinkAsync(user, NewEMail);
+                var confirmationLink = await Services.ConfirmationLinks.GetEMailChangeConfirmationLinkAsync(user, NewEMail);
                 var isSent = await Services.EMail.TrySendMessageAsync(user, "E-Mail change", "Administration", $@"You are trying to change profile e-mail.
 Current e-mail: {user.Email}
 New e-mail: {NewEMail}

@@ -10,7 +10,7 @@
 
 @foreach (var user in Model.Panel.Owners)
 {
-    <a asp-page="/Account/Profile" asp-all-route-id="@user.Id">@user.UserName</a>
+    <a asp-page="/Account/Profile" asp-route-id="@user.Id">@user.UserName</a>
 }
 
 <h4>Users you are in charge of</h4>
@@ -22,12 +22,12 @@
 
 @foreach (var user in Model.TargetUsers)
 {
-    <a asp-page="/Account/Profile" asp-all-route-id="@user.Id">@user.UserName</a>
+    <a asp-page="/Account/Profile" asp-route-id="@user.Id">@user.UserName</a>
 }
 
 @{
-    var assignedEntities = Model.Entities.Where(e => e.AssignedModerator == Model.Moderator);
-    var unassignedEntities = Model.Entities.Where(e => e.AssignedModerator != Model.Moderator);
+    var assignedEntities = Model.Entities.Where(e => e.AssignedModerator == Model.Owner);
+    var unassignedEntities = Model.Entities.Where(e => e.AssignedModerator != Model.Owner);
 }
 
 <h4>Entities you are assigned for</h4>
@@ -46,7 +46,7 @@
     {
         <li>
             @{ await Html.RenderPartialAsync("_EntityToCheck", entity); }
-            | <a asp-page-handler="Check" asp-route-id="@entity.Id">mark as resolved</a>
+            <span exclude-if="@Model.ReadOnlyAccess"> | <a asp-page-handler="Check" asp-route-id="@entity.Id">mark as resolved</a></span>
         </li>
     }
 </ul>
@@ -55,7 +55,9 @@
 
 @if (unassignedEntities.Any())
 {
-    <form method="post" asp-page-handler="Assign">
+    <form exclude-if="@Model.ReadOnlyAccess" method="post" asp-page-handler="Assign">
+        <input type="hidden" asp-for="@Model.TargetModeratorId" />
+
         <div class="form-group">
             <label>Number of entities to assign</label>
             <input asp-for="NumOfEntitiesToAssign" type="number"/>

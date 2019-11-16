@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using AspNetCore.IServiceCollection.AddIUrlHelper;
 using Blog.Middlewares;
+using Blog.Misc;
 using Blog.Pages.Account;
 using Blog.Services;
 using DBModels;
@@ -43,11 +44,9 @@ namespace Blog
             services.AddIdentity<User, IdentityRole>(options =>
                     {
                         options.User.RequireUniqueEmail = false;
-                        options.Tokens.ProviderMap.Add("CustomEmailConfirmation", new TokenProviderDescriptor(
-                            typeof(ReportViewConfirmationTokenProvider)));
                     })
-                    .AddEntityFrameworkStores<BlogContext>();
-            services.AddTransient<ReportViewConfirmationTokenProvider>();
+                    .AddEntityFrameworkStores<BlogContext>()
+                    .AddTokenProvider<BasicTokenProvider>(nameof(BasicTokenProvider));
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -84,6 +83,8 @@ namespace Blog
             services.AddScoped<DbEntitiesUpdateService>();
             services.AddScoped<LinkBuilderService>();
             services.AddScoped<ServicesProvider>();
+            services.AddScoped<ActivationLinkGeneratorService>();
+            services.AddScoped<SessionMutatorsManagerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
