@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace ASPCoreUtilities
 {
+    [HtmlTargetElement("*")]
     public class IfTagHelper : TagHelper
     {
         public override int Order => -1000;

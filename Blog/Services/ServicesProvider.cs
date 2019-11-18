@@ -28,6 +28,8 @@ namespace Blog.Services
         readonly Lazy<LinkBuilderService> _linkBuilder;
         readonly Lazy<IDataProtectionProvider> _protectionProvider;
         readonly Lazy<SessionMutatorsManagerService> _mutatorsManager;
+        readonly Lazy<UtilitiesService> _utilities;
+        readonly Lazy<BanningService> _banning;
 
         public IServiceProvider ServiceProvider { get; }
         public BlogContext Db => _db.Value;
@@ -46,6 +48,8 @@ namespace Blog.Services
         public LinkBuilderService LinkBuilder => _linkBuilder.Value;
         public IDataProtectionProvider ProtectionProvider => _protectionProvider.Value;
         public SessionMutatorsManagerService MutatorsManager => _mutatorsManager.Value;
+        public UtilitiesService Utilities => _utilities.Value;
+        public BanningService Banning => _banning.Value;
 
         public ServicesProvider(IServiceProvider serviceProvider)
         {
@@ -67,6 +71,8 @@ namespace Blog.Services
             _linkBuilder = ServiceProvider.GetLazyService<LinkBuilderService>();
             _protectionProvider = ServiceProvider.GetLazyService<IDataProtectionProvider>();
             _mutatorsManager = ServiceProvider.GetLazyService<SessionMutatorsManagerService>();
+            _utilities = ServiceProvider.GetLazyService<UtilitiesService>();
+            _banning = ServiceProvider.GetLazyService<BanningService>();
         }
     }
 }

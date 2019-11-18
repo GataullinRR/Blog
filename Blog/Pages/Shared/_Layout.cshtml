@@ -11,13 +11,19 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="~/css/site.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+    <link rel="stylesheet" href="~/css/site.css" />
 
     <title>@ViewData["Title"]</title>
 </head>
 
 <body>
+    <div id="busyModal" class="modal">
+        <div class="modal-content">
+            <p id="busyModalTextContainer" align="center"></p>
+        </div>
+    </div>
+
     <a asp-page="/Index">Home</a>
     @if (User.Identity.IsAuthenticated)
     {
@@ -39,14 +45,12 @@
     }
     <hr />
 
-    @foreach (var message in model.Messages)
-    {
-        <div>
-            <span>@message.Text</span>
-            <button onclick="removeParent(this)">Close</button>
-        </div>
-    }
-
+    <div id="messages">
+        @foreach (var message in model.Messages)
+        {
+            await Html.RenderPartialAsync("_MessageTemplate", message);
+        }
+    </div>
     @RenderBody()
 
     <hr />
@@ -60,11 +64,76 @@
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js" type="text/javascript"></script>
 
     <script>
+        $(document).ready(function () {
+            function applyClasses() {
+                $('a').click(function (e) {
+                    if ($(this).hasClass("no-redirect")) {
+                        e.preventDefault();
+                    }
+                    else {
+
+                    }
+                });
+            }
+
+            var observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (mutation) {
+                    if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                        applyClasses();
+                    }
+                });
+            });
+
+            var config = {
+                attributes: true,
+                childList: true,
+                characterData: true,
+                subtree: true, // Important
+            };
+
+            observer.observe(document.body, config);
+            applyClasses();
+        });
+        
+        function showBusy(operationName) {
+            var modal = document.getElementById("busyModal");
+            var modalTextContainer = document.getElementById("busyModalTextContainer");
+            modalTextContainer.innerHTML = operationName;
+            modal.style.display = "block";
+
+            return function () {
+                modal.style.display = "none";
+            }
+        }
+
+        function renderMessage(messageText, jsActions) {
+            var route = "/Messages/GetMessageView?body=" + messageText;
+            if (jsActions != undefined) {
+                route += "&jsActions=" + jsActions;
+            }
+            makeRequest(route, "get", function (response) {
+                var container = document.createElement("div");
+                container.innerHTML = response;
+                document.getElementById("messages").appendChild(container);
+            });
+        }
+
         function removeParent(element) {
             var container = element.parentElement;
             container.parentElement.removeChild(container);
 
             return true;
+        }
+
+        function makeRequest(route, requestType, onLoaded) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    onLoaded(this.responseText);
+                }
+            };
+            xhr.open(requestType, route);
+            xhr.send();
         }
     </script>
 

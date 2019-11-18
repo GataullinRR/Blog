@@ -27,13 +27,14 @@ namespace Blog.Pages
 
         public ModeratorPanelModel(ServicesProvider services) : base(services)
         {
+
         }
 
         public async Task OnGet(string id)
         {
             TargetModeratorId = id;
-            var currentUser = await GetCurrentUserModelOrThrowAsync();
-            Owner = await FindUserByIdOrGetCurrentOrThrowAsync(id);
+            var currentUser = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
+            Owner = await Services.Utilities.FindUserByIdOrGetCurrentOrThrowAsync(id);
             await Services.Permissions.ValidateAccessModeratorsPanelAsync(Owner);
             ReadOnlyAccess = Owner != currentUser;
 

@@ -34,13 +34,12 @@
 
 @if (!assignedEntities.Any())
 {
-    <div>There are no entities assigned :(</div>
+<div>None at the moment :(</div>
     if (unassignedEntities.Any())
     {
         <div>You can <a href="#UnassignedEntities">assign</a> new ones</div>
     }
 }
-
 <ul>
     @foreach (var entity in assignedEntities)
     {
@@ -51,11 +50,11 @@
     }
 </ul>
 
-<h4 id="UnassignedEntities">Unassigned entities</h4>
+    <h4 id="UnassignedEntities">Unassigned entities</h4>
 
 @if (unassignedEntities.Any())
 {
-    <form exclude-if="@Model.ReadOnlyAccess" method="post" asp-page-handler="Assign">
+    <form if exclude-if="@Model.ReadOnlyAccess" method="post" asp-page-handler="Assign">
         <input type="hidden" asp-for="@Model.TargetModeratorId" />
 
         <div class="form-group">

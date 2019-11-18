@@ -71,7 +71,8 @@ namespace Blog.Pages.Account
                     var result = await Services.UserManager.CreateAsync(newUser, Password);
                     if (result.Succeeded)
                     {
-                        await Services.UserManager.AddToRoleAsync(newUser, Roles.USER);
+                        await Services.UserManager.AddToRoleAsync(newUser, Services.MutatorsManager.RegistrationRole);
+                        Services.MutatorsManager.Reset(nameof(Services.MutatorsManager.RegistrationRole));
                         await Services.SignInManager.SignInAsync(newUser, true);
                         await Services.Db.SaveChangesAsync();
 

@@ -25,7 +25,7 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                CurrentUserModel = await GetCurrentUserModelOrThrowAsync();
+                CurrentUserModel = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
                 Commentary = await Services.Db.Commentaries.FirstOrDefaultByIdAsync(id);
 
                 return Page();

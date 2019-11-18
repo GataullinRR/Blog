@@ -50,28 +50,5 @@ namespace Blog.Models
 
             base.OnPageHandlerExecuted(context);
         }
-
-        public async Task<User> GetCurrentUserModelOrThrowAsync()
-        {
-            var user = await Services.UserManager.GetUserAsync(User);
-            if (user == null)
-            {
-                throw new UnauthorizedAccessException();
-            }
-            else
-            {
-                return user;
-            }
-        }
-        public async Task<User> FindUserByIdOrGetCurrentOrThrowAsync(string userId)
-        {
-            var user = await Services.UserManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return await GetCurrentUserModelOrThrowAsync();
-            }
-
-            return user;
-        }
     }
 }

@@ -41,15 +41,7 @@ namespace Blog.Services
 
         }
 
-        public async Task<string> GenerateRegisterAsModeratorLink(User provider)
-        {
-            return await generateLink(provider, ActivationLinkAction.REGISTER_AS_MODERATOR);
-        }
-        public async Task<string> GenerateRegisterAsOwnerLink(User provider)
-        {
-            return await generateLink(provider, ActivationLinkAction.REGISTER_AS_OWNER);
-        }
-        async Task<string> generateLink(User provider, ActivationLinkAction activationLinkAction)
+        public async Task<string> GenerateLink(User provider, ActivationLinkAction activationLinkAction)
         {
             return await getTokenedLinkAsync(provider, writer =>
             {

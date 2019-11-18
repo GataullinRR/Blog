@@ -24,23 +24,11 @@
             })
         });
 
-
         function loadView(route, onLoaded) {
             makeRequest(route, "get", function (response) {
                 container.innerHTML = response;
                 onLoaded();
             });
-        }
-
-        function makeRequest(route, requestType, onLoaded) {
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    onLoaded(this.responseText);
-                }
-            };
-            xhr.open(requestType, route);
-            xhr.send();
         }
 
         function doPost(form) {

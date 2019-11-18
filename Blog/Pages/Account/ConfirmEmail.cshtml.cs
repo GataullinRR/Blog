@@ -27,7 +27,7 @@ namespace Blog.Pages.Account
 
         public async Task<IActionResult> OnGetAsync()
         {
-            UserModel = await GetCurrentUserModelOrThrowAsync();
+            UserModel = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
 
             if (UserModel.EmailConfirmed)
             {

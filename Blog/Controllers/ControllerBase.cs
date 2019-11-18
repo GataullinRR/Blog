@@ -37,18 +37,5 @@ namespace Blog.Controllers
 
             base.OnActionExecuting(context);
         }
-
-        public async Task<User> GetCurrentUserModelOrThrowAsync()
-        {
-            var user = await Services.UserManager.GetUserAsync(User);
-            if (user == null)
-            {
-                throw new AuthenticationException();
-            }
-            else
-            {
-                return user;
-            }
-        }
     }
 }

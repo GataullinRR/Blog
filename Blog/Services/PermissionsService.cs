@@ -21,6 +21,7 @@ namespace Blog.Services
 
         public PermissionsService(ServicesProvider services) : base(services)
         {
+
         }
 
         public async Task ValidateEditPostAsync(Post post)
@@ -33,14 +34,13 @@ namespace Blog.Services
         public async Task<bool> CanEditPostAsync(Post post)
         {
             var user = await getCurrentUserOrNullAsync();
-            if (user == null)
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
             {
                 return false;
             }
             else
             {
                 return (user.UserName == post.Author.UserName
-                            && user.Status.State == ProfileState.ACTIVE
                             && post.CreationTime - DateTime.Now < TimeSpan.FromDays(3)
                             && post.Edits.Where(e => e.EditAuthor == post.Author).Count() < MAX_POST_EDITS_FOR_STANDARD_USER)
                        || await Services.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
@@ -50,7 +50,7 @@ namespace Blog.Services
         public async Task<bool> CanEditPostTitleAsync(Post post)
         {
             var user = await getCurrentUserOrNullAsync();
-            if (user == null)
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
             {
                 return false;
             }
@@ -92,7 +92,7 @@ namespace Blog.Services
         public async Task<bool> CanEditCommentaryAsync(Commentary comment)
         {
             var user = await getCurrentUserOrNullAsync();
-            if (user == null)
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
             {
                 return false;
             }
@@ -119,7 +119,7 @@ namespace Blog.Services
         public async Task<bool> CanDeleteCommentaryAsync(Commentary comment)
         {
             var user = await getCurrentUserOrNullAsync();
-            if (user == null)
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
             {
                 return false;
             }
@@ -199,7 +199,7 @@ namespace Blog.Services
         public async Task<bool> CanBanUserAsync(User targetUser)
         {
             var currentUser = await getCurrentUserOrNullAsync();
-            if (currentUser == null)
+            if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
             {
                 return false;
             }
@@ -221,7 +221,7 @@ namespace Blog.Services
         public async Task<bool> CanUnbanUserAsync(User targetUser)
         {
             var currentUser = await getCurrentUserOrNullAsync();
-            if (currentUser == null)
+            if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
             {
                 return false;
             }
@@ -248,7 +248,7 @@ namespace Blog.Services
         public async Task<bool> CanSeePrivateInformationAsync(User targetUser)
         {
             var currentUser = await getCurrentUserOrNullAsync();
-            if (currentUser == null)
+            if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
             {
                 return false;
             }
@@ -263,7 +263,7 @@ namespace Blog.Services
         public async Task<bool> CanSeeServiceInformationAsync()
         {
             var currentUser = await getCurrentUserOrNullAsync();
-            if (currentUser == null)
+            if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
             {
                 return false;
             }
@@ -299,7 +299,7 @@ namespace Blog.Services
         public async Task<bool> CanReportAsync(IReportObject reportObject)
         {
             var currentUser = await getCurrentUserOrNullAsync();
-            if (currentUser == null)
+            if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
             {
                 return false;
             }
@@ -321,7 +321,7 @@ namespace Blog.Services
         public async Task<bool> CanAccessModeratorsPanelAsync(User target)
         {
             var currentUser = await getCurrentUserOrNullAsync();
-            if (currentUser == null)
+            if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
             {
                 return false;
             }
@@ -344,15 +344,26 @@ namespace Blog.Services
         public async Task<bool> CanAccessBlogControlPanelAsync()
         {
             var currentUser = await getCurrentUserOrNullAsync();
-            if (currentUser == null)
+            if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
             {
                 return false;
             }
             else
             {
-                return await Services.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.OWNER)
-                    && currentUser.Status.State == ProfileState.ACTIVE;
+                return await Services.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.OWNER);
             }
+        }
+
+        public async Task ValidateGenerateActivationLinkAsync(ActivationLinkAction activationLinkAction)
+        {
+            if (!await CanGenerateActivationLinkAsync(activationLinkAction))
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanGenerateActivationLinkAsync(ActivationLinkAction activationLinkAction)
+        {
+            return await CanAccessBlogControlPanelAsync();
         }
 
         async Task<User> getCurrentUserOrNullAsync()

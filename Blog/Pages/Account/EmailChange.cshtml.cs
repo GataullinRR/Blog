@@ -25,7 +25,7 @@ namespace Blog.Pages.Account
 
         public async Task OnGet()
         {
-            var user = await GetCurrentUserModelOrThrowAsync();
+            var user = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
             await Services.Permissions.ValidateChangeEmailAsync(user);
         }
 
@@ -35,7 +35,7 @@ namespace Blog.Pages.Account
             {
                 autoSaveDbChanges = true;
 
-                var user = await GetCurrentUserModelOrThrowAsync();
+                var user = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
                 await Services.Permissions.ValidateChangeEmailAsync(user);
 
                 user.Actions.Add(new DBModels.UserAction(DBModels.ActionType.EMAIL_CHANGING, user));

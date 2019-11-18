@@ -85,6 +85,8 @@ namespace Blog
             services.AddScoped<ServicesProvider>();
             services.AddScoped<ActivationLinkGeneratorService>();
             services.AddScoped<SessionMutatorsManagerService>();
+            services.AddScoped<BanningService>();
+            services.AddScoped<UtilitiesService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

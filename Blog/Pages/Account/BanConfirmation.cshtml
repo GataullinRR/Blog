@@ -9,12 +9,12 @@
 <form method="post" asp-page-handler="Ban">
     <input type="hidden" asp-for="UserId"/>
 
-    <div>
+    <div class="form-group">
         <span>Duration: </span>
         <input asp-for="BannedTill" />
         <span asp-validation-for="BannedTill"></span>
     </div>
-    <div>
+    <div class="form-group">
         <span>Reason: </span>
         <input asp-for="Reason" />
         <span asp-validation-for="Reason"></span>
@@ -22,7 +22,7 @@
 
     <div asp-validation-summary="ModelOnly"></div>
 
-    <div>
-        <button type="submit">Apply</button>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Apply</button>
     </div>
 </form>

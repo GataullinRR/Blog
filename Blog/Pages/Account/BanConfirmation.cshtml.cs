@@ -23,9 +23,10 @@ namespace Blog.Pages.Account
 
         public BanConfirmationModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
+
         }
 
-        public async Task OnGetAsync(string id)
+        public async Task OnGetAsync([Required]string id)
         {
             UserId = id;
             var targetUser = await Services.UserManager.FindByIdAsync(id);
@@ -46,18 +47,8 @@ namespace Blog.Pages.Account
                 {
                     var targetUser = await Services.UserManager.FindByIdAsync(UserId);
                     await Services.Permissions.ValidateBanUserAsync(targetUser);
-
-                    targetUser.Status.State = DBModels.ProfileState.BANNED;
-                    targetUser.Status.BannedTill = BannedTill.ToUniversalTime();
-                    targetUser.Status.StateReason = Reason;
-                    targetUser.Actions.Add(new UserAction(ActionType.BAN, targetUser.Id));
-                    await Services.Db.SaveChangesAsync();
-
-                    await Services.EMail.TrySendMessageAsync(targetUser, "Administration", "Profile has been banned", $@"Profile name: {targetUser.UserName}
-Reason: {Reason}
-Ban will expire at {BannedTill.ToString("dd.MM.yyyy")}");
-
-                    LayoutModel.AddMessage($"User \"{targetUser.UserName}\" has been banned till {BannedTill.ToString("dd.MM.yyyy")}");
+                    await Services.Banning.BanAsync(targetUser, BannedTill, Reason);
+                    LayoutModel.AddMessage($"User \"{targetUser.UserName}\" has been banned");
 
                     return RedirectToPage("/Index");
                 }

@@ -40,7 +40,7 @@ namespace Blog.Pages
                 }
                 else
                 {
-                    var author = await GetCurrentUserModelOrThrowAsync();
+                    var author = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
                     var post = new Post(DateTime.UtcNow, author, Title, Body);
                     Services.Db.Posts.Add(post);
                     await Services.Db.SaveChangesAsync();

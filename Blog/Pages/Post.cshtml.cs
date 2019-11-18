@@ -53,7 +53,7 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                var currentUser = await GetCurrentUserModelOrThrowAsync();
+                var currentUser = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
                 if (commentBody != null)
                 {
                     var comment = new Commentary(

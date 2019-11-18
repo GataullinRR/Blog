@@ -1,0 +1,10 @@
+﻿@model MessageModel
+
+    <div>
+        <span>@Model.Text</span>
+        @foreach (var jsAction in Model.JSActions)
+        {
+            <a href="" class="no-redirect" onclick="@jsAction.FunctionName">@jsAction.Name</a>
+        }
+        <a href="" class="no-redirect" onclick="removeParent(this)">Close</a>
+    </div>

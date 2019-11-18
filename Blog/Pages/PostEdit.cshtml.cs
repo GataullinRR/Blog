@@ -49,7 +49,7 @@ namespace Blog.Pages
 
                 await Services.Permissions.ValidateEditPostAsync(editingPost);
 
-                var author = await GetCurrentUserModelOrThrowAsync();
+                var author = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
                 editingPost.Body = Body;
                 if (await Services.Permissions.CanEditPostTitleAsync(editingPost))
                 {

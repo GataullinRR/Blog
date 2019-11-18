@@ -82,7 +82,7 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await GetCurrentUserModelOrThrowAsync();
+                var user = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
                 var commentary = await Services.Db.Commentaries.FirstOrDefaultByIdAsync(id);
                 await Services.Permissions.ValidateDeleteCommentaryAsync(commentary);
                 

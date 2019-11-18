@@ -25,7 +25,7 @@ namespace Blog.Controllers
         [HttpGet()]
         public async Task CheckIfAuthentificated()
         {
-            await GetCurrentUserModelOrThrowAsync();
+            await Services.Utilities.GetCurrentUserModelOrThrowAsync();
         }
 
         [HttpGet()]
@@ -69,7 +69,22 @@ namespace Blog.Controllers
                 throw new Exception();
             }
         }
-        
+
+        [HttpGet()]
+        public async Task BanForeverAsync([Required]string userId, string reason)
+        {
+            if (ModelState.IsValid)
+            {
+                var targetUser = await Services.UserManager.FindByIdAsync(userId);
+                await Services.Permissions.ValidateBanUserAsync(targetUser);
+                await Services.Banning.BanForeverAsync(targetUser, reason);
+            }
+            else
+            {
+                throw new Exception();
+            }
+        }
+
         [HttpGet()]
         public async Task<IActionResult> ApplyActivationLinkAsync([Required]string token)
         {
@@ -101,7 +116,7 @@ namespace Blog.Controllers
                 }
                 Services.MutatorsManager.RegistrationRole = role;
                 await Services.ActivationLinks.MarkAsUsedOrExpiredAsync(token);
-                return RedirectToPage("/Account/Registration");
+                return RedirectToPage("/Account/Register");
             }
             else
             {
@@ -152,7 +167,7 @@ namespace Blog.Controllers
             {
                 return reportError("Bad arguments");
             }
-            else if (await GetCurrentUserModelOrThrowAsync() != user)
+            else if (await Services.Utilities.GetCurrentUserModelOrThrowAsync() != user)
             {
                 return reportError("You should log in in order this link to work");
             }
@@ -174,7 +189,7 @@ namespace Blog.Controllers
             {
                 return RedirectToPage("/Index");
             }
-            else if (await GetCurrentUserModelOrThrowAsync() != user)
+            else if (await Services.Utilities.GetCurrentUserModelOrThrowAsync() != user)
             {
                 return reportError("You should log in in order this link to work");
             }

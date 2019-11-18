@@ -59,7 +59,7 @@ namespace Blog.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var currentUser = await GetCurrentUserModelOrThrowAsync();
+                var currentUser = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
                 var editingUser = await getEditingUserIfAuthorizedAsync(EditUserId);
                 if (ProfileImage != null)
                 {
