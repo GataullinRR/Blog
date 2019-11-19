@@ -33,14 +33,14 @@ namespace Blog.Pages
         public async Task OnGet(string id)
         {
             TargetModeratorId = id;
-            var currentUser = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
-            Owner = await Services.Utilities.FindUserByIdOrGetCurrentOrThrowAsync(id);
-            await Services.Permissions.ValidateAccessModeratorsPanelAsync(Owner);
+            var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+            Owner = await S.Utilities.FindUserByIdOrGetCurrentOrThrowAsync(id);
+            await S.Permissions.ValidateAccessModeratorsPanelAsync(Owner);
             ReadOnlyAccess = Owner != currentUser;
 
             Panel = Owner.ModeratorPanel;
             Entities = Panel.EntitiesToCheck.Where(e => !e.IsResolved).OrderBy(e => e.AddTime);
-            TargetUsers = Services.Db.Users.Where(u => u.ModeratorsInCharge.Contains(Owner));
+            TargetUsers = S.Db.Users.Where(u => u.ModeratorsInCharge.Contains(Owner));
         }
 
         public async Task<IActionResult> OnPostAssign()
@@ -54,7 +54,7 @@ namespace Blog.Pages
                     entity.AssignedModerator = Owner;
                     entity.AssignationTime = DateTime.UtcNow;
                 }
-                await Services.Db.SaveChangesAsync();
+                await S.Db.SaveChangesAsync();
 
                 LayoutModel.AddMessage($"{entities.Length} new entities were assigned to you");
 
@@ -75,7 +75,7 @@ namespace Blog.Pages
                 entity.ResolvingTime = DateTime.UtcNow;
                 Owner.Actions.Add(new UserAction(ActionType.REPORT_CHECKED, entity));
 
-                await Services.Db.SaveChangesAsync();
+                await S.Db.SaveChangesAsync();
 
                 return Page();
             }

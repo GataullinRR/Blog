@@ -1,0 +1,14 @@
+﻿@model User
+@inject Blog.Services.PermissionsService Permissions
+
+@{
+    var lastActionSpan = Model.Actions.IsEmpty()
+        ? "∞"
+        : (DateTime.UtcNow - Model.Actions.LastElement().ActionDate).ToCurrentTimeRelativeString();
+}
+
+<a asp-page="/Account/Profile" asp-route-id="@Model.Id">@Model.UserName</a>, 
+<a asp-page="/ModeratorPanel" asp-route-id="@Model.Id">pannel</a>, 
+<span include-if="await Permissions.CanBanUserAsync(Model)"><a asp-page="/Account/BanConfirmation" asp-route-id="@Model.Id">ban</a>, </span>
+<span include-if="await Permissions.CanUnbanUserAsync(Model)"><a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@Model.Id">unban</a>, </span>
+last action was @lastActionSpan

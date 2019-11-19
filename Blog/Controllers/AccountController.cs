@@ -51,18 +51,11 @@ namespace Blog.Controllers
             {
                 var targetUser = await Services.UserManager.FindByIdAsync(userId);
                 await Services.Permissions.ValidateUnbanUserAsync(targetUser);
-
-                targetUser.Status.State = targetUser.EmailConfirmed
-                    ? ProfileState.ACTIVE
-                    : ProfileState.RESTRICTED;
-                targetUser.Status.StateReason = null;
-                targetUser.Status.BannedTill = null;
-                targetUser.Actions.Add(new UserAction(ActionType.UNBAN, targetUser));
-                await Services.Db.SaveChangesAsync();
+                await Services.Banning.UnbanAsync(targetUser);
 
                 LayoutModel.AddMessage($"User \"{targetUser.UserName}\" has been unbanned");
 
-                return RedirectToPage("/Account/Profile", new { id = userId });
+                return Redirect(Services.History.GetLastURL());
             }
             else
             {

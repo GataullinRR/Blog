@@ -25,7 +25,7 @@ namespace Blog.Pages
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            Post = await Services.Db.Posts.FirstOrDefaultAsync(p => p.Id == id);
+            Post = await S.Db.Posts.FirstOrDefaultAsync(p => p.Id == id);
             
             if (Post == null)
             {
@@ -33,16 +33,16 @@ namespace Blog.Pages
             }
             else
             {
-                var currentUser = await Services.UserManager.GetUserAsync(User);
+                var currentUser = await S.UserManager.GetUserAsync(User);
 
-                Commentaries = Services.Db.Commentaries.Where(c => c.Post == Post);
+                Commentaries = S.Db.Commentaries.Where(c => c.Post == Post);
                 foreach (var commentary in Commentaries)
                 {
                     commentary.ViewStatistic.UpdateStatistic(currentUser);
                 }
                 Post.ViewStatistic.UpdateStatistic(currentUser);
 
-                var x = await Services.Db.SaveChangesAsync();
+                var x = await S.Db.SaveChangesAsync();
 
                 return Page();
             }
@@ -53,19 +53,19 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                var currentUser = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
+                var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 await Permissions.ValidateAddCommentaryAsync();
                 if (commentBody != null)
                 {
                     var comment = new Commentary(
-                        await Services.Db.Users.FirstAsync(u => u.UserName == User.Identity.Name), 
+                        await S.Db.Users.FirstAsync(u => u.UserName == User.Identity.Name), 
                         DateTime.UtcNow, 
-                        await Services.Db.Posts.FindAsync(postId), 
+                        await S.Db.Posts.FindAsync(postId), 
                         commentBody);
-                    Services.Db.Commentaries.Add(comment);
-                    await Services.Db.SaveChangesAsync();
+                    S.Db.Commentaries.Add(comment);
+                    await S.Db.SaveChangesAsync();
                     currentUser.Actions.Add(new UserAction(ActionType.ADD_COMMENTARY, comment));
-                    await Services.Db.SaveChangesAsync();
+                    await S.Db.SaveChangesAsync();
                 }
             }
          

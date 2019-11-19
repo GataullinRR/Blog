@@ -27,7 +27,7 @@ namespace Blog.Pages.Account
 
         public async Task<IActionResult> OnGetAsync()
         {
-            UserModel = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
+            UserModel = await S.Utilities.GetCurrentUserModelOrThrowAsync();
 
             if (UserModel.EmailConfirmed)
             {
@@ -35,11 +35,11 @@ namespace Blog.Pages.Account
             }
             else
             {
-                var confirmationUrl = await Services.ConfirmationLinks.GetEMailConfirmationLinkAsync(UserModel);
+                var confirmationUrl = await S.ConfirmationLinks.GetEMailConfirmationLinkAsync(UserModel);
                 var message = $@"Hi {UserModel.UserName}!
 
 Please follow this link to complete the registration: {confirmationUrl}";
-                IsConfirmationLinkSent = await Services.EMail.TrySendMessageAsync(UserModel, "Registration", "EMail confirmation", message);
+                IsConfirmationLinkSent = await S.EMail.TrySendMessageAsync(UserModel, "Registration", "EMail confirmation", message);
 
                 return Page();
             }

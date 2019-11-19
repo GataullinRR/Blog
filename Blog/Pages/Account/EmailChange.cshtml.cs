@@ -25,8 +25,8 @@ namespace Blog.Pages.Account
 
         public async Task OnGet()
         {
-            var user = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
-            await Services.Permissions.ValidateChangeEmailAsync(user);
+            var user = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+            await S.Permissions.ValidateChangeEmailAsync(user);
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -35,8 +35,8 @@ namespace Blog.Pages.Account
             {
                 autoSaveDbChanges = true;
 
-                var user = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
-                await Services.Permissions.ValidateChangeEmailAsync(user);
+                var user = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+                await S.Permissions.ValidateChangeEmailAsync(user);
 
                 user.Actions.Add(new DBModels.UserAction(DBModels.ActionType.EMAIL_CHANGING, user));
 
@@ -46,7 +46,7 @@ namespace Blog.Pages.Account
 
                     return Page();
                 }
-                var isPasswordValid = await Services.UserManager.CheckPasswordAsync(user, Password);
+                var isPasswordValid = await S.UserManager.CheckPasswordAsync(user, Password);
                 if (!isPasswordValid)
                 {
 #warning security problem
@@ -55,8 +55,8 @@ namespace Blog.Pages.Account
                     return Page();
                 }
 
-                var confirmationLink = await Services.ConfirmationLinks.GetEMailChangeConfirmationLinkAsync(user, NewEMail);
-                var isSent = await Services.EMail.TrySendMessageAsync(user, "E-Mail change", "Administration", $@"You are trying to change profile e-mail.
+                var confirmationLink = await S.ConfirmationLinks.GetEMailChangeConfirmationLinkAsync(user, NewEMail);
+                var isSent = await S.EMail.TrySendMessageAsync(user, "E-Mail change", "Administration", $@"You are trying to change profile e-mail.
 Current e-mail: {user.Email}
 New e-mail: {NewEMail}
 Follow this link to finish the operation: {confirmationLink}");
@@ -65,7 +65,7 @@ Follow this link to finish the operation: {confirmationLink}");
                 {
                     LayoutModel.AddMessage($"Conformation link has been send to {NewEMail}");
 
-                    return Redirect(Services.History.GetLastURL());
+                    return Redirect(S.History.GetLastURL());
                 }
                 else
                 {

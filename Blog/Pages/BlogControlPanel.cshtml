@@ -19,12 +19,18 @@
     @foreach (var moderator in Model.Moderators.Where(m => m.Status.State == ProfileState.ACTIVE))
     {
         <li>
-            @{
-                var lastActionSpan = moderator.Actions.IsEmpty()
-                    ? "∞"
-                    : (moderator.Actions.LastElement().ActionDate - DateTime.UtcNow).ToCurrentTimeRelativeString();
-            }
-            <a asp-page="/Account/Profile" asp-route-id="@moderator.Id">@moderator.UserName</a>, <a asp-page="/ModeratorPanel" asp-route-id="@moderator.Id">pannel</a>, <a asp-page="/Account/BanConfirmation" asp-route-id="@moderator.Id">ban</a>, last action was @lastActionSpan ago
+            @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
+        </li>
+    }
+</ul>
+
+<h3>Inactive moderators</h3>
+
+<ul>
+    @foreach (var moderator in Model.Moderators.Where(m => m.Status.State != ProfileState.ACTIVE))
+    {
+        <li>
+           @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
         </li>
     }
 </ul>

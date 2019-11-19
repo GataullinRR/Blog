@@ -22,8 +22,8 @@ namespace Blog.Pages
         
         public async Task OnGetAsync()
         {
-            await Services.Permissions.ValidateAccessBlogControlPanelAsync();
-            Moderators = await Services.UserManager.GetUsersInRoleAsync(Roles.MODERATOR);
+            await S.Permissions.ValidateAccessBlogControlPanelAsync();
+            Moderators = await S.UserManager.GetUsersInRoleAsync(Roles.MODERATOR);
         }
     }
 }

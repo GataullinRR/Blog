@@ -28,7 +28,7 @@ namespace Blog.Pages.Account
 
         public async Task OnGetAsync()
         {
-            await Services.Permissions.ValidateChangePasswordAsync(await Services.UserManager.GetUserAsync(User));
+            await S.Permissions.ValidateChangePasswordAsync(await S.UserManager.GetUserAsync(User));
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -37,15 +37,15 @@ namespace Blog.Pages.Account
             {
                 if (NewPassword == NewPasswordConfirmation)
                 {
-                    var user = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
-                    await Services.Permissions.ValidateChangePasswordAsync(user);
+                    var user = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+                    await S.Permissions.ValidateChangePasswordAsync(user);
                     user.Actions.Add(new UserAction(ActionType.PASSWORD_CHANGING, user));
-                    var result = await Services.UserManager.ChangePasswordAsync(user, CurrentPassword, NewPassword);
+                    var result = await S.UserManager.ChangePasswordAsync(user, CurrentPassword, NewPassword);
                     if (result.Succeeded)
                     {
-                        await Services.SignInManager.SignOutAsync();
+                        await S.SignInManager.SignOutAsync();
                         user.Actions.Add(new DBModels.UserAction(ActionType.PASSWORD_CHANGED, null));
-                        await Services.Db.SaveChangesAsync();
+                        await S.Db.SaveChangesAsync();
 
                         LayoutModel.AddMessage("Password has been changed");
 

@@ -30,7 +30,7 @@ namespace Blog.Pages.Account
 
         public async Task<IActionResult> OnGetAsync(string id)
         {
-            var currentUser = await Services.UserManager.GetUserAsync(HttpContext.User);
+            var currentUser = await S.UserManager.GetUserAsync(HttpContext.User);
             if (id == null)
             {
                 if (currentUser == null)
@@ -44,21 +44,21 @@ namespace Blog.Pages.Account
             }
             else
             {
-                UserModel = await Services.UserManager.FindByIdAsync(id);
+                UserModel = await S.UserManager.FindByIdAsync(id);
             }
 
             IsCurrentUser = currentUser?.Id == UserModel.Id;
-            Role = (await Services.UserManager.GetRolesAsync(UserModel)).Single();
+            Role = (await S.UserManager.GetRolesAsync(UserModel)).Single();
             UserModel.Profile.ViewStatistic.UpdateStatistic(currentUser);
 
-            await Services.Db.SaveChangesAsync();
+            await S.Db.SaveChangesAsync();
 
             return Page();
         }
 
         public async Task<IActionResult> OnPostBanAsync(string id)
         {
-            var currentUser = await Services.UserManager.GetUserAsync(HttpContext.User);
+            var currentUser = await S.UserManager.GetUserAsync(HttpContext.User);
             if (id == null)
             {
                 if (currentUser == null)
@@ -72,15 +72,15 @@ namespace Blog.Pages.Account
             }
             else
             {
-                UserModel = await Services.UserManager.FindByIdAsync(id);
+                UserModel = await S.UserManager.FindByIdAsync(id);
             }
 
             IsCurrentUser = currentUser?.Id == UserModel.Id;
-            UserModel.Posts = await Services.Db.Posts
+            UserModel.Posts = await S.Db.Posts
                 .IncludeAuthor()
                 .Where(p => p.Author == UserModel)
                 .ToListAsync();
-            Role = (await Services.UserManager.GetRolesAsync(UserModel)).Single();
+            Role = (await S.UserManager.GetRolesAsync(UserModel)).Single();
             return Page();
         }
     }

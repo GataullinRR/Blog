@@ -29,8 +29,8 @@ namespace Blog.Pages.Account
         public async Task OnGetAsync([Required]string id)
         {
             UserId = id;
-            var targetUser = await Services.UserManager.FindByIdAsync(id);
-            await Services.Permissions.ValidateBanUserAsync(targetUser);
+            var targetUser = await S.UserManager.FindByIdAsync(id);
+            await S.Permissions.ValidateBanUserAsync(targetUser);
         }
 
         public async Task<IActionResult> OnPostBanAsync()
@@ -45,12 +45,12 @@ namespace Blog.Pages.Account
                 }
                 else
                 {
-                    var targetUser = await Services.UserManager.FindByIdAsync(UserId);
-                    await Services.Permissions.ValidateBanUserAsync(targetUser);
-                    await Services.Banning.BanAsync(targetUser, BannedTill, Reason);
+                    var targetUser = await S.UserManager.FindByIdAsync(UserId);
+                    await S.Permissions.ValidateBanUserAsync(targetUser);
+                    await S.Banning.BanAsync(targetUser, BannedTill, Reason);
                     LayoutModel.AddMessage($"User \"{targetUser.UserName}\" has been banned");
 
-                    return RedirectToPage("/Index");
+                    return Redirect(S.History.GetLastURL());
                 }
             }
             else

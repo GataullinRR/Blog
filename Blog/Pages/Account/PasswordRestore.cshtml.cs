@@ -34,7 +34,7 @@ namespace Blog.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var user = await Services.UserManager.FindByNameAsync(UserName);
+                var user = await S.UserManager.FindByNameAsync(UserName);
                 if (user == null)
                 {
                     ModelState.AddModelError("", $"Profile \"{UserName}\" does not exist");
@@ -43,7 +43,7 @@ namespace Blog.Pages.Account
                 }
                 else
                 {
-                    await Services.Permissions.ValidateResetPasswordAsync(user);
+                    await S.Permissions.ValidateResetPasswordAsync(user);
                     user.Actions.Add(new UserAction(ActionType.PASSWORD_RESETING, user));
 
                     var link = await _confirmation.GetPasswordResetConfirmationLinkAsync(user);
@@ -52,7 +52,7 @@ After openning the link, new password will be sent to this E-Mail");
                     if (isSent)
                     {
                         user.Status.LastPasswordRestoreAttempt = DateTime.UtcNow;
-                        await Services.UserManager.UpdateAsync(user);
+                        await S.UserManager.UpdateAsync(user);
 
                         LayoutModel.AddMessage("Password reset confirmation link has been sent");
 

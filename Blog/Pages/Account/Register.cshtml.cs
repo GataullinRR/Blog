@@ -46,7 +46,7 @@ namespace Blog.Pages.Account
             }
             else
             {
-                RegistrationRole = Services.MutatorsManager.RegistrationRole;
+                RegistrationRole = S.MutatorsManager.RegistrationRole;
                 return Page();
             }
         }
@@ -60,7 +60,7 @@ namespace Blog.Pages.Account
 
             if (ModelState.IsValid)
             {
-                var user = await Services.UserManager.FindByNameAsync(Username);
+                var user = await S.UserManager.FindByNameAsync(Username);
                 if (user == null)
                 {
                     var newUser = new User(new Profile(DateTime.UtcNow), new ProfileStatus(default))
@@ -68,13 +68,13 @@ namespace Blog.Pages.Account
                         UserName = Username,
                         Email = EMail
                     };
-                    var result = await Services.UserManager.CreateAsync(newUser, Password);
+                    var result = await S.UserManager.CreateAsync(newUser, Password);
                     if (result.Succeeded)
                     {
-                        await Services.UserManager.AddToRoleAsync(newUser, Services.MutatorsManager.RegistrationRole);
-                        Services.MutatorsManager.Reset(nameof(Services.MutatorsManager.RegistrationRole));
-                        await Services.SignInManager.SignInAsync(newUser, true);
-                        await Services.Db.SaveChangesAsync();
+                        await S.UserManager.AddToRoleAsync(newUser, S.MutatorsManager.RegistrationRole);
+                        S.MutatorsManager.Reset(nameof(S.MutatorsManager.RegistrationRole));
+                        await S.SignInManager.SignInAsync(newUser, true);
+                        await S.Db.SaveChangesAsync();
 
                         return RedirectToPage("/Account/ConfirmEmail");
                     }

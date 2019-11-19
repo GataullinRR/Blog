@@ -48,5 +48,19 @@ namespace Blog.Services
 Reason: {reason}
 {isForeverlyBanned.Ternar("", $"Ban will expire at {bannedTill.ToString("dd.MM.yyyy")}")}");
         }
+
+        public async Task UnbanAsync(User targetUser)
+        {
+            var performer = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
+            await Services.Permissions.ValidateUnbanUserAsync(targetUser);
+
+            targetUser.Status.State = targetUser.EmailConfirmed
+                ? ProfileState.ACTIVE
+                : ProfileState.RESTRICTED;
+            targetUser.Status.StateReason = null;
+            targetUser.Status.BannedTill = null;
+            performer.Actions.Add(new UserAction(ActionType.UNBAN, targetUser));
+            await Services.Db.SaveChangesAsync();
+        }
     }
 }

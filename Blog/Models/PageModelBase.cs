@@ -20,15 +20,15 @@ namespace Blog.Models
 
     public abstract class PageModelBase : PageModel, ILayoutModelProvider
     {
-        public ServicesProvider Services { get; set; }
+        public ServicesProvider S { get; set; }
 
-        public PermissionsService Permissions => Services.Permissions;
+        public PermissionsService Permissions => S.Permissions;
         public LayoutModel LayoutModel { get; private set; }
         protected bool autoSaveDbChanges = false;
 
         public PageModelBase(ServicesProvider services)
         {
-            Services = services;
+            S = services;
         }
 
         public override void OnPageHandlerSelected(PageHandlerSelectedContext context)
@@ -42,10 +42,10 @@ namespace Blog.Models
         {
             LayoutModel.UpdateMessages();
             LayoutModel.Save(HttpContext.Session);
-            Services.History.SaveCurrentURL();
+            S.History.SaveCurrentURL();
             if (autoSaveDbChanges)
             {
-                Services.Db.SaveChanges();
+                S.Db.SaveChanges();
             }
 
             base.OnPageHandlerExecuted(context);

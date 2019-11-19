@@ -40,8 +40,8 @@ namespace Blog.Pages.Account
         public async Task<IActionResult> OnGetAsync([Required]string id)
         {
             EditUserId = id;
-            var currentUser = await Services.UserManager.GetUserAsync(User);
-            var editUser = await Services.UserManager.FindByIdAsync(EditUserId);
+            var currentUser = await S.UserManager.GetUserAsync(User);
+            var editUser = await S.UserManager.FindByIdAsync(EditUserId);
             if (editUser != null &&
                (currentUser.Id == EditUserId || User.IsInOneOfTheRoles(Roles.GetAllNotLess(Roles.MODERATOR))))
             {
@@ -59,7 +59,7 @@ namespace Blog.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var currentUser = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
+                var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 var editingUser = await getEditingUserIfAuthorizedAsync(EditUserId);
                 if (ProfileImage != null)
                 {
@@ -75,7 +75,7 @@ namespace Blog.Pages.Account
                 }
                 editingUser.Profile.About = About;
                 currentUser.Actions.Add(new UserAction(ActionType.PROFILE_EDIT, editingUser));
-                await Services.Db.SaveChangesAsync();
+                await S.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Account/Profile", new { id = editingUser.Id });
             }
@@ -86,9 +86,9 @@ namespace Blog.Pages.Account
 
             async Task<User> getEditingUserIfAuthorizedAsync(string userId)
             {
-                var currentUser = await Services.UserManager.GetUserAsync(User);
+                var currentUser = await S.UserManager.GetUserAsync(User);
                 var isEditAuthorized = currentUser?.Id == userId || User.IsInOneOfTheRoles(Roles.GetAllNotLess(Roles.MODERATOR));
-                var editUser = await Services.UserManager.FindByIdAsync(userId);
+                var editUser = await S.UserManager.FindByIdAsync(userId);
 
                 return isEditAuthorized ? editUser : null;
             }

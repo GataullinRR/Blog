@@ -25,10 +25,10 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                var post = await Services.Db.Posts.FirstOrDefaultByIdAsync(id);
+                var post = await S.Db.Posts.FirstOrDefaultByIdAsync(id);
                 if (post != null)
                 {
-                    await Services.Permissions.ValidateEditPostAsync(post);
+                    await S.Permissions.ValidateEditPostAsync(post);
                     Title = post.Title;
                     Body = post.Body;
                     Post = post;
@@ -38,26 +38,26 @@ namespace Blog.Pages
                 }
             }
 
-            return Redirect(Services.History.GetLastURL());
+            return Redirect(S.History.GetLastURL());
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             if (ModelState.IsValid)
             {
-                var editingPost = await Services.Db.Posts.FirstOrDefaultByIdAsync(PostId);
+                var editingPost = await S.Db.Posts.FirstOrDefaultByIdAsync(PostId);
 
-                await Services.Permissions.ValidateEditPostAsync(editingPost);
+                await S.Permissions.ValidateEditPostAsync(editingPost);
 
-                var author = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
+                var author = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 editingPost.Body = Body;
-                if (await Services.Permissions.CanEditPostTitleAsync(editingPost))
+                if (await S.Permissions.CanEditPostTitleAsync(editingPost))
                 {
                     editingPost.Title = Title;
                 }
                 editingPost.Edits.Add(new PostEdit(author, EditReason, DateTime.UtcNow));
                 author.Actions.Add(new UserAction(ActionType.POST_EDIT, editingPost));
-                await Services.Db.SaveChangesAsync();
+                await S.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Post", new { id = editingPost.Id });
             }

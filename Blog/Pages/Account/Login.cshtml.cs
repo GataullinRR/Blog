@@ -45,7 +45,7 @@ namespace Blog.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var user = await Services.UserManager.FindByNameAsync(Login);
+                var user = await S.UserManager.FindByNameAsync(Login);
                 if (user == null)
                 {
                     ModelState.AddModelError("", "This login is not registered");
@@ -54,18 +54,18 @@ namespace Blog.Pages.Account
                 }
                 else
                 {
-                    var result = await Services.SignInManager.PasswordSignInAsync(user, Password, true, false);
+                    var result = await S.SignInManager.PasswordSignInAsync(user, Password, true, false);
                     if (result.Succeeded)
                     {
                         user.Actions.Add(new UserAction(ActionType.SIGNED_IN, null));
-                        await Services.Db.SaveChangesAsync();
+                        await S.Db.SaveChangesAsync();
 
                         return RedirectToPage("/Index");
                     }
                     else
                     {
                         user.Actions.Add(new UserAction(ActionType.SIGN_IN_FAIL, null));
-                        await Services.Db.SaveChangesAsync();
+                        await S.Db.SaveChangesAsync();
 
                         ModelState.AddModelError("", "Login or password is not valid");
 

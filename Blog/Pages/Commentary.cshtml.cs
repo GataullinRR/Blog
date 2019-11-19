@@ -25,14 +25,14 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                CurrentUserModel = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
-                Commentary = await Services.Db.Commentaries.FirstOrDefaultByIdAsync(id);
+                CurrentUserModel = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+                Commentary = await S.Db.Commentaries.FirstOrDefaultByIdAsync(id);
 
                 return Page();
             }
             else
             {
-                return Redirect(Services.History.GetLastURL());
+                return Redirect(S.History.GetLastURL());
             }
         }
     }
