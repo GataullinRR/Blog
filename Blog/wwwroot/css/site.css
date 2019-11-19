@@ -42,3 +42,7 @@ span.comment-deleted {
     padding: 20px;
     width: 80%; /* Could be more or less, depending on screen size */
 }
+
+.line-breaks {
+    white-space: pre-line;
+}

@@ -12,9 +12,13 @@
         @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportPostAsync), "id", Model.Post.Id, await Model.Permissions.CanReportAsync(Model.Post)))
     </h2>
 
-    <div>
+    <div class="line-breaks">
         @Model.Post.Body
     </div>
+
+<div>
+    <span>Posted by <a asp-page="/Account/Profile" asp-route-id="@Model.Post.Author.Id">@Model.Post.Author.UserName</a> at @Model.Post.CreationTime.ToHoursDateString()</span>
+</div>
 
 @foreach (var edit in Model.Post.Edits.NullToEmpty())
 {

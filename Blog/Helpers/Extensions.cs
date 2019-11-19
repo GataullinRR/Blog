@@ -121,6 +121,11 @@ namespace Blog
             }
         }
 
+        public static string ToHoursDateString(this DateTime dateTime)
+        {
+            return dateTime.ToString("hh:mm dd.MM.yyyy");
+        }
+
         public static IDisposable SaveChangesMode(this BlogContext db)
         {
             return new DisposingAction(() => db.SaveChanges());
