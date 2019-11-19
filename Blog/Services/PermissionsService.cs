@@ -130,6 +130,26 @@ namespace Blog.Services
             }
         }
 
+        public async Task ValidateAddCommentaryAsync()
+        {
+            if (!await CanAddCommentaryAsync())
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanAddCommentaryAsync()
+        {
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
         public async Task ValidateResetPasswordAsync(User targetUser)
         {
             if (!await CanRestorePasswordAsync(targetUser))
@@ -255,8 +275,7 @@ namespace Blog.Services
             else
             {
                 return currentUser.Id == targetUser.Id
-                    || await Services.UserManager.IsInOneOfTheRolesAsync(targetUser, Roles.MODERATOR, Roles.OWNER)
-                    || await Services.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.NOT_RESTRICTED);
+                    || await Services.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR));
             }
         }
 
@@ -269,8 +288,7 @@ namespace Blog.Services
             }
             else
             {
-                return currentUser.Status.State == ProfileState.ACTIVE
-                    && await Services.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR));
+                return await Services.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR));
             }
         }
 

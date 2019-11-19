@@ -34,8 +34,9 @@ namespace Blog.Services
                         entity.AssignationTime = null;
                         entity.AssignedModerator = null;
                     }
-                } 
-                targetUser.ModeratorPanel.Owners.Remove(targetUser);
+                }
+                // Sets ModeratorPanel to null
+                //targetUser.ModeratorPanel.Owners.Remove(targetUser);
             }
             targetUser.Status.State = ProfileState.BANNED;
             targetUser.Status.BannedTill = bannedTill.ToUniversalTime();

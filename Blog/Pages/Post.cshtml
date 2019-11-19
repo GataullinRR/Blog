@@ -48,13 +48,13 @@
 
 @if (User.Identity.IsAuthenticated)
 {
-    <form method="post" asp-page-handler="AddCommentary">
+    <form include-if="await Model.Permissions.CanAddCommentaryAsync()" method="post" asp-page-handler="AddCommentary">
         <input type="hidden" name="postId" value="@Model.Post.Id" />
         <textarea name="commentBody" rows="3" placeholder="Your comment"></textarea>
 
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-        <button type="submit">Send</button>
+        <button type="submit" class="btn btn-primary">Send</button>
     </form>
 }
 else

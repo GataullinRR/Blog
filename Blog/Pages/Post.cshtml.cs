@@ -54,6 +54,7 @@ namespace Blog.Pages
             if (ModelState.IsValid)
             {
                 var currentUser = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
+                await Permissions.ValidateAddCommentaryAsync();
                 if (commentBody != null)
                 {
                     var comment = new Commentary(
