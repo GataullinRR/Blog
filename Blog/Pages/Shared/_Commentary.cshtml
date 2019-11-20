@@ -7,10 +7,6 @@
             "Delete", nameof(CommentaryController), nameof(CommentaryController.DeleteCommentaryAsync),
             "id", Model.Commentary.Id,
             await Model.Permissions.CanDeleteCommentaryAsync(Model.Commentary)))
-        @*@if (await Model.Permissions.CanEditCommentaryAsync(Model.Commentary))
-        {
-            <button class="commentary-edit-button">Edit</button>
-        }*@
         <span include-if="await Model.Permissions.CanEditCommentaryAsync(Model.Commentary)">| <a href="" class="no-redirect commentary-edit-button">Edit</a></span>
         @await Html.PartialAsync("_Anchor", AnchorModel.ToController(
            "Report", nameof(ReportingController), nameof(ReportingController.ReportCommentaryAsync),

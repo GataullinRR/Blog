@@ -12,11 +12,6 @@ namespace DBModels
         [Required]
         public string Description { get; set; }
 
-        [InverseProperty(nameof(User.Violations))]
-        public override User ObjectOwner { get => base.ObjectOwner; set => base.ObjectOwner = value; }
-        [InverseProperty(nameof(User.ReportedViolations))]
-        public override User Reporter { get => base.Reporter; set => base.Reporter = value; }
-
         public Violation() { }
 
         public Violation(User reporter, User reportObjectOwner, IModeratableObject reportObject, string description) : base(reporter, reportObjectOwner, reportObject)

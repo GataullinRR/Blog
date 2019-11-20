@@ -15,7 +15,8 @@ namespace DBModels
         [Required] public virtual List<CommentaryEdit> Edits { get; set; } = new List<CommentaryEdit>();
         [InverseProperty(nameof(Report.CommentaryObject))]
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
-        [Required] public List<Violation> Violations { get; set; } = new List<Violation>();
+        [InverseProperty(nameof(Violation.CommentaryObject))]
+        [Required] public virtual List<Violation> Violations { get; set; } = new List<Violation>();
         [Required] public virtual ViewStatistic ViewStatistic { get; set; }
         public bool IsHidden { get; set; }
         public bool IsDeleted { get; set; }

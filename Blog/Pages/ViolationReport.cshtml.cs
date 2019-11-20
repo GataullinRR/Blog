@@ -61,7 +61,7 @@ namespace Blog.Pages
                 await Permissions.ValidateReportViolationAsync(reportObject);
                 var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 var violation = new Violation(currentUser, reportObject.Author, reportObject, Description);
-                reportObject.Violations.Add(violation);
+                S.Db.UserRuleViolations.Add(violation);
                 currentUser.Actions.Add(new UserAction(ActionType.VIOLATION_REPORTED, reportObject));
                 await S.Db.SaveChangesAsync();
 

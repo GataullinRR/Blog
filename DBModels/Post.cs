@@ -17,7 +17,8 @@ namespace DBModels
         [Required] public virtual ViewStatistic ViewStatistic { get; set; }
         [InverseProperty(nameof(Report.PostObject))]
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
-        [Required] public List<Violation> Violations { get; set; } = new List<Violation>();
+        [InverseProperty(nameof(Violation.PostObject))]
+        [Required] public virtual List<Violation> Violations { get; set; } = new List<Violation>();
 
         public Post() 
         { 
