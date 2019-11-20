@@ -12,14 +12,15 @@
     var banButton = await Html.PartialAsync("_Anchor", new AnchorModel("Ban", "/Account/BanConfirmation", targetUser.Id, await Model.Permissions.CanBanUserAsync(targetUser)));
 }
 
-<h3>
-    Profile information @await generateEditButtonAsync(targetUser.Id, canEdit) @banButton
-    @if (await Model.Permissions.CanUnbanUserAsync(targetUser))
-    {
-        <span>| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
-    }
-    @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportProfileAsync), "id", targetUser.Profile.Id, await Model.Permissions.CanReportAsync(targetUser.Profile)))
-</h3>
+    <h3>
+        Profile information @await generateEditButtonAsync(targetUser.Id, canEdit) @banButton
+        @if (await Model.Permissions.CanUnbanUserAsync(targetUser))
+        {
+            <span>| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
+        }
+        @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportProfileAsync), "id", targetUser.Profile.Id, await Model.Permissions.CanReportAsync(targetUser.Profile)))
+        <span include-if="await Model.Permissions.CanReportViolationAsync(targetUser.Profile)">| <a asp-page="/ViolationReport" asp-page-handler="Profile" asp-route-id="@targetUser.Profile.Id">Report violation</a></span>
+    </h3>
 
 @await Html.PartialAsync("_ProfileImage", targetUser)
 
@@ -71,7 +72,7 @@ else
 {
     <h3>Posts</h3>
 
-    @foreach (var post in targetUser.Posts)
+    @foreach (var post in targetUser.Posts.OrderByDescending(p => p.CreationTime))
     {
         <div><a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a></div>
     }
@@ -87,7 +88,7 @@ else
     }
 
     <ul>
-        @foreach (var violation in targetUser.Violations)
+        @foreach (var violation in targetUser.Violations.OrderByDescending(v => v.CreationDate))
         {
         <li>
             <span>Got from <a asp-page="/Account/Profile" asp-route-id="@violation.Reporter.Id">@violation.Reporter.UserName</a>, object: </span>
