@@ -1,0 +1,21 @@
+﻿@page
+@model Blog.Pages.ViolationReportModel
+@{ 
+    ViewBag.Title = "Violation report";
+}
+
+<h3>Violation report</h3>
+
+<form method="post">
+    <input type="hidden" asp-for="ReportObjectToken" />
+
+    <div class="form-group">
+        <span>Violation description: </span>
+        <textarea asp-for="Description"></textarea>
+        <span asp-validation-for="Description"></span>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Report</button>
+    </div>
+</form>

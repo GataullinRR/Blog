@@ -22,10 +22,10 @@ namespace Blog.Services
         public async Task BanAsync(User targetUser, DateTime bannedTill, string reason)
         {
             var isForeverlyBanned = bannedTill == DateTime.MaxValue;
-            var performer = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
-            await Services.Permissions.ValidateBanUserAsync(targetUser);
+            var performer = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+            await S.Permissions.ValidateBanUserAsync(targetUser);
 
-            if (await Services.UserManager.IsInRoleAsync(targetUser, Roles.MODERATOR))
+            if (await S.UserManager.IsInRoleAsync(targetUser, Roles.MODERATOR))
             {
                 foreach (var entity in targetUser.ModeratorPanel.EntitiesToCheck)
                 {
@@ -42,17 +42,17 @@ namespace Blog.Services
             targetUser.Status.BannedTill = bannedTill.ToUniversalTime();
             targetUser.Status.StateReason = reason;
             performer.Actions.Add(new UserAction(ActionType.BAN, targetUser));
-            await Services.Db.SaveChangesAsync();
+            await S.Db.SaveChangesAsync();
 
-            await Services.EMail.TrySendMessageAsync(targetUser, "Administration", $"Profile has been banned{isForeverlyBanned.Ternar(" foreverly", "")}", $@"Profile name: {targetUser.UserName}
+            await S.EMail.TrySendMessageAsync(targetUser, "Administration", $"Profile has been banned{isForeverlyBanned.Ternar(" foreverly", "")}", $@"Profile name: {targetUser.UserName}
 Reason: {reason}
 {isForeverlyBanned.Ternar("", $"Ban will expire at {bannedTill.ToString("dd.MM.yyyy")}")}");
         }
 
         public async Task UnbanAsync(User targetUser)
         {
-            var performer = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
-            await Services.Permissions.ValidateUnbanUserAsync(targetUser);
+            var performer = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+            await S.Permissions.ValidateUnbanUserAsync(targetUser);
 
             targetUser.Status.State = targetUser.EmailConfirmed
                 ? ProfileState.ACTIVE
@@ -60,7 +60,7 @@ Reason: {reason}
             targetUser.Status.StateReason = null;
             targetUser.Status.BannedTill = null;
             performer.Actions.Add(new UserAction(ActionType.UNBAN, targetUser));
-            await Services.Db.SaveChangesAsync();
+            await S.Db.SaveChangesAsync();
         }
     }
 }

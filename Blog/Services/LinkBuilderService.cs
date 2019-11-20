@@ -17,11 +17,11 @@ namespace Blog.Services
 
         public string GenerateLink(string controller, string controllerAction, object values)
         {
-            return Services.UrlHelper.Action(
+            return S.UrlHelper.Action(
                 controllerAction, 
                 controller.GetController(), 
                 values, 
-                Services.HttpContext.Request.Scheme);
+                S.HttpContext.Request.Scheme);
         }
     }
 }

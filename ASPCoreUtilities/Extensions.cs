@@ -11,5 +11,15 @@ namespace ASPCoreUtilities
         {
             return controllerNameOf.Remove("Controller");
         }
+
+        public static string GetHandler(this string handlerNameof)
+        {
+            return handlerNameof.Remove("OnGet").Remove("OnPost");
+        }
+
+        public static string GetPage(this string pageModelNameof)
+        {
+            return pageModelNameof.Remove("_Pages_").Remove("Model");
+        }
     }
 }

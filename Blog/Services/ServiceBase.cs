@@ -9,11 +9,11 @@ namespace Blog.Services
 {
     public class ServiceBase
     {
-        protected ServicesProvider Services { get; }
+        protected ServicesProvider S { get; }
 
         public ServiceBase(ServicesProvider services)
         {
-            Services = services;
+            S = services;
         }
     }
 }

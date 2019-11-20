@@ -6,22 +6,18 @@ using System.Text;
 
 namespace DBModels
 {
-    public class Post : IDbEntity, IReportObject
+    public class Post : IDbEntity, IModeratableObject
     {
-        [Key]
-        public int Id { get; set; }
-        [Required]
-        public DateTime CreationTime { get; set; }
-        [Required]
-        public virtual User Author { get; set; }
-        [Required]
-        public string Title { get; set; }
-        [Required]
-        public string Body { get; set; }
+        [Key] public int Id { get; set; }
+        [Required] public DateTime CreationTime { get; set; }
+        [Required] public virtual User Author { get; set; }
+        [Required] public string Title { get; set; }
+        [Required] public string Body { get; set; }
         [Required] public virtual List<PostEdit> Edits { get; set; } = new List<PostEdit>();
         [Required] public virtual ViewStatistic ViewStatistic { get; set; }
         [InverseProperty(nameof(Report.PostObject))]
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
+        [Required] public List<Violation> Violations { get; set; } = new List<Violation>();
 
         public Post() 
         { 

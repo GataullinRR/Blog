@@ -55,7 +55,7 @@ namespace Blog.Controllers
             }
         }
 
-        async Task<IActionResult> reportAsync(IReportObject reportObject)
+        async Task<IActionResult> reportAsync(IModeratableObject reportObject)
         {
             await Services.Permissions.ValidateReportAsync(reportObject);
 

@@ -25,7 +25,7 @@ namespace DBModels
             ProfilesToCheck
         };
 
-        public void AddEntityToCheck(IReportObject reportObject)
+        public void AddEntityToCheck(IModeratableObject reportObject)
         {
             add((dynamic)reportObject);
         }

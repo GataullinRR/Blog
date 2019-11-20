@@ -87,12 +87,6 @@ namespace Blog
             viewStatistic.TotalViews++;
         }
 
-        public static async Task<T> FirstOrDefaultByIdAsync<T>(this DbSet<T> entities, int id)
-            where T : class, IDbEntity
-        {
-            return await entities.FirstOrDefaultAsync(e => e.Id == id);
-        }
-
         public static async Task<IQueryable<User>> GetUsersInRoleAsync(this BlogContext db, string role)
         {
             var roleId = (await db.Roles.FirstAsync(r => r.Name == role)).Id;

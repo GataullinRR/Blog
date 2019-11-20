@@ -2,10 +2,11 @@
 
 namespace DBModels
 {
-    public interface IReportObject : IDbEntity
+    public interface IModeratableObject : IDbEntity
     {
         User Author { get; }
         ViewStatistic ViewStatistic { get; }
         List<Report> Reports { get; }
+        List<Violation> Violations { get; }
     }
 }

@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DBModels
 {
-    public class Profile : IDbEntity, IReportObject
+    public class Profile : IDbEntity, IModeratableObject
     {
         [Key]
         public int Id { get; set; }
@@ -18,6 +18,7 @@ namespace DBModels
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
         public string AuthorForeignKey { get; set; }
         public virtual User Author { get; set; }
+        [Required] public List<Violation> Violations { get; set; } = new List<Violation>();
 
         public Profile() { }
 

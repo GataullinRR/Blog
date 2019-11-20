@@ -18,7 +18,7 @@ namespace Blog.Services
             return ShouldReportToModerator(commentary);
         }
 
-        public bool ShouldReportToModerator(IReportObject reportObject)
+        public bool ShouldReportToModerator(IModeratableObject reportObject)
         {
             return reportObject.ViewStatistic.TotalViews >= 10
                 && (reportObject.Reports.Count()) / (double)reportObject.ViewStatistic.TotalViews > 0.099;

@@ -13,6 +13,13 @@
     }
     else
     {
-        <span>| <a asp-page="@Model.Page" asp-all-route-data=routeData>@Model.Text</a></span>
+        if (Model.Handler == null)
+        {
+            <span>| <a asp-page="@Model.Page" asp-all-route-data=routeData>@Model.Text</a></span>
+        }
+        else
+        {
+            <span>| <a asp-page="@Model.Page" asp-page-handler="@Model.Handler" asp-all-route-data=routeData>@Model.Text</a></span>
+        }
     }
 }

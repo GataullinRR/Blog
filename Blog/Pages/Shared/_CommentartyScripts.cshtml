@@ -31,52 +31,52 @@
             });
         }
 
-        function doPost(form) {
-            //var xhr = new XMLHttpRequest();
-            //xhr.open("POST", form.attr('action'));
-            //xhr.onload=function()
-            //{
-            //  if(xhr.status==200)
-            //    resolve(xhr.response);
-            //  else
-            //    reject("error:"+xhr.status);
-            //}
-            //var data=JSON.stringify({some_data});
-            //xhr.send(data);
+        //function doPost(form) {
+        //    //var xhr = new XMLHttpRequest();
+        //    //xhr.open("POST", form.attr('action'));
+        //    //xhr.onload=function()
+        //    //{
+        //    //  if(xhr.status==200)
+        //    //    resolve(xhr.response);
+        //    //  else
+        //    //    reject("error:"+xhr.status);
+        //    //}
+        //    //var data=JSON.stringify({some_data});
+        //    //xhr.send(data);
 
-            $.ajax({
-                type: "POST",
-                url: "/Commentary/UpdateCommentaryAsync",
-                data: form.serialize(),
-                error: function (xhr, status, error) {
-                    //do something about the error
-                },
-                success: function (response) {
-                    //do something with response
-                }
-            });
+        //    $.ajax({
+        //        type: "POST",
+        //        url: "/Commentary/UpdateCommentaryAsync",
+        //        data: form.serialize(),
+        //        error: function (xhr, status, error) {
+        //            //do something about the error
+        //        },
+        //        success: function (response) {
+        //            //do something with response
+        //        }
+        //    });
 
-            return false;// if it's a link to prevent post
+        //    return false;// if it's a link to prevent post
 
-            //$.ajax({
-            //    type: "POST",
-            //    url: form.attr('action'),
-            //    data: form.serialize(),
-            //    contentType: "application/json; charset=utf-8",
-            //    beforeSend: function (xhr) {
-            //        xhr.setRequestHeader("XSRF-TOKEN",
-            //            $('input:hidden[name="__RequestVerificationToken"]').val());
-            //    },
-            //    success: function () {
-            //        alert("success");
-            //    },
-            //    complete: function () {
-            //        alert("complete")
-            //    },
-            //    failure: function () {
-            //        alert("failure");
-            //    }
-            //});
-        }
+        //    //$.ajax({
+        //    //    type: "POST",
+        //    //    url: form.attr('action'),
+        //    //    data: form.serialize(),
+        //    //    contentType: "application/json; charset=utf-8",
+        //    //    beforeSend: function (xhr) {
+        //    //        xhr.setRequestHeader("XSRF-TOKEN",
+        //    //            $('input:hidden[name="__RequestVerificationToken"]').val());
+        //    //    },
+        //    //    success: function () {
+        //    //        alert("success");
+        //    //    },
+        //    //    complete: function () {
+        //    //        alert("complete")
+        //    //    },
+        //    //    failure: function () {
+        //    //        alert("failure");
+        //    //    }
+        //    //});
+        //}
     }
 </script>

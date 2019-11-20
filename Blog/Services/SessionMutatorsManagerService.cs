@@ -17,16 +17,16 @@ namespace Blog.Services
 
         public string RegistrationRole
         {
-            get => Services.HttpContext.Session.GetStringOrDefault(nameof(RegistrationRole), Roles.USER);
+            get => S.HttpContext.Session.GetStringOrDefault(nameof(RegistrationRole), Roles.USER);
             set
             {
-                Services.HttpContext.Session.Set(nameof(RegistrationRole), value.ToByteArray(Encoding.UTF8));
+                S.HttpContext.Session.Set(nameof(RegistrationRole), value.ToByteArray(Encoding.UTF8));
             }
         }
 
         public void Reset(string mutatorPropertyName)
         {
-            Services.HttpContext.Session.Remove(mutatorPropertyName);
+            S.HttpContext.Session.Remove(mutatorPropertyName);
         }
     }
 }

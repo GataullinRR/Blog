@@ -89,31 +89,13 @@ else
     <ul>
         @foreach (var violation in targetUser.Violations)
         {
-            <li>
-                <span>Got from <a asp-page="/Account/Profile" asp-route-id="@violation.Reporter.Id">@violation.Reporter.UserName</a></span>
-                <div>
-                    <span>@violation.Description</span>
-                </div>
-                <div>
-                    <span>Object: </span>
-                    @switch (violation.ObjectType)
-                    {
-                        case ViolationObjectType.UNSPECIFIED:
-                            <span>is not specified</span>
-                            break;
-                        case ViolationObjectType.COMMENTARY:
-                            <a asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.GetCommentaryAsync)" asp-route-id="@violation.ObjectId">commentary</a>
-                            break;
-                        case ViolationObjectType.POST:
-                            <a asp-page="/Post" asp-route-id="@violation.ObjectId">post</a>
-                            break;
-
-                        default:
-                            <span>unknown</span>
-                            break;
-                    }
-                </div>
-            </li>
+        <li>
+            <span>Got from <a asp-page="/Account/Profile" asp-route-id="@violation.Reporter.Id">@violation.Reporter.UserName</a>, object: </span>
+            @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(violation.Object)); }
+            <div>
+                <span>Description: @violation.Description</span>
+            </div>
+        </li>
         }
     </ul>
 
@@ -128,8 +110,8 @@ else
         @foreach (var report in targetUser.Reports.OrderByDescending(r => r.CreationDate))
         {
             <li>
-                <span>Reported by <a asp-page="/Account/Profile" asp-route-id="@report.Reporter.Id">@report.Reporter.UserName</a> at @report.CreationDate.ToString("hh:mm dd.MM.yyyy"). Report object: </span>
-                @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(report.ReportObject)); }
+                <span>Reported by <a asp-page="/Account/Profile" asp-route-id="@report.Reporter.Id">@report.Reporter.UserName</a> at @report.CreationDate.ToHoursDateString(). Report object: </span>
+                @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(report.Object)); }
             </li>
         }
     </ul>

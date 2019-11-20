@@ -16,7 +16,7 @@ namespace Blog.Services
 
         public async Task<User> GetCurrentUserModelOrThrowAsync()
         {
-            var user = await Services.UserManager.GetUserAsync(Services.HttpContext.User);
+            var user = await S.UserManager.GetUserAsync(S.HttpContext.User);
             if (user == null)
             {
                 throw new AuthenticationException();
@@ -29,7 +29,7 @@ namespace Blog.Services
 
         public async Task<User> FindUserByIdOrGetCurrentOrThrowAsync(string userId)
         {
-            var user = await Services.UserManager.FindByIdAsync(userId);
+            var user = await S.UserManager.FindByIdAsync(userId);
             if (user == null)
             {
                 return await GetCurrentUserModelOrThrowAsync();

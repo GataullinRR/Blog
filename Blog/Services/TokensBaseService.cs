@@ -45,7 +45,7 @@ namespace Blog.Services
         protected async Task<string> getTokenedLinkAsync(User targetOrProvider, Func<BinaryWriter, Task> writer)
         {
             var token = await generateAsync();
-            return Services.LinkBuilder.GenerateLink(
+            return S.LinkBuilder.GenerateLink(
                 _targetAction.ControllerName,
                 _targetAction.ActionName,
                 new { token = token });
@@ -56,12 +56,12 @@ namespace Blog.Services
                 using (var writerStream = ms.CreateWriter())
                 {
                     var tokenMetadata = new TokenMetadata();
-                    Services.Db.TokenMetadatas.Add(tokenMetadata);
-                    await Services.Db.SaveChangesAsync();
+                    S.Db.TokenMetadatas.Add(tokenMetadata);
+                    await S.Db.SaveChangesAsync();
                     writerStream.Write(tokenMetadata.Id);
                     writerStream.Write(DateTimeOffset.UtcNow);
                     writerStream.Write(Convert.ToString(targetOrProvider.Id, CultureInfo.InvariantCulture));
-                    string stamp = await Services.UserManager.GetSecurityStampAsync(targetOrProvider);
+                    string stamp = await S.UserManager.GetSecurityStampAsync(targetOrProvider);
                     writerStream.Write(stamp);
                     await writer(writerStream);
                 }
@@ -80,7 +80,7 @@ namespace Blog.Services
                 using (var readerStream = ms.CreateReader())
                 {
                     var metadataId = readerStream.ReadInt32();
-                    var metadata = await Services.Db.TokenMetadatas.FirstOrDefaultByIdAsync(metadataId);
+                    var metadata = await S.Db.TokenMetadatas.FirstOrDefaultByIdAsync(metadataId);
                     if (metadata == null)
                     {
                         return (null, TokenValidity.INVALID);
@@ -96,13 +96,13 @@ namespace Blog.Services
                         return (null, TokenValidity.EXPIRED);
                     }
                     var userId = readerStream.ReadString();
-                    var user = await Services.UserManager.FindByIdAsync(userId);
+                    var user = await S.UserManager.FindByIdAsync(userId);
                     if (user == null)
                     {
                         return (null, TokenValidity.INVALID);
                     }
                     var stamp = readerStream.ReadString();
-                    var expectedStamp = await Services.UserManager.GetSecurityStampAsync(user);
+                    var expectedStamp = await S.UserManager.GetSecurityStampAsync(user);
                     if (stamp != expectedStamp)
                     {
                         return (null, TokenValidity.INVALID);
@@ -124,9 +124,9 @@ namespace Blog.Services
             using (var readerStream = ms.CreateReader())
             {
                 var metadataId = readerStream.ReadInt32();
-                var metadata = await Services.Db.TokenMetadatas.FirstOrDefaultByIdAsync(metadataId);
+                var metadata = await S.Db.TokenMetadatas.FirstOrDefaultByIdAsync(metadataId);
                 metadata.IsUsedOrExpired = true;
-                await Services.Db.SaveChangesAsync();
+                await S.Db.SaveChangesAsync();
             }
         }
     }

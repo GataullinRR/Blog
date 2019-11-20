@@ -55,7 +55,7 @@ namespace BlogTests
             using (getServices(out var services))
             {
                 var moderator = await services.UserManager.GetUsersInRoleAsync(Roles.MODERATOR).ThenDo(ms => ms.Single());
-                var target = testingEntity.Select<IEnumerable<IReportObject>>(
+                var target = testingEntity.Select<IEnumerable<IModeratableObject>>(
                     (te => (string)te == "Commentary", services.Db.Commentaries),
                     (te => (string)te == "Post", services.Db.Posts),
                     (te => (string)te == "Profile", services.Db.ProfilesInfos))

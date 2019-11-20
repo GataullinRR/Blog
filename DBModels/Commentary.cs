@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DBModels
 {
-    public class Commentary : IDbEntity, IReportObject
+    public class Commentary : IDbEntity, IModeratableObject
     {
         [Key] public int Id { get; set; }
         [Required] public virtual User Author { get; set; }
@@ -15,6 +15,7 @@ namespace DBModels
         [Required] public virtual List<CommentaryEdit> Edits { get; set; } = new List<CommentaryEdit>();
         [InverseProperty(nameof(Report.CommentaryObject))]
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
+        [Required] public List<Violation> Violations { get; set; } = new List<Violation>();
         [Required] public virtual ViewStatistic ViewStatistic { get; set; }
         public bool IsHidden { get; set; }
         public bool IsDeleted { get; set; }

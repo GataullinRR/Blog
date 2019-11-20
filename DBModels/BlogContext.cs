@@ -13,7 +13,7 @@ namespace DBModels
         public DbSet<Commentary> Commentaries { get; set; }
         public DbSet<PostEdit> PostsEdits { get; set; }
         public DbSet<CommentaryEdit> CommentaryEdits { get; set; }
-        public DbSet<UserRuleViolation> UserRuleViolations { get; set; }
+        public DbSet<Violation> UserRuleViolations { get; set; }
         public DbSet<ProfileStatus> ProfilesStatuses { get; set; }
         public DbSet<Profile> ProfilesInfos { get; set; }
         public DbSet<Report> Reports { get; set; }

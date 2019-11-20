@@ -32,7 +32,8 @@ namespace DBModels
         SIGNED_OUT = 1200,
         SIGN_IN_FAIL = 1300,
         
-        REPORT_CHECKED = 1400
+        REPORT_CHECKED = 1400,
+        VIOLATION_REPORTED = 1500,
     }
 
     public class UserAction : IDbEntity
@@ -44,17 +45,17 @@ namespace DBModels
         public virtual Commentary CommentaryObject { get; set; }
         public virtual Post PostObject { get; set; }
         public virtual Profile ProfileObject { get; set; }
-        public IReportObject ReportObject => CommentaryObject ?? (IReportObject)PostObject ?? ProfileObject;
+        public IModeratableObject ReportObject => CommentaryObject ?? (IModeratableObject)PostObject ?? ProfileObject;
 
         public UserAction() { }
 
-        public UserAction(ActionType actionType, object actionObject)
+        public UserAction(ActionType actionType, object @object)
         {
             ActionType = actionType;
             ActionDate = DateTime.UtcNow;
-            CommentaryObject = actionObject as Commentary;
-            PostObject = actionObject as Post;
-            ProfileObject = actionObject as Profile;
+            CommentaryObject = @object as Commentary;
+            PostObject = @object as Post;
+            ProfileObject = @object as Profile;
         }
     }
 }

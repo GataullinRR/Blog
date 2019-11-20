@@ -9,11 +9,11 @@ namespace Blog.Models
     public class AnchorModel
     {
         public string Page { get; private set; }
+        public string Handler { get; private set; }
         public string Text { get; private set; }
         public object RouteId { get; private set; } = null;
         public string RouteIdParameterName { get; private set; } = "id";
         public bool IsShown { get; private set; } = true;
-
         public string Controller { get; private set; }
         public string Action { get; private set; }
 
@@ -51,6 +51,19 @@ namespace Blog.Models
                 Action = action,
                 RouteIdParameterName = routeIdParameterName,
                 RouteId = routeId,
+                IsShown = isShown
+            };
+        }
+
+        public static AnchorModel ToPage(string text, string page, string handler, string routeIdParameterName, object routeId, bool isShown)
+        {
+            return new AnchorModel()
+            {
+                Text = text,
+                Page = page.GetPage(),
+                Handler = handler?.GetHandler(),
+                RouteId = routeId,
+                RouteIdParameterName = routeIdParameterName,
                 IsShown = isShown
             };
         }

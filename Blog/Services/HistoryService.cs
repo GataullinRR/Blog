@@ -11,7 +11,7 @@ namespace Blog.Services
     {
         const string PREV_LAST_URL_KEY = "PrevLastGetRequestPath";
         const string LAST_URL_KEY = "LastGetRequestPath";
-        public bool HasLastUri => Services.HttpContext.Session.Keys.Contains(LAST_URL_KEY);
+        public bool HasLastUri => S.HttpContext.Session.Keys.Contains(LAST_URL_KEY);
 
         public HistoryService(ServicesProvider serviceProvider) : base(serviceProvider)
         {
@@ -20,14 +20,14 @@ namespace Blog.Services
 
         public void SaveCurrentURL()
         {
-            if (Services.HttpContext.Request.Method == "GET")
+            if (S.HttpContext.Request.Method == "GET")
             {
                 var url = getCurrentURL();
                 var lastURL = getByKeyOrIndex(LAST_URL_KEY);
                 if (lastURL != url) // do nothing if we have current url in the history
                 {
-                    Services.HttpContext.Session.Set(PREV_LAST_URL_KEY, lastURL.GetBytes(Encoding.UTF8));
-                    Services.HttpContext.Session.Set(LAST_URL_KEY, url.GetBytes(Encoding.UTF8));
+                    S.HttpContext.Session.Set(PREV_LAST_URL_KEY, lastURL.GetBytes(Encoding.UTF8));
+                    S.HttpContext.Session.Set(LAST_URL_KEY, url.GetBytes(Encoding.UTF8));
                 }
             }
         }
@@ -45,7 +45,7 @@ namespace Blog.Services
         }
         string getByKeyOrIndex(string key)
         {
-            var has = Services.HttpContext.Session.TryGetValue(key, out byte[] uri);
+            var has = S.HttpContext.Session.TryGetValue(key, out byte[] uri);
             if (!has)
             {
                 return getURLToIndex();
@@ -58,20 +58,20 @@ namespace Blog.Services
         {
             return new UriBuilder
             {
-                Scheme = Services.HttpContext.Request.Scheme,
-                Host = Services.HttpContext.Request.Host.Host,
-                Port = Services.HttpContext.Request.Host.Port.GetValueOrDefault(80),
-                Path = Services.HttpContext.Request.Path.ToString(),
-                Query = Services.HttpContext.Request.QueryString.ToString()
+                Scheme = S.HttpContext.Request.Scheme,
+                Host = S.HttpContext.Request.Host.Host,
+                Port = S.HttpContext.Request.Host.Port.GetValueOrDefault(80),
+                Path = S.HttpContext.Request.Path.ToString(),
+                Query = S.HttpContext.Request.QueryString.ToString()
             }.Uri.ToString();
         }
         string getURLToIndex()
         {
             return new UriBuilder
             {
-                Scheme = Services.HttpContext.Request.Scheme,
-                Host = Services.HttpContext.Request.Host.Host,
-                Port = Services.HttpContext.Request.Host.Port.GetValueOrDefault(80),
+                Scheme = S.HttpContext.Request.Scheme,
+                Host = S.HttpContext.Request.Host.Host,
+                Port = S.HttpContext.Request.Host.Port.GetValueOrDefault(80),
             }.Uri.ToString();
         }
     }
