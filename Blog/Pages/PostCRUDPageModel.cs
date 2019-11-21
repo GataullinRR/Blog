@@ -1,10 +1,13 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 using Blog.Models;
 using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Utilities.Extensions;
 
 namespace Blog.Pages
 {
@@ -21,6 +24,15 @@ namespace Blog.Pages
         public PostCRUDPageModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
 
+        }
+
+        protected string getEscapedPostBody()
+        {
+            return S.Sanitizer.AllowAllButNotExecutable.Sanitize(Body);
+        }
+        protected string getPostBodyPreview(string escapedBody)
+        {
+            return S.Sanitizer.IgnoreNonTextNodes(escapedBody.Take(500).Aggregate());
         }
     }
 }

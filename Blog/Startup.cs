@@ -9,6 +9,7 @@ using Blog.Misc;
 using Blog.Pages.Account;
 using Blog.Services;
 using DBModels;
+using Ganss.XSS;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Utilities.Types;
 
 namespace Blog
 {
@@ -87,6 +89,7 @@ namespace Blog
             services.AddScoped<SessionMutatorsManagerService>();
             services.AddScoped<BanningService>();
             services.AddScoped<UtilitiesService>();
+            services.AddSingleton<HtmlSanitizerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

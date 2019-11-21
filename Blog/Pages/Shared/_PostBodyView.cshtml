@@ -1,0 +1,13 @@
+﻿@model PostViewModel
+
+<div class="mce-content-body">
+    @if (Model.PreviewVersion)
+    {
+        // If Db will be forged
+        @Html.Raw(Model.Post.BodyPreview);
+    }
+    else
+    {
+        @Html.Raw(Model.Post.Body);
+    }
+</div>

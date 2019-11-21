@@ -170,7 +170,7 @@ namespace BlogTests
                 var testUser = await services.Db.Users.FirstAsync(u => u.UserName == TEST_USER_NAME);
                 testUser.Status.State = ProfileState.ACTIVE;
                 testUser.EmailConfirmed = true;
-                var testPost = new Post(DateTime.UtcNow, testUser, "1", "2");
+                var testPost = new Post(DateTime.UtcNow, testUser, "1", "2", "");
                 services.Db.Posts.Add(testPost);
                 await services.Db.SaveChangesAsync();
 

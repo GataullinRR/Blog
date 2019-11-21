@@ -13,6 +13,7 @@ namespace DBModels
         [Required] public virtual User Author { get; set; }
         [Required] public string Title { get; set; }
         [Required] public string Body { get; set; }
+        [Required] public string BodyPreview { get; set; }
         [Required] public virtual List<PostEdit> Edits { get; set; } = new List<PostEdit>();
         [Required] public virtual ViewStatistic ViewStatistic { get; set; }
         [InverseProperty(nameof(Report.PostObject))]
@@ -25,12 +26,13 @@ namespace DBModels
 
         }
 
-        public Post(DateTime creationTime, User author, string title, string body)
+        public Post(DateTime creationTime, User author, string title, string body, string bodyPreview)
         {
             CreationTime = creationTime;
             Author = author ?? throw new ArgumentNullException(nameof(author));
             Title = title ?? throw new ArgumentNullException(nameof(title));
             Body = body ?? throw new ArgumentNullException(nameof(body));
+            BodyPreview = bodyPreview ?? throw new ArgumentNullException(nameof(bodyPreview));
             ViewStatistic = new ViewStatistic();
         }
     }

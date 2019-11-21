@@ -50,13 +50,14 @@ namespace Blog.Pages
                 await S.Permissions.ValidateEditPostAsync(editingPost);
 
                 var author = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-                editingPost.Body = Body;
+                editingPost.Body = getEscapedPostBody();
+                editingPost.BodyPreview = getPostBodyPreview(editingPost.Body);
                 if (await S.Permissions.CanEditPostTitleAsync(editingPost))
                 {
                     editingPost.Title = Title;
                 }
                 editingPost.Edits.Add(new PostEdit(author, EditReason, DateTime.UtcNow));
-                author.Actions.Add(new UserAction(ActionType.POST_EDIT, editingPost));
+                author.Actions.Add(new UserAction(ActionType.POST_EDITED, editingPost));
                 await S.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Post", new { id = editingPost.Id });

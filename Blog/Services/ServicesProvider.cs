@@ -1,4 +1,5 @@
 ﻿using DBModels;
+using Ganss.XSS;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -30,6 +31,7 @@ namespace Blog.Services
         readonly Lazy<SessionMutatorsManagerService> _mutatorsManager;
         readonly Lazy<UtilitiesService> _utilities;
         readonly Lazy<BanningService> _banning;
+        readonly Lazy<HtmlSanitizerService> _sanitizer;
 
         public IServiceProvider ServiceProvider { get; }
         public BlogContext Db => _db.Value;
@@ -50,6 +52,7 @@ namespace Blog.Services
         public SessionMutatorsManagerService MutatorsManager => _mutatorsManager.Value;
         public UtilitiesService Utilities => _utilities.Value;
         public BanningService Banning => _banning.Value;
+        public HtmlSanitizerService Sanitizer => _sanitizer.Value;
 
         public ServicesProvider(IServiceProvider serviceProvider)
         {
@@ -73,6 +76,7 @@ namespace Blog.Services
             _mutatorsManager = ServiceProvider.GetLazyService<SessionMutatorsManagerService>();
             _utilities = ServiceProvider.GetLazyService<UtilitiesService>();
             _banning = ServiceProvider.GetLazyService<BanningService>();
+            _sanitizer = ServiceProvider.GetLazyService<HtmlSanitizerService>();
         }
     }
 }

@@ -6,17 +6,16 @@
     ViewData["Title"] = Model.Post.Title;
 }
 
-    <h2>
-        @Model.Post.Title
-        @await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/PostEdit", "id", Model.Post.Id, await Model.Permissions.CanEditPostAsync(Model.Post)))
-        @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportPostAsync), "id", Model.Post.Id, await Model.Permissions.CanReportAsync(Model.Post)))
-        <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Post)">| <a asp-page="/ViolationReport" asp-page-handler="Post" asp-route-id="@Model.Post.Id">Report violation</a></span>
-    </h2>
+<h2>
+    @Model.Post.Title
+    @await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/PostEdit", "id", Model.Post.Id, await Model.Permissions.CanEditPostAsync(Model.Post)))
+    @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportPostAsync), "id", Model.Post.Id, await Model.Permissions.CanReportAsync(Model.Post)))
+    <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Post)">| <a asp-page="/ViolationReport" asp-page-handler="Post" asp-route-id="@Model.Post.Id">Report violation</a></span>
+</h2>
 
-    <div class="line-breaks">
-        @Model.Post.Body
-    </div>
-
+<div>
+    @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(Model.Post, false)); }
+</div>
 <div>
     <span>Posted by <a asp-page="/Account/Profile" asp-route-id="@Model.Post.Author.Id">@Model.Post.Author.UserName</a> at @Model.Post.CreationTime.ToHoursDateString()</span>
 </div>

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Utilities.Extensions;
 
 namespace Blog.Pages
 {
@@ -41,10 +42,12 @@ namespace Blog.Pages
                 else
                 {
                     var author = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-                    var post = new Post(DateTime.UtcNow, author, Title, Body);
+                    var body = getEscapedPostBody();
+                    var preview = getPostBodyPreview(body);
+                    var post = new Post(DateTime.UtcNow, author, Title, body, preview);
                     S.Db.Posts.Add(post);
                     await S.Db.SaveChangesAsync();
-                    author.Actions.Add(new UserAction(ActionType.POST_CREATE, post));
+                    author.Actions.Add(new UserAction(ActionType.POST_CREATED, post));
                     await S.Db.SaveChangesAsync();
 
                     return RedirectToPage("/Post", new { id = post.Id });

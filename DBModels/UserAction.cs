@@ -12,10 +12,10 @@ namespace DBModels
     {
         NONE = 0,
         OTHER = 50,
-        POST_CREATE = 100,
+        POST_CREATED = 100,
         ADD_COMMENTARY = 200,
         PROFILE_EDIT = 300,
-        POST_EDIT = 400,
+        POST_EDITED = 400,
         COMMENTARY_EDIT = 450,
         COMMENTARY_DELETE = 500,
         REPORT = 600,
