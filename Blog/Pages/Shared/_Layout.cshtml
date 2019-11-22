@@ -11,7 +11,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="~/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-4.3.1-dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="~/ js / tinymce / skins / ui / oxide / content.min.css" />
     @*<link rel="stylesheet" href="~/js/tinymce/skins/content/default/content.min.css" />*@
@@ -26,26 +26,57 @@
         </div>
     </div>
 
-    <a asp-page="/Index">Home</a>
-    @if (User.Identity.IsAuthenticated)
-    {
-        <a asp-page="/Account/Profile">@User.Identity.Name</a>
-        <a asp-controller="Account" asp-action="Logout">Logout</a>
-    }
-    else
-    {
-        <a asp-page="/Account/Login">Login</a>
-        <a asp-page="/Account/Register">Register</a>
-    }
-    @if (await Permissions.CanAccessModeratorsPanelAsync(currentUser))
-    {
-        <a asp-page="/ModeratorPanel">Moderator panel</a>
-    }
-    @if (await Permissions.CanAccessBlogControlPanelAsync())
-    {
-        <a asp-page="/BlogControlPanel">Control panel</a>
-    }
-    <hr />
+    <nav class="navbar navbar-expand-sm navbar-light bg-white">
+        <a class="navbar-brand" asp-page="/Index">Home</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="collapsibleNavbar">
+            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/Account/Profile">@User.Identity.Name</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Account" asp-action="Logout">Logout</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/Account/Login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/Account/Register">Register</a>
+                    </li>
+                }
+                @if (await Permissions.CanCreatePostAsync())
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/PostCreate">New post</a>
+                    </li>
+                }
+                @if (await Permissions.CanAccessModeratorsPanelAsync(currentUser))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/ModeratorPanel">Moderator panel</a>
+                    </li>
+                }
+                @if (await Permissions.CanAccessBlogControlPanelAsync())
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/BlogControlPanel">Control panel</a>
+                    </li>
+                }
+            </ul>
+
+            <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" />
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+    </nav>
 
     <div id="messages">
         @foreach (var message in model.Messages)
@@ -55,8 +86,10 @@
     </div>
     @RenderBody()
 
-    <hr />
-    <h6>GataullinRR</h6>
+    <footer>
+        <strong>Created by <a href="https://github.com/GataullinRR">GataullinRR</a></strong>
+        <span style="float:right">Powered by ASP .NET Core 2.2</span>
+    </footer>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -64,14 +97,15 @@
     <script src="~/lib/jquery-ajax-unobtrusive/dist/jquery.unobtrusive-ajax.min.js" type="text/javascript"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.js" type="text/javascript"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js" type="text/javascript"></script>
+    <script src="~/lib/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
     <script src="~/js/tinymce/tinymce.min.js"></script>
 
     <script>
         // See https://www.tiny.cloud/docs/demo/full-featured/
         // and https://www.tiny.cloud/docs/configure/editor-appearance/#menu
         tinymce.init({
-            mode : "specific_textareas",
-            editor_selector : "rich-edit",
+            mode: "specific_textareas",
+            editor_selector: "rich-edit",
             plugins: 'preview paste searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen table image link codesample charmap hr pagebreak nonbreaking anchor insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons',
             imagetools_cors_hosts: ['picsum.photos'],
             toolbar: 'undo redo | bold italic underline strikethrough | outdent indent |  numlist bullist | removeformat | charmap emoticons | fullscreen preview | insertfile image media link anchor codesample',

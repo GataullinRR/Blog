@@ -1,9 +1,9 @@
-﻿body {
+﻿/*body {
     padding-top: 10px;
     padding-bottom: 10px;
     padding-left: 10px;
     padding-right: 10px;
-}
+}*/
 
 textarea {
     width: 100%
@@ -47,7 +47,20 @@ span.comment-deleted {
     white-space: pre-line;
 }
 
+.post-preview {
+    margin: 0 0 25px 0;
+}
 
+.navbar-light .navbar-nav .nav-link {
+    color: #3a3a3a;
+}
+nav .navbar-light {
+    background: #3a3a3a;
+}
+
+footer {
+    margin: 0 15px 0 15px
+}
 
 .mce-content-body table {
     border-collapse: collapse
