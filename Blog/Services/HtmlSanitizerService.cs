@@ -15,7 +15,7 @@ namespace Blog.Services
         {
             AllowAllButNotExecutable = new HtmlSanitizer(
                 allowedTags: "code i b s img li ul ol link p em strong tr td table tbody a br span code pre sup sub blockquote caption".Split(" "),
-                allowedSchemes: "http https".Split(" "),
+                allowedSchemes: "http https data".Split(" "),
                 allowedAttributes: "href src style class".Split(" "),
                 uriAttributes: "href src".Split(" "),
                 allowedCssProperties: "list-style-type padding-left text-decoration height width border border-collapse cellspacing cellpadding data-mce-style".Split(" "),

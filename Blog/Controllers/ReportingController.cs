@@ -23,7 +23,7 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                return await reportAsync(Services.Db.ProfilesInfos.FirstOrDefault(p => p.Id == id));
+                return await reportAsync(S.Db.ProfilesInfos.FirstOrDefault(p => p.Id == id));
             }
             else
             {
@@ -35,7 +35,7 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                return await reportAsync(Services.Db.Posts.FirstOrDefault(p => p.Id == id));
+                return await reportAsync(S.Db.Posts.FirstOrDefault(p => p.Id == id));
             }
             else
             {
@@ -47,7 +47,7 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                return await reportAsync(Services.Db.Commentaries.FirstOrDefault(p => p.Id == id));
+                return await reportAsync(S.Db.Commentaries.FirstOrDefault(p => p.Id == id));
             }
             else
             {
@@ -57,17 +57,17 @@ namespace Blog.Controllers
 
         async Task<IActionResult> reportAsync(IModeratableObject reportObject)
         {
-            await Services.Permissions.ValidateReportAsync(reportObject);
+            await S.Permissions.ValidateReportAsync(reportObject);
 
             Report report;
-            var reportingUser = await Services.UserManager.GetUserAsync(User);
+            var reportingUser = await S.UserManager.GetUserAsync(User);
             if (reportObject is Post post)
             {
                 report = new Report(reportingUser, post.Author, reportObject);
             }
             else if (reportObject is Profile profile)
             {
-                var owner = await Services.Db.Users.FirstOrDefaultAsync(u => u.Profile.Id == profile.Id);
+                var owner = await S.Db.Users.FirstOrDefaultAsync(u => u.Profile.Id == profile.Id);
                 report = new Report(reportingUser, owner, reportObject);
             }
             else if (reportObject is Commentary commentary)
@@ -75,18 +75,18 @@ namespace Blog.Controllers
                 report = new Report(reportingUser, commentary.Author, reportObject);
                 commentary.IsHidden = commentary.IsHidden 
                     ? true 
-                    : Services.Decisions.ShouldHide(commentary);
+                    : S.Decisions.ShouldHide(commentary);
             }
             else
             {
                 throw new InvalidOperationException("Can't create report for object of such type");
             }
 
-            Services.Db.Reports.Add(report);
+            S.Db.Reports.Add(report);
             reportingUser.Actions.Add(new UserAction(ActionType.REPORT, reportObject));
-            if (Services.Decisions.ShouldReportToModerator(reportObject))
+            if (S.Decisions.ShouldReportToModerator(reportObject))
             {
-                await Services.DbUpdator.EnsureHasEnoughModeratorsInChargeAsync(reportObject.Author);
+                await S.DbUpdator.EnsureHasEnoughModeratorsInChargeAsync(reportObject.Author);
                 foreach (var moderator in reportObject.Author.ModeratorsInCharge)
                 {
                     var alreadyAdded = moderator.ModeratorPanel.EntitiesToCheck
@@ -101,11 +101,11 @@ namespace Blog.Controllers
                     }
                 }
             }
-            await Services.Db.SaveChangesAsync();
+            await S.Db.SaveChangesAsync();
 
             LayoutModel.AddMessage("Report has been submitted");
 
-            return Redirect(Services.History.GetLastURL());
+            return Redirect(S.History.GetLastURL());
         }
     }
 }

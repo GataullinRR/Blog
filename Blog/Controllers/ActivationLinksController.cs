@@ -21,10 +21,10 @@ namespace Blog.Controllers
             if (ModelState.IsValid)
             {
                 var action = EnumUtils.CastSafe<ActivationLinkAction>(actionRaw);
-                await Services.Permissions.ValidateGenerateActivationLinkAsync(action);
+                await S.Permissions.ValidateGenerateActivationLinkAsync(action);
 
-                var currenUser = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
-                return await Services.ActivationLinks.GenerateLink(currenUser, action);
+                var currenUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+                return await S.ActivationLinks.GenerateLink(currenUser, action);
             }
             else
             {

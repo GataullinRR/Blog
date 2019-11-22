@@ -15,12 +15,12 @@ namespace Blog.Controllers
 {
     public abstract class ControllerBase : Controller, ILayoutModelProvider
     {
-        internal ServicesProvider Services { get; }
+        internal ServicesProvider S { get; }
         public LayoutModel LayoutModel { get; private set; }
 
         public ControllerBase(ServicesProvider serviceProvider)
         {
-            Services = serviceProvider;
+            S = serviceProvider;
         }
 
         public override void OnActionExecuted(ActionExecutedContext context)

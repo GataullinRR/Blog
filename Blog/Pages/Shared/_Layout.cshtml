@@ -133,6 +133,26 @@
             applyClasses();
         });
 
+        function makePost(route, dataObject, isAsync, onSuccess, onError) {
+            $.ajax({
+                type: "POST",
+                url: route,
+                data: dataObject,
+                dataType: "text",
+                async: isAsync,
+                success: function (data, textStatus, jqXHR) {
+                    if (onSuccess) {
+                        onSuccess(data);
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (onError) {
+                        onError();
+                    }
+                }
+            });
+        }
+
         function showBusy(operationName) {
             var modal = document.getElementById("busyModal");
             var modalTextContainer = document.getElementById("busyModalTextContainer");

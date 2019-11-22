@@ -25,20 +25,20 @@ namespace Blog.Controllers
         [HttpGet()]
         public async Task CheckIfAuthentificated()
         {
-            await Services.Utilities.GetCurrentUserModelOrThrowAsync();
+            await S.Utilities.GetCurrentUserModelOrThrowAsync();
         }
 
         [HttpGet()]
         public async Task<IActionResult> Logout()
         {
-            await Services.Permissions.ValidateLogoutAsync();
+            await S.Permissions.ValidateLogoutAsync();
 
-            var currenUser = await Services.UserManager.GetUserAsync(User);
-            await Services.SignInManager.SignOutAsync();
+            var currenUser = await S.UserManager.GetUserAsync(User);
+            await S.SignInManager.SignOutAsync();
             if (currenUser != null)
             {
                 currenUser.Actions.Add(new DBModels.UserAction(ActionType.SIGNED_OUT, null));
-                await Services.Db.SaveChangesAsync();
+                await S.Db.SaveChangesAsync();
             }
 
             return RedirectToPage("/Index");
@@ -49,13 +49,13 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var targetUser = await Services.UserManager.FindByIdAsync(userId);
-                await Services.Permissions.ValidateUnbanUserAsync(targetUser);
-                await Services.Banning.UnbanAsync(targetUser);
+                var targetUser = await S.UserManager.FindByIdAsync(userId);
+                await S.Permissions.ValidateUnbanUserAsync(targetUser);
+                await S.Banning.UnbanAsync(targetUser);
 
                 LayoutModel.AddMessage($"User \"{targetUser.UserName}\" has been unbanned");
 
-                return Redirect(Services.History.GetLastURL());
+                return Redirect(S.History.GetLastURL());
             }
             else
             {
@@ -68,9 +68,9 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var targetUser = await Services.UserManager.FindByIdAsync(userId);
-                await Services.Permissions.ValidateBanUserAsync(targetUser);
-                await Services.Banning.BanForeverAsync(targetUser, reason);
+                var targetUser = await S.UserManager.FindByIdAsync(userId);
+                await S.Permissions.ValidateBanUserAsync(targetUser);
+                await S.Banning.BanForeverAsync(targetUser, reason);
             }
             else
             {
@@ -83,7 +83,7 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var tokenData = await Services.ActivationLinks.ParseAsync(token);
+                var tokenData = await S.ActivationLinks.ParseAsync(token);
                 if (tokenData.Validity != TokenValidity.VALID)
                 {
                     return reportError(tokenData.Validity.GetEnumValueDescription());
@@ -107,8 +107,8 @@ namespace Blog.Controllers
                 {
                     await Logout();
                 }
-                Services.MutatorsManager.RegistrationRole = role;
-                await Services.ActivationLinks.MarkAsUsedOrExpiredAsync(token);
+                S.MutatorsManager.RegistrationRole = role;
+                await S.ActivationLinks.MarkAsUsedOrExpiredAsync(token);
                 return RedirectToPage("/Account/Register");
             }
             else
@@ -122,7 +122,7 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var tokenData = await Services.ConfirmationLinks.ParseAsync(token);
+                var tokenData = await S.ConfirmationLinks.ParseAsync(token);
                 if (tokenData.Validity != TokenValidity.VALID)
                 {
                     return reportError(tokenData.Validity.GetEnumValueDescription());
@@ -145,7 +145,7 @@ namespace Blog.Controllers
                         throw new NotSupportedException();
                 }
 
-                await Services.ConfirmationLinks.MarkAsUsedOrExpiredAsync(token);
+                await S.ConfirmationLinks.MarkAsUsedOrExpiredAsync(token);
                 
                 return view;
             }
@@ -160,7 +160,7 @@ namespace Blog.Controllers
             {
                 return reportError("Bad arguments");
             }
-            else if (await Services.Utilities.GetCurrentUserModelOrThrowAsync() != user)
+            else if (await S.Utilities.GetCurrentUserModelOrThrowAsync() != user)
             {
                 return reportError("You should log in in order this link to work");
             }
@@ -169,7 +169,7 @@ namespace Blog.Controllers
                 var newEmail = arguments;
                 user.Email = newEmail;
                 user.Actions.Add(new DBModels.UserAction(DBModels.ActionType.EMAIL_CHANGED, user));
-                await Services.Db.SaveChangesAsync();
+                await S.Db.SaveChangesAsync();
 
                 LayoutModel.AddMessage($"Email has been changed to {newEmail}");
 
@@ -182,16 +182,16 @@ namespace Blog.Controllers
             {
                 return RedirectToPage("/Index");
             }
-            else if (await Services.Utilities.GetCurrentUserModelOrThrowAsync() != user)
+            else if (await S.Utilities.GetCurrentUserModelOrThrowAsync() != user)
             {
                 return reportError("You should log in in order this link to work");
             }
             else
             {
                 user.EmailConfirmed = true;
-                await Services.UserManager.AddToRoleAsync(user, Roles.USER);
+                await S.UserManager.AddToRoleAsync(user, Roles.USER);
                 user.Actions.Add(new UserAction(ActionType.EMAIL_CONFIRMED, user));
-                await Services.Db.SaveChangesAsync();
+                await S.Db.SaveChangesAsync();
 
                 LayoutModel.AddMessage("Email has been confirmed!");
 
@@ -201,15 +201,15 @@ namespace Blog.Controllers
         async Task<IActionResult> generateAndSendNewPasswordAsync(User user)
         {
             var newPassword = 3.Times(_ => Global.Random.NextENWord().Capitalize()).Aggregate("");
-            var isSent = await Services.EMail.TrySendMessageAsync(user, "Password reset", "New password", $@"Your new password is: {newPassword}
+            var isSent = await S.EMail.TrySendMessageAsync(user, "Password reset", "New password", $@"Your new password is: {newPassword}
 Please delete this message so that nobody can see it");
             if (isSent)
             {
-                user.PasswordHash = Services.UserManager.PasswordHasher.HashPassword(user, newPassword);
-                var result = await Services.UserManager.UpdateAsync(user);
-                await Services.SignInManager.SignOutAsync();
+                user.PasswordHash = S.UserManager.PasswordHasher.HashPassword(user, newPassword);
+                var result = await S.UserManager.UpdateAsync(user);
+                await S.SignInManager.SignOutAsync();
                 user.Actions.Add(new UserAction(ActionType.PASSWORD_RESET, null));
-                await Services.Db.SaveChangesAsync();
+                await S.Db.SaveChangesAsync();
 
                 LayoutModel.AddMessage("New password has been sent to your E-Mail");
 

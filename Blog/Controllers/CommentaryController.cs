@@ -27,8 +27,8 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var commentary = await Services.Db.Commentaries.FirstAsync(c => c.Id == id);
-                await Services.Permissions.ValidateEditCommentaryAsync(commentary);
+                var commentary = await S.Db.Commentaries.FirstAsync(c => c.Id == id);
+                await S.Permissions.ValidateEditCommentaryAsync(commentary);
 
                 return PartialView("_CommentaryEdit", commentary);
             }
@@ -43,10 +43,10 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var commentary = await Services.Db.Commentaries.FirstAsync(c => c.Id == id);
-                var user = await Services.UserManager.GetUserAsync(User);
+                var commentary = await S.Db.Commentaries.FirstAsync(c => c.Id == id);
+                var user = await S.UserManager.GetUserAsync(User);
 
-                return PartialView("_Commentary", new CommentaryModel(user, commentary, Services.Permissions));
+                return PartialView("_Commentary", new CommentaryModel(user, commentary, S.Permissions));
             }
             else
             {
@@ -59,17 +59,17 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var currentUser = await Services.UserManager.GetUserAsync(User);
-                var commentary = await Services.Db.Commentaries.FirstAsync(c => c.Id == id);
-                await Services.Permissions.ValidateEditCommentaryAsync(commentary);
+                var currentUser = await S.UserManager.GetUserAsync(User);
+                var commentary = await S.Db.Commentaries.FirstAsync(c => c.Id == id);
+                await S.Permissions.ValidateEditCommentaryAsync(commentary);
 
-                var user = await Services.UserManager.GetUserAsync(User);
+                var user = await S.UserManager.GetUserAsync(User);
                 commentary.Body = body;
                 commentary.Edits.Add(new CommentaryEdit(user, editReason, DateTime.UtcNow));
                 currentUser.Actions.Add(new UserAction(ActionType.COMMENTARY_EDIT, commentary));
-                await Services.Db.SaveChangesAsync();
+                await S.Db.SaveChangesAsync();
 
-                return Redirect(Services.History.GetLastURL());
+                return Redirect(S.History.GetLastURL());
             }
             else
             {
@@ -82,15 +82,15 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await Services.Utilities.GetCurrentUserModelOrThrowAsync();
-                var commentary = await Services.Db.Commentaries.FirstOrDefaultByIdAsync(id);
-                await Services.Permissions.ValidateDeleteCommentaryAsync(commentary);
+                var user = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+                var commentary = await S.Db.Commentaries.FirstOrDefaultByIdAsync(id);
+                await S.Permissions.ValidateDeleteCommentaryAsync(commentary);
                 
                 user.Actions.Add(new UserAction(ActionType.COMMENTARY_DELETE, commentary));
                 commentary.IsDeleted = true;
-                await Services.Db.SaveChangesAsync();
+                await S.Db.SaveChangesAsync();
 
-                return Redirect(Services.History.GetLastURL());
+                return Redirect(S.History.GetLastURL());
             }
             else
             {
