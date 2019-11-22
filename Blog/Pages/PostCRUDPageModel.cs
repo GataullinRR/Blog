@@ -16,7 +16,7 @@ namespace Blog.Pages
     {
         [BindProperty(), Required(), MinLength(8), MaxLength(100)]
         public string Title { get; set; }
-        [BindProperty(), Required(), MinLength(500), MaxLength(100000)]
+        [BindProperty(), Required(), MinLength(500), MaxLength(10000000)]
         public string Body { get; set; }
         [BindProperty]
         public int PostId { get; set; }
