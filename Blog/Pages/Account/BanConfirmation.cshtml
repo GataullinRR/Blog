@@ -4,25 +4,25 @@
     ViewData["Title"] = "Ban confirmation";
 }
 
-<h2>Ban confirmation</h2>
+<div class="form-sm">
+    <form method="post" class="container" asp-page-handler="Ban">
+        <input type="hidden" asp-for="UserId" />
 
-<form method="post" asp-page-handler="Ban">
-    <input type="hidden" asp-for="UserId"/>
+        <h2>Ban confirmation</h2>
 
-    <div class="form-group">
-        <span>Duration: </span>
-        <input asp-for="BannedTill" />
-        <span asp-validation-for="BannedTill"></span>
-    </div>
-    <div class="form-group">
-        <span>Reason: </span>
-        <input asp-for="Reason" />
-        <span asp-validation-for="Reason"></span>
-    </div>
+        <div class="form-group">
+            <label>Duration</label>
+            <input class="form-control" asp-for="BannedTill" />
+            <span class="text-danger" asp-validation-for="BannedTill"></span>
+        </div>
+        <div class="form-group">
+            <label>Reason</label>
+            <textarea class="form-control" asp-for="Reason" placeholder="Reason"></textarea>
+            <span class="text-danger" asp-validation-for="Reason"></span>
+        </div>
 
-    <div asp-validation-summary="ModelOnly"></div>
+        <div asp-validation-summary="ModelOnly"></div>
 
-    <div class="form-group">
         <button type="submit" class="btn btn-primary">Apply</button>
-    </div>
-</form>
+    </form>
+</div>

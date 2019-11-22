@@ -51,38 +51,54 @@ span.comment-deleted {
     margin: 0 0 25px 0;
 }
 
+.form-sm{
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.form-sm button {
+    width: 100%;
+}
+.form-caption {
+    display: inline-block;
+    margin: 0 0 20px 0;
+}
+.form-sm h2 {
+    margin: 0 0 15px 0;
+}
+
 .navbar-light .navbar-nav .nav-link {
     color: #3a3a3a;
 }
+
 nav .navbar-light {
     background: #3a3a3a;
 }
 
 footer {
-    margin: 0 15px 0 15px
+    margin: 15px;
 }
 
 .mce-content-body table {
     border-collapse: collapse
 }
 
-    .mce-content-body table td,
-    table th {
-        border: 1px solid #ccc;
-        padding: .4rem
-    }
+.mce-content-body table td, table th {
+    border: 1px solid #ccc;
+    padding: .4rem
+}
 
 .mce-content-body figure {
     display: table;
     margin: 1rem auto
 }
 
-    .mce-content-body figure figcaption {
-        color: #999;
-        display: block;
-        margin-top: .25rem;
-        text-align: center
-    }
+.mce-content-body figure figcaption {
+    color: #999;
+    display: block;
+    margin-top: .25rem;
+    text-align: center
+}
 
 .mce-content-body hr {
     border-color: #ccc;

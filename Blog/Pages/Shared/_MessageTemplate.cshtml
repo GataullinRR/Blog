@@ -1,10 +1,18 @@
 ﻿@model MessageModel
 
-    <div>
-        <span>@Model.Text</span>
+<div class="container-fluid" style="margin:10px 0 10px 0">
+    <div class="d-flex flex-sm-row">
+        <div class="d-flex flex-sm-column flex-grow-1">
+            <span>@Model.Text</span>
+        </div>
         @foreach (var jsAction in Model.JSActions)
         {
-            <a href="" class="no-redirect" onclick="@jsAction.FunctionName">@jsAction.Name</a>
+            <div class="d-flex flex-sm-column">
+                <a href="" style="margin-right:10px" class="no-redirect" onclick="@jsAction.FunctionName">@jsAction.Name</a>
+            </div>
         }
-        <a href="" class="no-redirect" onclick="removeParent(this)">Close</a>
+        <div class="d-flex flex-sm-column">
+            <a href="" class="no-redirect" onclick="removeParent(this)">Close</a>
+        </div>
     </div>
+</div>

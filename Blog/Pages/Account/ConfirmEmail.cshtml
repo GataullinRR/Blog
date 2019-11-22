@@ -5,30 +5,35 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-@if (Model.UserModel.EmailConfirmed)
-{
-    <div>
-        Your E-Mail is now confirmed. You can post and comment now!
-    </div>
-    <div>
-        <a asp-page="/Index">Go home</a>
-    </div>
-}
-else
-{
-    @if (Model.IsConfirmationLinkSent)
-    {
-        <h2>Almost done!</h2>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            @if (Model.UserModel.EmailConfirmed)
+            {
+                <div>
+                    Your E-Mail is now confirmed. You can post and comment now!
+                </div>
+                <div>
+                    <a asp-page="/Index">Go home</a>
+                </div>
+            }
+            else
+            {
+                @if (Model.IsConfirmationLinkSent)
+                {
+                    <h2>Almost done!</h2>
 
-        <div>
-            We've sent confirmation link to your e-mail
+                    <div>
+                        We've sent confirmation link to your e-mail
+                    </div>
+                }
+                else
+                {
+                    <div>We couldn't send confirmation link to your email</div>
+                    <div><a asp-page="/Account/ConfirmEMail">Send again</a></div>
+                }
+            }
         </div>
-    }
-    else
-    {
-        <div>We couldn't send confirmation link to your email</div>
-        <div><a asp-page="/Account/ConfirmEMail">Send again</a></div>
-    }
-}
-
+    </div>
+</div>
 

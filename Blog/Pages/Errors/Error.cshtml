@@ -4,6 +4,12 @@
     ViewData["Title"] = "Error";
 }
 
-<h2>Something went wrong :(</h2>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <h2>Something went wrong :(</h2>
 
-<span>Error code: @Model.HttpStatus @((System.Net.HttpStatusCode)Model.HttpStatus)</span>
+            <span>Error code: @Model.HttpStatus @((System.Net.HttpStatusCode)Model.HttpStatus)</span>
+        </div>
+    </div>
+</div>

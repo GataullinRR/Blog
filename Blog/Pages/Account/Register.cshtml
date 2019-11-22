@@ -5,42 +5,43 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-    <h2>Registration</h2>
+<div class="form-sm">
+    <form method="post">
+        <h2>Registration</h2>
 
-@if (Model.RegistrationRole != Roles.USER)
-{
-    <span>You will be registered as @Model.RegistrationRole</span>
-}
+        @if (Model.RegistrationRole != Roles.USER)
+        {
+            <span>You will be registered as @Model.RegistrationRole</span>
+        }
 
-<form method="post">
-    <div class="form-group">
-        <span>User name: </span>
-        <input asp-for="Username" />
-        <span asp-validation-for="Username"></span>
-    </div>
+        <div class="form-group">
+            <label>User name</label>
+            <input class="form-control" asp-for="Username" />
+            <span class="text-danger" asp-validation-for="Username"></span>
+        </div>
 
-    <div class="form-group">
-        <span>E-Mail: </span>
-        <input asp-for="EMail" />
-        <span asp-validation-for="EMail"></span>
-    </div>
+        <div class="form-group">
+            <label>E-Mail</label>
+            <input class="form-control" asp-for="EMail" />
+            <span class="text-danger" asp-validation-for="EMail"></span>
+        </div>
 
-    <div class="form-group">
-        <span>Password: </span>
-        <input asp-for="Password" />
-        <span asp-validation-for="Password"></span>
-    </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input class="form-control" asp-for="Password" />
+            <span class="text-danger" asp-validation-for="Password"></span>
+        </div>
 
-    <div class="form-group">
-        <span>Confirm password: </span>
-        <input asp-for="ConfirmPassword" />
-        <span asp-validation-for="ConfirmPassword"></span>
-    </div>
+        <div class="form-group">
+            <label>Confirm password</label>
+            <input class="form-control" asp-for="ConfirmPassword" />
+            <span class="text-danger" asp-validation-for="ConfirmPassword"></span>
+        </div>
 
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    <div class="form-group">
-        <input class="btn btn-primary" type="submit" value="Register" />
-    </div>
-</form>
-
+        <div class="form-group">
+            <button class="btn btn-primary" type="submit">Register</button>
+        </div>
+    </form>
+</div>

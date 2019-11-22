@@ -1,44 +1,52 @@
 ﻿@model CommentaryModel
 
-    <h4 id="#@Model.Commentary.Id">
-        <a asp-page="/Commentary" asp-route-id="@Model.Commentary.Id">#@Model.Commentary.Id</a>
-        <a asp-page="/Account/Profile" asp-route-id="@Model.Commentary.Author.Id">@Model.Commentary.Author.UserName</a> - @Model.Commentary.CreationTime.ToString("hh:mm dd.MM.yyyy")
-        @await Html.PartialAsync("_Anchor", AnchorModel.ToController(
-            "Delete", nameof(CommentaryController), nameof(CommentaryController.DeleteCommentaryAsync),
-            "id", Model.Commentary.Id,
-            await Model.Permissions.CanDeleteCommentaryAsync(Model.Commentary)))
-        <span include-if="await Model.Permissions.CanEditCommentaryAsync(Model.Commentary)">| <a href="" class="no-redirect commentary-edit-button">Edit</a></span>
-        @await Html.PartialAsync("_Anchor", AnchorModel.ToController(
-           "Report", nameof(ReportingController), nameof(ReportingController.ReportCommentaryAsync),
-           "id", Model.Commentary.Id,
-           await Model.Permissions.CanReportAsync(Model.Commentary)))
-        <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Commentary)">| <a asp-page="/ViolationReport" asp-page-handler="Commentary" asp-route-id="@Model.Commentary.Id">Report violation</a></span>
-    </h4>
+<div style="margin-bottom:20px">
+        <h4 id="#@Model.Commentary.Id">
+            <a asp-page="/Commentary" asp-route-id="@Model.Commentary.Id">#@Model.Commentary.Id</a>
+            <a asp-page="/Account/Profile" asp-route-id="@Model.Commentary.Author.Id">@Model.Commentary.Author.UserName</a>
+            <span style="float:right">@Model.Commentary.CreationTime.ToString("hh:mm dd.MM.yyyy")</span>
+            @await Html.PartialAsync("_Anchor", AnchorModel.ToController(
+                "Delete", nameof(CommentaryController), nameof(CommentaryController.DeleteCommentaryAsync),
+                "id", Model.Commentary.Id,
+                await Model.Permissions.CanDeleteCommentaryAsync(Model.Commentary)))
+            <span include-if="await Model.Permissions.CanEditCommentaryAsync(Model.Commentary)">| <a href="" class="no-redirect commentary-edit-button">Edit</a></span>
+            @await Html.PartialAsync("_Anchor", AnchorModel.ToController(
+                "Report", nameof(ReportingController), nameof(ReportingController.ReportCommentaryAsync),
+                "id", Model.Commentary.Id,
+                await Model.Permissions.CanReportAsync(Model.Commentary)))
+            <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Commentary)">| <a asp-page="/ViolationReport" asp-page-handler="Commentary" asp-route-id="@Model.Commentary.Id">Report violation</a></span>
+        </h4>
+    <div class="d-flex flex-sm-row">
+        <div class="d-flex flex-sm-column" style="margin-right:20px">
+            @await Html.PartialAsync("_ProfileImage", Model.Commentary.Author)
+        </div>
+        <div class="d-flex flex-sm-column">
+            @if (!Model.Commentary.IsDeleted)
+            {
+                @if (Model.Commentary.IsHidden)
+                {
+                    <span class="comment-hidden">@Model.Commentary.Body</span>
+                }
+                else
+                {
+                    <span>@Model.Commentary.Body</span>
+                }
+            }
+            else
+            {
+                <span class="comment-deleted">This commentary has been deleted</span>
+            }
 
-@await Html.PartialAsync("_ProfileImage", Model.Commentary.Author)
-@if (!Model.Commentary.IsDeleted)
-{
-    @if (Model.Commentary.IsHidden)
-    {
-        <span class="comment-hidden">@Model.Commentary.Body</span>
-    }
-    else
-    {
-        <span>@Model.Commentary.Body</span>
-    }                                           
-}
-else
-{
-    <span class="comment-deleted">This commentary has been deleted</span>
-}
-
-@foreach (var edit in Model.Commentary.Edits)
-{
-    <div>
-        <span>Edited at @edit.EditTime.ToString("hh:mm dd.MM.yy") by <a asp-page="/Account/Profile" asp-route-id="@edit.EditAuthor.Id">@edit.EditAuthor.UserName</a></span>
-        @if (edit.Reason.IsNotNullOrWhiteSpace())
-        {
-            <span>Reason: @edit.Reason</span>
-        }
+            @foreach (var edit in Model.Commentary.Edits)
+            {
+                <div>
+                    <span>Edited at @edit.EditTime.ToString("hh:mm dd.MM.yy") by <a asp-page="/Account/Profile" asp-route-id="@edit.EditAuthor.Id">@edit.EditAuthor.UserName</a></span>
+                    @if (edit.Reason.IsNotNullOrWhiteSpace())
+                    {
+                        <span>Reason: @edit.Reason</span>
+                    }
+                </div>
+            }
+        </div>
     </div>
-}
+</div>

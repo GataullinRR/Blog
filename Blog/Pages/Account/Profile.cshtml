@@ -12,138 +12,144 @@
     var banButton = await Html.PartialAsync("_Anchor", new AnchorModel("Ban", "/Account/BanConfirmation", targetUser.Id, await Model.Permissions.CanBanUserAsync(targetUser)));
 }
 
-    <h3>
-        Profile information @await generateEditButtonAsync(targetUser.Id, canEdit) @banButton
-        @if (await Model.Permissions.CanUnbanUserAsync(targetUser))
-        {
-            <span>| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
-        }
-        @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportProfileAsync), "id", targetUser.Profile.Id, await Model.Permissions.CanReportAsync(targetUser.Profile)))
-        <span include-if="await Model.Permissions.CanReportViolationAsync(targetUser.Profile)">| <a asp-page="/ViolationReport" asp-page-handler="Profile" asp-route-id="@targetUser.Profile.Id">Report violation</a></span>
-    </h3>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <h2>
+                Profile information @await generateEditButtonAsync(targetUser.Id, canEdit) @banButton
+                @if (await Model.Permissions.CanUnbanUserAsync(targetUser))
+                {
+                    <span>| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
+                }
+                @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportProfileAsync), "id", targetUser.Profile.Id, await Model.Permissions.CanReportAsync(targetUser.Profile)))
+                <span include-if="await Model.Permissions.CanReportViolationAsync(targetUser.Profile)">| <a asp-page="/ViolationReport" asp-page-handler="Profile" asp-route-id="@targetUser.Profile.Id">Report violation</a></span>
+            </h2>
 
-@await Html.PartialAsync("_ProfileImage", targetUser)
+            @await Html.PartialAsync("_ProfileImage", targetUser)
 
-<div>@("Name: " + targetUser.UserName)</div>
-<div>@("Gender: " + targetUser.Profile.Gender.GetEnumValueDescription())</div>
-@if (canSeePrivateInformation)
-{
-    <div>@("E-Mail: " + targetUser.Email)</div>
-    <div>@("E-Mail confirmed: " + targetUser.EmailConfirmed.Ternar("Yes", "No"))</div>
-}
-<div>@("Role: " + Model.Role)</div>
-<div>@("State: " + targetUser.Status.State.GetEnumValueDescription())</div>
+            <div>@("Name: " + targetUser.UserName)</div>
+            <div>@("Gender: " + targetUser.Profile.Gender.GetEnumValueDescription())</div>
+            @if (canSeePrivateInformation)
+            {
+                <div>@("E-Mail: " + targetUser.Email)</div>
+                <div>@("E-Mail confirmed: " + targetUser.EmailConfirmed.Ternar("Yes", "No"))</div>
+            }
+            <div>@("Role: " + Model.Role)</div>
+            <div>@("State: " + targetUser.Status.State.GetEnumValueDescription())</div>
 
-<div>@("Registration date: " + targetUser.Profile.RegistrationDate.ToString("dd.MM.yyyy"))</div>
-@if (targetUser.EmailConfirmed)
-{
-    if (canEdit)
-    {
-        <div><a asp-page="/Account/ProfileEdit" asp-route-id="@targetUser.Id">Edit profile</a></div>
-    }
-    if (await Model.Permissions.CanChangePasswordAsync(targetUser))
-    {
-        <div><a asp-page="/Account/PasswordChange" asp-route-id="@targetUser.Id">Change password</a></div>
-    }
-    if (await Model.Permissions.CanChangeEmailAsync(targetUser))
-    {
-        <div><a asp-page="/Account/EmailChange" asp-route-id="@targetUser.Id">Change e-mail</a></div>
-    }
-}
-else
-{
-    if (Model.IsCurrentUser)
-    {
-        <div><a asp-page="/Account/ConfirmEMail">Confirm email</a></div>
-    }
-}
+            <div>@("Registration date: " + targetUser.Profile.RegistrationDate.ToString("dd.MM.yyyy"))</div>
+            @if (targetUser.EmailConfirmed)
+            {
+                if (canEdit)
+                {
+                    <div><a asp-page="/Account/ProfileEdit" asp-route-id="@targetUser.Id">Edit profile</a></div>
+                }
+                if (await Model.Permissions.CanChangePasswordAsync(targetUser))
+                {
+                    <div><a asp-page="/Account/PasswordChange" asp-route-id="@targetUser.Id">Change password</a></div>
+                }
+                if (await Model.Permissions.CanChangeEmailAsync(targetUser))
+                {
+                    <div><a asp-page="/Account/EmailChange" asp-route-id="@targetUser.Id">Change e-mail</a></div>
+                }
+            }
+            else
+            {
+                if (Model.IsCurrentUser)
+                {
+                    <div><a asp-page="/Account/ConfirmEMail">Confirm email</a></div>
+                }
+            }
 
-<h4>About @targetUser.UserName @await generateEditButtonAsync(targetUser.Id, canEdit)</h4>
-@if (string.IsNullOrEmpty(targetUser.Profile.About))
-{
-    <div>No information provided</div>
-}
-else
-{
-    <div>@targetUser.Profile.About</div>
-}
+            <h4>About @targetUser.UserName @await generateEditButtonAsync(targetUser.Id, canEdit)</h4>
+            @if (string.IsNullOrEmpty(targetUser.Profile.About))
+            {
+                <div>No information provided</div>
+            }
+            else
+            {
+                <div>@targetUser.Profile.About</div>
+            }
 
-@if (targetUser.Posts.Any())
-{
-    <h3>Posts</h3>
+            @if (targetUser.Posts.Any())
+            {
+                <h3>Posts</h3>
 
-    @foreach (var post in targetUser.Posts.OrderByDescending(p => p.CreationTime))
-    {
-        <div><a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a></div>
-    }
-}
+                @foreach (var post in targetUser.Posts.OrderByDescending(p => p.CreationTime))
+                {
+                    <div><a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a></div>
+                }
+            }
 
-@if (await Model.Permissions.CanSeeServiceInformationAsync())
-{
-    <h4>Violations</h4>
+            @if (await Model.Permissions.CanSeeServiceInformationAsync())
+            {
+                <h4>Violations</h4>
 
-    if (targetUser.Violations.Count == 0)
-    {
-        <span>None we know about ;)</span>
-    }
+                if (targetUser.Violations.Count == 0)
+                {
+                    <span>None we know about ;)</span>
+                }
 
-    <ul>
-        @foreach (var violation in targetUser.Violations.OrderByDescending(v => v.CreationDate))
-        {
-        <li>
-            <span>Got from <a asp-page="/Account/Profile" asp-route-id="@violation.Reporter.Id">@violation.Reporter.UserName</a>, object: </span>
-            @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(violation.Object)); }
+                <ul>
+                    @foreach (var violation in targetUser.Violations.OrderByDescending(v => v.CreationDate))
+                    {
+                        <li>
+                            <span>Got from <a asp-page="/Account/Profile" asp-route-id="@violation.Reporter.Id">@violation.Reporter.UserName</a>, object: </span>
+                            @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(violation.Object)); }
+                            <div>
+                                <span>Description: @violation.Description</span>
+                            </div>
+                        </li>
+                    }
+                </ul>
+
+                <h4>Reports</h4>
+
+                if (targetUser.Reports.Count == 0)
+                {
+                    <span>None we know about ;)</span>
+                }
+
+                <ul>
+                    @foreach (var report in targetUser.Reports.OrderByDescending(r => r.CreationDate))
+                    {
+                        <li>
+                            <span>Reported by <a asp-page="/Account/Profile" asp-route-id="@report.Reporter.Id">@report.Reporter.UserName</a> at @report.CreationDate.ToHoursDateString(). Report object: </span>
+                            @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(report.Object)); }
+                        </li>
+                    }
+                </ul>
+
+                <h4>Actions</h4>
+
+                if (targetUser.Actions.Count == 0)
+                {
+                    <span>Nothing at the moment</span>
+                }
+
+                <ul>
+                    @foreach (var action in targetUser.Actions.OrderByDescending(r => r.ActionDate))
+                    {
+                        <li>
+                            <span>@action.ActionType.ToString() at @action.ActionDate.ToString("hh:mm dd.MM.yyyy"). Object: </span>
+                            @if (action.ReportObject != null)
+                            {
+                                await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(action.ReportObject));
+                            }
+                            else
+                            {
+                                <span>unknown</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+
             <div>
-                <span>Description: @violation.Description</span>
+                Seen @Model.UserModel.Profile.ViewStatistic.TotalViews times
             </div>
-        </li>
-        }
-    </ul>
-
-    <h4>Reports</h4>
-
-    if (targetUser.Reports.Count == 0)
-    {
-        <span>None we know about ;)</span>
-    }
-
-    <ul>
-        @foreach (var report in targetUser.Reports.OrderByDescending(r => r.CreationDate))
-        {
-            <li>
-                <span>Reported by <a asp-page="/Account/Profile" asp-route-id="@report.Reporter.Id">@report.Reporter.UserName</a> at @report.CreationDate.ToHoursDateString(). Report object: </span>
-                @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(report.Object)); }
-            </li>
-        }
-    </ul>
-
-    <h4>Actions</h4>
-
-    if (targetUser.Actions.Count == 0)
-    {
-        <span>Nothing at the moment</span>
-    }
-
-    <ul>
-        @foreach (var action in targetUser.Actions.OrderByDescending(r => r.ActionDate))
-        {
-            <li>
-                <span>@action.ActionType.ToString() at @action.ActionDate.ToString("hh:mm dd.MM.yyyy"). Object: </span>
-                @if (action.ReportObject != null)
-                {
-                    await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(action.ReportObject));
-                }
-                else
-                {
-                    <span>unknown</span>
-                }
-            </li>
-        }
-    </ul>
-}
-
-<div>
-    Seen @Model.UserModel.Profile.ViewStatistic.TotalViews times
+        </div>
+    </div>
 </div>
 
 @functions

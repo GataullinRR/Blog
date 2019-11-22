@@ -6,68 +6,74 @@
     ViewData["Title"] = Model.Post.Title;
 }
 
-<h2>
-    @Model.Post.Title
-    @await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/PostEdit", "id", Model.Post.Id, await Model.Permissions.CanEditPostAsync(Model.Post)))
-    @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportPostAsync), "id", Model.Post.Id, await Model.Permissions.CanReportAsync(Model.Post)))
-    <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Post)">| <a asp-page="/ViolationReport" asp-page-handler="Post" asp-route-id="@Model.Post.Id">Report violation</a></span>
-</h2>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <h2>
+                @Model.Post.Title
+                @await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/PostEdit", "id", Model.Post.Id, await Model.Permissions.CanEditPostAsync(Model.Post)))
+                @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportPostAsync), "id", Model.Post.Id, await Model.Permissions.CanReportAsync(Model.Post)))
+                <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Post)">| <a asp-page="/ViolationReport" asp-page-handler="Post" asp-route-id="@Model.Post.Id">Report violation</a></span>
+            </h2>
 
-<div>
-    @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(Model.Post, false)); }
-</div>
-<div>
-    <span>Posted by <a asp-page="/Account/Profile" asp-route-id="@Model.Post.Author.Id">@Model.Post.Author.UserName</a> at @Model.Post.CreationTime.ToHoursDateString()</span>
-</div>
+            <div>
+                @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(Model.Post, false)); }
+            </div>
+            <div>
+                <span>Posted by <a asp-page="/Account/Profile" asp-route-id="@Model.Post.Author.Id">@Model.Post.Author.UserName</a> at @Model.Post.CreationTime.ToHoursDateString()</span>
+            </div>
 
-@foreach (var edit in Model.Post.Edits.NullToEmpty())
-{
-    <div>
-        <span>Edited at @edit.EditTime.ToString("hh:mm dd.MM.yy") by <a asp-page="/Account/Profile" asp-route-id="@edit.EditAuthor.Id">@edit.EditAuthor.UserName</a></span>
-        <span>Reason: @edit.Reason</span>
+            @foreach (var edit in Model.Post.Edits.NullToEmpty())
+            {
+                <div>
+                    <span>Edited at @edit.EditTime.ToString("hh:mm dd.MM.yy") by <a asp-page="/Account/Profile" asp-route-id="@edit.EditAuthor.Id">@edit.EditAuthor.UserName</a></span>
+                    <span>Reason: @edit.Reason</span>
+                </div>
+            }
+            <div>
+                Seen @Model.Post.ViewStatistic.TotalViews times
+            </div>
+
+            <hr />
+            <h3>Commentaries</h3>
+
+            @{ var count = 0; }
+            @foreach (var commentary in Model.Commentaries
+              .OrderByDescending(c => c.CreationTime)
+              .Take(100)
+              .Select(c => Html.PartialAsync("_CommentaryContainer", c))
+              .ToArray())
+            {
+                @await commentary;
+
+                count++;
+            }
+
+            <div>
+                <span>@count of @Model.Commentaries.Count() commentaries have been shown</span>
+            </div>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                <form include-if="await Model.Permissions.CanAddCommentaryAsync()" method="post" asp-page-handler="AddCommentary">
+                    <input type="hidden" name="postId" value="@Model.Post.Id" />
+                    <textarea name="commentBody" rows="3" placeholder="Your comment"></textarea>
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+            }
+            else
+            {
+                <a asp-page="/Account/Login">Login</a>
+                <span> or </span>
+                <a asp-page="/Account/Register">register</a>
+                <span> to comment</span>
+            }
+        </div>
     </div>
-}
-<div>
-    Seen @Model.Post.ViewStatistic.TotalViews times
 </div>
-
-<hr />
-<h3>Commentaries</h3>
-
-@{ var count = 0; }
-@foreach (var commentary in Model.Commentaries
-    .OrderByDescending(c => c.CreationTime)
-    .Take(100)
-    .Select(c => Html.PartialAsync("_CommentaryContainer", c))
-    .ToArray())
-{
-    @await commentary;
-
-    count++;
-}
-
-<div>
-    <span>@count of @Model.Commentaries.Count() commentaries have been shown</span>
-</div>
-
-@if (User.Identity.IsAuthenticated)
-{
-    <form include-if="await Model.Permissions.CanAddCommentaryAsync()" method="post" asp-page-handler="AddCommentary">
-        <input type="hidden" name="postId" value="@Model.Post.Id" />
-        <textarea name="commentBody" rows="3" placeholder="Your comment"></textarea>
-
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-        <button type="submit" class="btn btn-primary">Send</button>
-    </form>
-}
-else
-{
-    <a asp-page="/Account/Login">Login</a>
-    <span> or </span>
-    <a asp-page="/Account/Register">register</a>
-    <span> to comment</span>
-}
 
 @section Scripts {
     <partial name="_CommentartyScripts" />

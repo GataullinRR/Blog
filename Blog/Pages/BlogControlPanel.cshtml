@@ -3,37 +3,42 @@
 @{
     ViewData["Title"] = "Blog control";
 }
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <h2>Blog control</h2>
 
-<h2>Blog control</h2>
+            <div>
+                <a href="" id="inviteModerator" class="no-redirect" onclick="inviteModerator()">Invite</a> new moderator
+            </div>
+            <div>
+                <a href="" id="inviteOwner" class="no-redirect" onclick="inviteOwner()">Invite</a> new owner
+            </div>
 
-<div>
-    <a href="" id="inviteModerator" class="no-redirect" onclick="inviteModerator()">Invite</a> new moderator
+            <h3>Currently active moderators</h3>
+
+            <ul>
+                @foreach (var moderator in Model.Moderators.Where(m => m.Status.State == ProfileState.ACTIVE))
+                {
+                    <li>
+                        @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
+                    </li>
+                }
+            </ul>
+
+            <h3>Inactive moderators</h3>
+
+            <ul>
+                @foreach (var moderator in Model.Moderators.Where(m => m.Status.State != ProfileState.ACTIVE))
+                {
+                    <li>
+                        @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
 </div>
-<div>
-    <a href="" id="inviteOwner" class="no-redirect" onclick="inviteOwner()">Invite</a> new owner
-</div>
-
-<h3>Currently active moderators</h3>
-
-<ul>
-    @foreach (var moderator in Model.Moderators.Where(m => m.Status.State == ProfileState.ACTIVE))
-    {
-        <li>
-            @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
-        </li>
-    }
-</ul>
-
-<h3>Inactive moderators</h3>
-
-<ul>
-    @foreach (var moderator in Model.Moderators.Where(m => m.Status.State != ProfileState.ACTIVE))
-    {
-        <li>
-           @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
-        </li>
-    }
-</ul>
 
 @section Scripts {
     <script>
