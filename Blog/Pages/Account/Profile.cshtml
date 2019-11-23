@@ -9,20 +9,20 @@
     var targetUser = Model.UserModel;
     var canSeePrivateInformation = await Model.Permissions.CanSeePrivateInformationAsync(targetUser);
     var canEdit = await Model.Permissions.CanEditProfileAsync(targetUser);
-    var banButton = await Html.PartialAsync("_Anchor", new AnchorModel("Ban", "/Account/BanConfirmation", targetUser.Id, await Model.Permissions.CanBanUserAsync(targetUser)));
 }
 
 <div class="container-fluid">
     <div class="row">
         <div class="col">
             <h2>
-                Profile information @await generateEditButtonAsync(targetUser.Id, canEdit) @banButton
+                Profile information @await generateEditButtonAsync(targetUser.Id, canEdit)
                 @if (await Model.Permissions.CanUnbanUserAsync(targetUser))
                 {
                     <span>| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
                 }
                 @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportProfileAsync), "id", targetUser.Profile.Id, await Model.Permissions.CanReportAsync(targetUser.Profile)))
                 <span include-if="await Model.Permissions.CanReportViolationAsync(targetUser.Profile)">| <a asp-page="/ViolationReport" asp-page-handler="Profile" asp-route-id="@targetUser.Profile.Id">Report violation</a></span>
+                <span include-if="await Model.Permissions.CanBanUserAsync(targetUser)">| <a class="operation-danger" asp-page="/Account/BanConfirmation" asp-route-id="@targetUser.Id">Ban</a></span>
             </h2>
 
             @await Html.PartialAsync("_ProfileImage", targetUser)

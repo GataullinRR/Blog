@@ -1,21 +1,18 @@
 ﻿@model CommentaryModel
 
 <div style="margin-bottom:20px">
-        <h4 id="#@Model.Commentary.Id">
-            <a asp-page="/Commentary" asp-route-id="@Model.Commentary.Id">#@Model.Commentary.Id</a>
-            <a asp-page="/Account/Profile" asp-route-id="@Model.Commentary.Author.Id">@Model.Commentary.Author.UserName</a>
-            <span style="float:right">@Model.Commentary.CreationTime.ToString("hh:mm dd.MM.yyyy")</span>
-            @await Html.PartialAsync("_Anchor", AnchorModel.ToController(
-                "Delete", nameof(CommentaryController), nameof(CommentaryController.DeleteCommentaryAsync),
-                "id", Model.Commentary.Id,
-                await Model.Permissions.CanDeleteCommentaryAsync(Model.Commentary)))
-            <span include-if="await Model.Permissions.CanEditCommentaryAsync(Model.Commentary)">| <a href="" class="no-redirect commentary-edit-button">Edit</a></span>
-            @await Html.PartialAsync("_Anchor", AnchorModel.ToController(
-                "Report", nameof(ReportingController), nameof(ReportingController.ReportCommentaryAsync),
-                "id", Model.Commentary.Id,
-                await Model.Permissions.CanReportAsync(Model.Commentary)))
-            <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Commentary)">| <a asp-page="/ViolationReport" asp-page-handler="Commentary" asp-route-id="@Model.Commentary.Id">Report violation</a></span>
-        </h4>
+    <h4 id="#@Model.Commentary.Id">
+        <a asp-page="/Commentary" asp-route-id="@Model.Commentary.Id">#@Model.Commentary.Id</a>
+        <a asp-page="/Account/Profile" asp-route-id="@Model.Commentary.Author.Id">@Model.Commentary.Author.UserName</a>
+        <span style="float:right">@Model.Commentary.CreationTime.ToString("hh:mm dd.MM.yyyy")</span>
+        <span include-if="await Model.Permissions.CanEditCommentaryAsync(Model.Commentary)">| <a href="" class="no-redirect commentary-edit-button">Edit</a></span>
+        @await Html.PartialAsync("_Anchor", AnchorModel.ToController(
+            "Report", nameof(ReportingController), nameof(ReportingController.ReportCommentaryAsync),
+            "id", Model.Commentary.Id,
+            await Model.Permissions.CanReportAsync(Model.Commentary)))
+        <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Commentary)">| <a asp-page="/ViolationReport" asp-page-handler="Commentary" asp-route-id="@Model.Commentary.Id">Report violation</a></span>
+        <span include-if="await Model.Permissions.CanDeleteCommentaryAsync(Model.Commentary)">| <a class="operation-danger" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.DeleteCommentaryAsync)" asp-route-id="@Model.Commentary.Id">Delete</a></span>
+    </h4>
     <div class="d-flex flex-sm-row">
         <div class="d-flex flex-sm-column" style="margin-right:20px">
             @await Html.PartialAsync("_ProfileImage", Model.Commentary.Author)

@@ -1,9 +1,10 @@
-﻿/*body {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    padding-left: 10px;
-    padding-right: 10px;
-}*/
+﻿.operation-danger {
+    color: red;
+}
+
+.title-deleted {
+    color: darkgray;
+}
 
 textarea {
     width: 100%

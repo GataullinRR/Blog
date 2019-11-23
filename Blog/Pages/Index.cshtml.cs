@@ -30,7 +30,7 @@ namespace Blog.Pages
         {
             CurrentPage = pageIndex ?? 0;
             Posts = await S.Db.Posts
-                .Where(p => p.State == ModerationState.MODERATED)
+                .Where(p => p.State == ModerationState.MODERATED && !p.IsDeleted)
                 .OrderByDescending(p => p.CreationTime)
                 .Skip(CurrentPage * NUM_OF_POSTS_ON_PAGE)
                 .Take(NUM_OF_POSTS_ON_PAGE)

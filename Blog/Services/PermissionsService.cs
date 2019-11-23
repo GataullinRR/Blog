@@ -40,12 +40,13 @@ namespace Blog.Services
             }
             else
             {
-                return (user.UserName == post.Author.UserName
+                return await isNotBlockedAsync(post)
+                       && ((user.UserName == post.Author.UserName
                             && post.CreationTime - DateTime.Now < TimeSpan.FromDays(3)
                             && post.Edits.Where(e => e.Author == post.Author).Count() < MAX_POST_EDITS_FOR_STANDARD_USER
                             && post.State == ModerationState.MODERATED)
                        || (await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR))
-                            && user != post.Author);
+                            && user != post.Author));
             }
         }
 
@@ -58,8 +59,9 @@ namespace Blog.Services
             }
             else
             {
-                return await CanEditPostAsync(post)
-                       && await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
+                return await isNotBlockedAsync(post)
+                    && await CanEditPostAsync(post)
+                    && await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
             }
         }
 
@@ -73,14 +75,13 @@ namespace Blog.Services
         public async Task<bool> CanCreatePostAsync()
         {
             var user = await getCurrentUserOrNullAsync();
-            if (user == null)
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
             {
                 return false;
             }
             else
             {
-                return await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.USER))
-                    && user.Status.State == ProfileState.ACTIVE;
+                return await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.USER));
             }
         }
 
@@ -95,16 +96,19 @@ namespace Blog.Services
         {
             var user = await getCurrentUserOrNullAsync();
             var result = post.State == ModerationState.MODERATED
-                    && !showLastEdit;
+                    && !showLastEdit
+                    && !post.IsDeleted;
             if (user == null)
             {
                 return result;
             }
             else
             {
-                return result
+                return (await S.UserManager.IsInRoleAsync(user, Roles.USER) 
+                    && !post.IsDeleted)
+                    || result
                     || await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR))
-                    || user == post.Author;
+                    || user == post.Author && !post.IsDeleted;
             }
         }
 
@@ -124,7 +128,8 @@ namespace Blog.Services
             }
             else
             {
-                return  !comment.IsDeleted
+                return await isNotBlockedAsync(comment)
+                        && !comment.IsDeleted
                             && ((!comment.IsHidden
                                 && !comment.IsDeleted
                                 && user.UserName == comment.Author.UserName
@@ -135,6 +140,17 @@ namespace Blog.Services
             }
         }
 
+        public async Task ValidateDeletePostAsync(Post post)
+        {
+            if (!await CanDeletePostAsync(post))
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanDeletePostAsync(Post post)
+        {
+            return await canDeleteAsync(post);
+        }
         public async Task ValidateDeleteCommentaryAsync(Commentary comment)
         {
             if (!await CanDeleteCommentaryAsync(comment))
@@ -144,6 +160,10 @@ namespace Blog.Services
         }
         public async Task<bool> CanDeleteCommentaryAsync(Commentary comment)
         {
+            return await canDeleteAsync(comment);
+        }
+        async Task<bool> canDeleteAsync(IDeletable deletable)
+        {
             var user = await getCurrentUserOrNullAsync();
             if (user == null || user.Status.State != ProfileState.ACTIVE)
             {
@@ -151,19 +171,20 @@ namespace Blog.Services
             }
             else
             {
-                return !comment.IsDeleted
-                     && await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
+                return await isNotBlockedAsync(deletable)
+                    && !deletable.IsDeleted
+                    && await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
             }
         }
 
-        public async Task ValidateAddCommentaryAsync()
+        public async Task ValidateAddCommentaryAsync(Post post)
         {
-            if (!await CanAddCommentaryAsync())
+            if (!await CanAddCommentaryAsync(post))
             {
                 throw buildException();
             }
         }
-        public async Task<bool> CanAddCommentaryAsync()
+        public async Task<bool> CanAddCommentaryAsync(Post post)
         {
             var user = await getCurrentUserOrNullAsync();
             if (user == null || user.Status.State != ProfileState.ACTIVE)
@@ -172,7 +193,7 @@ namespace Blog.Services
             }
             else
             {
-                return true;
+                return await isNotBlockedAsync(post);
             }
         }
 
@@ -216,7 +237,8 @@ namespace Blog.Services
             }
             else
             {
-                return targetUser.Id == currentUser.Id
+                return await isNotBlockedAsync(targetUser)
+                    && targetUser.Id == currentUser.Id
                     && targetUser.EmailConfirmed
                     && targetUser.Status.State == ProfileState.ACTIVE
                     && await S.UserManager.IsInOneOfTheRolesAsync(targetUser, Roles.NOT_RESTRICTED);
@@ -251,7 +273,8 @@ namespace Blog.Services
             }
             else
             {
-                return targetUser.Status.State.IsOneOf(ProfileState.ACTIVE, ProfileState.RESTRICTED)
+                return await isNotBlockedAsync(targetUser)
+                    && targetUser.Status.State.IsOneOf(ProfileState.ACTIVE, ProfileState.RESTRICTED)
                     && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
                     && (await S.UserManager.GetRolesAsync(targetUser)).Single().IsLess((await S.UserManager.GetRolesAsync(currentUser)).Single());
             }
@@ -273,7 +296,8 @@ namespace Blog.Services
             }
             else
             {
-                return targetUser.Status.State.IsOneOf(ProfileState.BANNED)
+                return await isNotBlockedAsync(targetUser)
+                    && targetUser.Status.State.IsOneOf(ProfileState.BANNED)
                     && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
                     && (await S.UserManager.GetRolesAsync(targetUser)).Single().IsLess((await S.UserManager.GetRolesAsync(currentUser)).Single());
             }
@@ -327,7 +351,8 @@ namespace Blog.Services
             }
             else
             {
-                return await CanSeePrivateInformationAsync(targetUser)
+                return await isNotBlockedAsync(targetUser)
+                    && await CanSeePrivateInformationAsync(targetUser)
                     && ((await S.UserManager.GetRolesAsync(targetUser)).Single().IsLess((await S.UserManager.GetRolesAsync(currentUser)).Single())
                         || currentUser.Id == targetUser.Id);
             }
@@ -349,7 +374,8 @@ namespace Blog.Services
             }
             else
             {
-                return !reportObject.Reports.Any(r => r.Reporter.Id == currentUser.Id)
+                return await isNotBlockedAsync(reportObject)
+                    && !reportObject.Reports.Any(r => r.Reporter.Id == currentUser.Id)
                     && !(reportObject.As<Commentary>()?.IsDeleted).NullToFalse()
                     && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR)).ThenDo(r => !r);
             }
@@ -371,7 +397,8 @@ namespace Blog.Services
             }
             else
             {
-                return await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
+                return await isNotBlockedAsync(reportObject)
+                    && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
                     && reportObject.Violations.All(v => v.Reporter != currentUser);
             }
         }
@@ -392,7 +419,8 @@ namespace Blog.Services
             }
             else
             {
-                return await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
+                return await isNotBlockedAsync(reportObject)
+                    && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
                     && reportObject.State.IsOneOf(ModerationState.UNDER_MODERATION)
                     && currentUser != reportObject.Author;
             }
@@ -451,6 +479,18 @@ namespace Blog.Services
         public async Task<bool> CanGenerateActivationLinkAsync(ActivationLinkAction activationLinkAction)
         {
             return await CanAccessBlogControlPanelAsync();
+        }
+
+        async Task<bool> isNotBlockedAsync(object entity)
+        {
+            if (entity is IDeletable deletable)
+            {
+                return await Task.FromResult(!deletable.IsDeleted);
+            }
+            else
+            {
+                return true;
+            }
         }
 
         async Task<User> getCurrentUserOrNullAsync()

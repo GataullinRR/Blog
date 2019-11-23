@@ -64,8 +64,11 @@ namespace Blog.Controllers
             moderatable.State = ModerationState.MODERATED;
             var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
             currentUser.Actions.Add(new UserAction(ActionType.MARKED_AS_MODERATED, moderatable));
-            var checkable = S.Db.EntitiesToCheck.First(e => e.Entity == moderatable);
-            checkable.ResolvingTime = DateTime.UtcNow; // Delete from every moderators panel
+            var checkable = S.Db.EntitiesToCheck.FirstOrDefault(e => e.Entity == moderatable);
+            if (checkable != null)
+            {
+                checkable.ResolvingTime = DateTime.UtcNow; // Delete from every moderators panel
+            }
         }
     }
 }

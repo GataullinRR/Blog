@@ -18,6 +18,7 @@ namespace DBModels
         POST_EDITED = 400,
         COMMENTARY_EDIT = 450,
         COMMENTARY_DELETE = 500,
+        POST_DELETED = 550,
         REPORT = 600,
         BAN = 700,
         UNBAN = 750,

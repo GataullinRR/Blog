@@ -7,7 +7,7 @@ using System.Text;
 
 namespace DBModels
 {
-    public class Post : IDbEntity, IReportable, IModeratable
+    public class Post : IDbEntity, IReportable, IModeratable, IDeletable
     {
         [Key] public int Id { get; set; }
         [Required] public DateTime CreationTime { get; set; }
@@ -24,6 +24,7 @@ namespace DBModels
         [InverseProperty(nameof(Violation.PostObject))]
         [Required] public virtual List<Violation> Violations { get; set; } = new List<Violation>();
         [Required] public ModerationState State { get; set; }
+        public bool IsDeleted { get; set; }
 
         public Post() 
         { 

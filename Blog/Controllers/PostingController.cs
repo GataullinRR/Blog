@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Blog.Services;
+using DBModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Controllers
@@ -21,6 +22,25 @@ namespace Blog.Controllers
             if (ModelState.IsValid)
             {
                 return S.Sanitizer.AllowAllButNotExecutable.Sanitize(rawBody);
+            }
+            else
+            {
+                throw new Exception();
+            }
+        }
+
+        public async Task<IActionResult> DeletePostAsync([Required]int id)
+        {
+            if (ModelState.IsValid)
+            {
+                var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+                var post = await S.Db.Posts.FirstOrDefaultByIdAsync(id);
+                await S.Permissions.ValidateDeletePostAsync(post);
+                post.IsDeleted = true;
+                currentUser.Actions.Add(new UserAction(ActionType.POST_DELETED, post));
+                await S.Db.SaveChangesAsync();
+
+                return RedirectToPage("/Post", new { id = id });
             }
             else
             {
