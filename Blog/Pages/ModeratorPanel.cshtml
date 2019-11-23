@@ -11,7 +11,7 @@
 
             <h3>Owners</h3>
 
-            @foreach (var user in Model.Panel.Owners)
+            @foreach (var user in Model.Group.Moderators)
             {
                 <a asp-page="/Account/Profile" asp-route-id="@user.Id">@user.UserName</a>
             }
@@ -30,7 +30,7 @@
 
             @{
                 var assignedEntities = Model.Entities.Where(e => e.AssignedModerator == Model.Owner);
-                var unassignedEntities = Model.Entities.Where(e => e.AssignedModerator != Model.Owner);
+                var unassignedEntities = Model.Entities.Where(e => e.AssignedModerator == null);
             }
 
             <h3>Entities you are assigned for</h3>
@@ -57,31 +57,31 @@
 
             @if (unassignedEntities.Any())
             {
-                <form if exclude-if="@Model.ReadOnlyAccess" method="post" asp-page-handler="Assign">
+                <ul style="margin-bottom:10px">
+                    @foreach (var entity in unassignedEntities.Take(100))
+                    {
+                        <li>
+                            @{ await Html.RenderPartialAsync("_EntityToCheck", entity); }
+                        </li>
+                    }
+                </ul>
+
+                <form if exclude-if="@Model.ReadOnlyAccess" method="post" asp-page-handler="Assign" style="max-width:300px">
                     <input type="hidden" asp-for="@Model.TargetModeratorId" />
 
                     <div class="form-group">
                         <label>Number of entities to assign</label>
-                        <input asp-for="NumOfEntitiesToAssign" type="number" />
-                        <span asp-validation-for="NumOfEntitiesToAssign"></span>
+                        <input class="form-control" asp-for="NumOfEntitiesToAssign" type="number" />
+                        <span class="text-danger" asp-validation-for="NumOfEntitiesToAssign"></span>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">Assign</button>
+                    <button type="submit" style="width:100%" class="btn btn-primary">Assign</button>
                 </form>
             }
             else
             {
                 <div>There are no entities to process. Come back later!</div>
             }
-
-            <ul>
-                @foreach (var entity in unassignedEntities.Take(100))
-                {
-                    <li>
-                        @{ await Html.RenderPartialAsync("_EntityToCheck", entity); }
-                    </li>
-                }
-            </ul>
         </div>
     </div>
 </div>

@@ -51,7 +51,7 @@ namespace DBModels
 
     public static class Extensions
     {
-        public static FinderToken GetFinderToken(this IModeratableObject @object)
+        public static FinderToken GetFinderToken(this IReportable @object)
         {
             var implementation = @object.Select(
                 (v => v is Commentary, Implementation.COMMENTARY),

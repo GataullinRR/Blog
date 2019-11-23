@@ -90,6 +90,7 @@ namespace Blog
             services.AddScoped<BanningService>();
             services.AddScoped<UtilitiesService>();
             services.AddSingleton<HtmlSanitizerService>();
+            services.AddScoped<EntitiesProviderService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

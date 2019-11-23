@@ -55,7 +55,7 @@ namespace Blog.Controllers
             }
         }
 
-        async Task<IActionResult> reportAsync(IModeratableObject reportObject)
+        async Task<IActionResult> reportAsync(IReportable reportObject)
         {
             await S.Permissions.ValidateReportAsync(reportObject);
 
@@ -86,19 +86,15 @@ namespace Blog.Controllers
             reportingUser.Actions.Add(new UserAction(ActionType.REPORT, reportObject));
             if (S.Decisions.ShouldReportToModerator(reportObject))
             {
-                await S.DbUpdator.EnsureHasEnoughModeratorsInChargeAsync(reportObject.Author);
-                foreach (var moderator in reportObject.Author.ModeratorsInCharge)
+                var moderators = reportObject.Author.ModeratorsInChargeGroup;
+                var alreadyAdded = moderators.EntitiesToCheck.FirstOrDefault(e => e.Entity == reportObject);
+                if (alreadyAdded == null)
                 {
-                    var alreadyAdded = moderator.ModeratorPanel.EntitiesToCheck
-                        .FirstOrDefault(e => e.Entity == reportObject);
-                    if (alreadyAdded == null)
-                    {
-                        moderator.ModeratorPanel.AddEntityToCheck(reportObject);
-                    }
-                    else
-                    {
-                        alreadyAdded.AddTime = DateTime.UtcNow;
-                    }
+                    moderators.AddEntityToCheck(reportObject, CheckReason.TOO_MANY_REPORTS);
+                }
+                else
+                {
+                    alreadyAdded.AddTime = DateTime.UtcNow;
                 }
             }
             await S.Db.SaveChangesAsync();

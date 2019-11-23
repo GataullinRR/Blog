@@ -32,6 +32,7 @@ namespace Blog.Services
         readonly Lazy<UtilitiesService> _utilities;
         readonly Lazy<BanningService> _banning;
         readonly Lazy<HtmlSanitizerService> _sanitizer;
+        readonly Lazy<EntitiesProviderService> _entities;
 
         public IServiceProvider ServiceProvider { get; }
         public BlogContext Db => _db.Value;
@@ -53,6 +54,7 @@ namespace Blog.Services
         public UtilitiesService Utilities => _utilities.Value;
         public BanningService Banning => _banning.Value;
         public HtmlSanitizerService Sanitizer => _sanitizer.Value;
+        public EntitiesProviderService Entities => _entities.Value;
 
         public ServicesProvider(IServiceProvider serviceProvider)
         {
@@ -77,6 +79,7 @@ namespace Blog.Services
             _utilities = ServiceProvider.GetLazyService<UtilitiesService>();
             _banning = ServiceProvider.GetLazyService<BanningService>();
             _sanitizer = ServiceProvider.GetLazyService<HtmlSanitizerService>();
+            _entities = ServiceProvider.GetLazyService<EntitiesProviderService>();
         }
     }
 }

@@ -42,8 +42,10 @@ namespace Blog.Services
             {
                 return (user.UserName == post.Author.UserName
                             && post.CreationTime - DateTime.Now < TimeSpan.FromDays(3)
-                            && post.Edits.Where(e => e.EditAuthor == post.Author).Count() < MAX_POST_EDITS_FOR_STANDARD_USER)
-                       || await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
+                            && post.Edits.Where(e => e.Author == post.Author).Count() < MAX_POST_EDITS_FOR_STANDARD_USER
+                            && post.State == ModerationState.MODERATED)
+                       || (await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR))
+                            && user != post.Author);
             }
         }
 
@@ -82,6 +84,30 @@ namespace Blog.Services
             }
         }
 
+        public async Task ValidateViewPostAsync(Post post, bool showLastEdit)
+        {
+            if (!await CanViewPostAsync(post, showLastEdit))
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanViewPostAsync(Post post, bool showLastEdit)
+        {
+            var user = await getCurrentUserOrNullAsync();
+            var result = post.State == ModerationState.MODERATED
+                    && !showLastEdit;
+            if (user == null)
+            {
+                return result;
+            }
+            else
+            {
+                return result
+                    || await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR))
+                    || user == post.Author;
+            }
+        }
+
         public async Task ValidateEditCommentaryAsync(Commentary comment)
         {
             if (!await CanEditCommentaryAsync(comment))
@@ -104,7 +130,7 @@ namespace Blog.Services
                                 && user.UserName == comment.Author.UserName
                                 && user.Status.State == ProfileState.ACTIVE
                                 && comment.CreationTime - DateTime.Now < TimeSpan.FromDays(1)
-                                && comment.Edits.Count(e => e.EditAuthor == user) < 1)
+                                && comment.Edits.Count(e => e.Author == user) < 1)
                             || await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR)));  
             }
         }
@@ -307,14 +333,14 @@ namespace Blog.Services
             }
         }
 
-        public async Task ValidateReportAsync(IModeratableObject reportObject)
+        public async Task ValidateReportAsync(IReportable reportObject)
         {
             if (!await CanReportAsync(reportObject))
             {
                 throw buildException();
             }
         }
-        public async Task<bool> CanReportAsync(IModeratableObject reportObject)
+        public async Task<bool> CanReportAsync(IReportable reportObject)
         {
             var currentUser = await getCurrentUserOrNullAsync();
             if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
@@ -325,18 +351,18 @@ namespace Blog.Services
             {
                 return !reportObject.Reports.Any(r => r.Reporter.Id == currentUser.Id)
                     && !(reportObject.As<Commentary>()?.IsDeleted).NullToFalse()
-                    && await S.UserManager.IsInRoleAsync(currentUser, Roles.MODERATOR).ThenDo(r => !r);
+                    && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR)).ThenDo(r => !r);
             }
         }
 
-        public async Task ValidateReportViolationAsync(IModeratableObject reportObject)
+        public async Task ValidateReportViolationAsync(IReportable reportObject)
         {
             if (!await CanReportViolationAsync(reportObject))
             {
                 throw buildException();
             }
         }
-        public async Task<bool> CanReportViolationAsync(IModeratableObject reportObject)
+        public async Task<bool> CanReportViolationAsync(IReportable reportObject)
         {
             var currentUser = await getCurrentUserOrNullAsync();
             if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
@@ -347,6 +373,28 @@ namespace Blog.Services
             {
                 return await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
                     && reportObject.Violations.All(v => v.Reporter != currentUser);
+            }
+        }
+
+        public async Task ValidateMarkAsModeratedAsync(IModeratable moderatable)
+        {
+            if (!await CanMarkAsModeratedAsync(moderatable))
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanMarkAsModeratedAsync(IModeratable reportObject)
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
+            {
+                return false;
+            }
+            else
+            {
+                return await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
+                    && reportObject.State.IsOneOf(ModerationState.UNDER_MODERATION)
+                    && currentUser != reportObject.Author;
             }
         }
 

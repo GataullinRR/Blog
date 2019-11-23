@@ -3,24 +3,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DBModels
 {
-    public enum CheckReason
-    {
-        NOT_SET = 0,
-        TOO_MANY_REPORTS = 100
-    }
-
-    public interface IEntityToCheck : IDbEntity
-    {
-        object Entity { get; }
-        DateTime AddTime { get; set; }
-        DateTime? AssignationTime { get; set; }
-        DateTime? ResolvingTime { get; set; }
-        bool IsResolved { get; }
-        CheckReason CheckReason { get; set; }
-        User AssignedModerator { get; set; }
-        User EntityOwner { get; }
-    }
-
     public class EntityToCheck<T> : IEntityToCheck
     {
         public EntityToCheck()

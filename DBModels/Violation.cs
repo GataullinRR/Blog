@@ -14,7 +14,7 @@ namespace DBModels
 
         public Violation() { }
 
-        public Violation(User reporter, User reportObjectOwner, IModeratableObject reportObject, string description) : base(reporter, reportObjectOwner, reportObject)
+        public Violation(User reporter, User reportObjectOwner, IReportable reportObject, string description) : base(reporter, reportObjectOwner, reportObject)
         {
             Description = description ?? throw new ArgumentNullException(nameof(description));
         }

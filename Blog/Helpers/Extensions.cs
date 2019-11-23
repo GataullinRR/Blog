@@ -46,28 +46,6 @@ namespace Blog
             return false;
         }
 
-        public static IIncludableQueryable<Commentary, User> IncludeAuthor(this DbSet<Commentary> commentaries)
-        {
-            return commentaries.Include(c => c.Author)
-                    .ThenInclude(a => a.Profile)
-                    .Include(c => c.Author)
-                    .ThenInclude(a => a.Status)
-                    .Include(c => c.Author);
-        }
-        public static IIncludableQueryable<Post, User> IncludeAuthor(this DbSet<Post> posts)
-        {
-            return posts.Include(c => c.Author)
-                    .ThenInclude(a => a.Profile)
-                    .Include(c => c.Author)
-                    .ThenInclude(a => a.Status)
-                    .Include(c => c.Author);
-        }
-        public static IIncludableQueryable<User, ProfileStatus> IncludeAll(this DbSet<User> users)
-        {
-            return users.Include(a => a.Profile)
-                    .Include(a => a.Status);
-        }
-
         public static T GetService<T>(this IServiceProvider serviceProvider)
         {
             return (T)serviceProvider.GetService(typeof(T));

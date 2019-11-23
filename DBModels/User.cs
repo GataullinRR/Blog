@@ -55,8 +55,11 @@ namespace DBModels
         /// <summary>
         /// Not null for User in <see cref="Roles.MODERATOR"/>
         /// </summary>
-        public virtual ModeratorPannel ModeratorPanel { get; set; }
-        public virtual List<User> ModeratorsInCharge { get; set; } = new List<User>();
+        public virtual ModeratorsGroup ModeratorsGroup { get; set; }
+        /// <summary>
+        /// Not null for each User
+        /// </summary>
+        public virtual ModeratorsGroup ModeratorsInChargeGroup { get; set; }
 
         public User() { }
 

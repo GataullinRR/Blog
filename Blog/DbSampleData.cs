@@ -25,13 +25,17 @@ namespace Blog
 
             if (!context.Users.Any())
             {
+                var moderatorGroup1 = new ModeratorsGroup();
+                var moderatorGroup2 = new ModeratorsGroup();
+
                 var radmir = new User(
                     new Profile(new DateTime(2018, 1, 20)), 
                     new ProfileStatus(ProfileState.ACTIVE))
                 {
                     Email = "QTU100@yandex.ru",
                     UserName = "QTU100",
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    ModeratorsInChargeGroup = moderatorGroup1,
                 };
                 userManager.CreateAsync(radmir, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(radmir, Roles.OWNER).Wait();
@@ -42,7 +46,8 @@ namespace Blog
                 {
                     Email = "Sasha@yandex.ru",
                     UserName = "Alexandra",
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    ModeratorsInChargeGroup = moderatorGroup1,
                 };
                 userManager.CreateAsync(alex, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(alex, Roles.USER).Wait();
@@ -53,7 +58,8 @@ namespace Blog
                 {
                     Email = "Ksy_chemist@mail.ru",
                     UserName = "_KSY_",
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    ModeratorsInChargeGroup = moderatorGroup2,
                 };
                 userManager.CreateAsync(ksenya, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(ksenya, Roles.USER).Wait();
@@ -65,7 +71,8 @@ namespace Blog
                     Email = "Oleg@yota.ru",
                     UserName = "Oleg",
                     EmailConfirmed = true,
-                    ModeratorPanel = new ModeratorPannel()
+                    ModeratorsGroup = moderatorGroup1,
+                    ModeratorsInChargeGroup = moderatorGroup2
                 };
                 userManager.CreateAsync(oleg, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(oleg, Roles.MODERATOR).Wait();
@@ -81,6 +88,32 @@ namespace Blog
                 };
                 userManager.CreateAsync(muddy, "QTU100@yandex.ru").Wait();
 
+                var arslan = new User(
+                    new Profile(new DateTime(1996, 10, 2)),
+                    new ProfileStatus(ProfileState.ACTIVE))
+                {
+                    Email = "Arslan@google.com",
+                    UserName = "Arslan",
+                    EmailConfirmed = true,
+                    ModeratorsGroup = moderatorGroup2,
+                    ModeratorsInChargeGroup = moderatorGroup1
+                };
+                userManager.CreateAsync(arslan, "QTU100@yandex.ru").Wait();
+                userManager.AddToRoleAsync(arslan, Roles.MODERATOR).Wait();
+
+                var anthon = new User(
+                    new Profile(new DateTime(1997, 06, 20)),
+                    new ProfileStatus(ProfileState.ACTIVE))
+                {
+                    Email = "Anthon@google.com",
+                    UserName = "Anthon",
+                    EmailConfirmed = true,
+                    ModeratorsGroup = moderatorGroup2,
+                    ModeratorsInChargeGroup = moderatorGroup1
+                };
+                userManager.CreateAsync(anthon, "QTU100@yandex.ru").Wait();
+                userManager.AddToRoleAsync(anthon, Roles.MODERATOR).Wait();
+
                 var radmirsPost1 = new Post(
                     new DateTime(2018, 2, 1),
                     radmir,
@@ -90,7 +123,10 @@ What is C#?
 It is a general-purpose language designed for developing apps on the Microsoft platform and requires the .NET framework on Windows to work. C# is often thought of as a hybrid that takes the best of C and C++ to create a truly modernized language. Although the .NET framework supports several other coding languages, C# has quickly become one of the most popular.
 C# can be used to create almost anything but is particularly strong at building Windows desktop applications and games. C# can also be used to develop web applications and has become increasingly popular for mobile development too. Cross-platform tools such as Xamarin allow apps written in C# to be used on almost any mobile device.",
                     "C# is a modern object-oriented programming language developed in 2000 by Anders Hejlsberg at Microsoft as a rival to Java (which it is quite similar to)."
-                    );
+                    )
+                {
+                    State = ModerationState.MODERATED
+                };
                 var radmirsPost2 = new Post(
                     new DateTime(2018, 2, 5, 12, 40, 23),
                     radmir,
@@ -227,7 +263,7 @@ Ozone,
 
                 context.Posts.AddRange(radmirsPost1, radmirsPost2, post3, post4, post5);
                 context.Commentaries.AddRange(commentary1, commentary2, commentary3);
-                post3.Edits.Add(new PostEdit(radmir, "Removed typo", post3.CreationTime.AddHours(4)));
+                post3.Edits.Add(new PostEdit(radmir, "Removed typo", post3.CreationTime.AddHours(4), "Test", "La la :(", "Preview"));
 
                 context.SaveChanges();
             }

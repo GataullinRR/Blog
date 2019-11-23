@@ -11,11 +11,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Blog.Pages.Errors
 {
-    public class ErrorModel : PageModelBase
+    public class ErrorModel : PageModel
     {
         public int HttpStatus { get; private set; }
 
-        public ErrorModel(ServicesProvider services) : base(services)
+        public ErrorModel(ServicesProvider services)
         {
 
         }

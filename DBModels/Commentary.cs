@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DBModels
 {
-    public class Commentary : IDbEntity, IModeratableObject
+    public class Commentary : IDbEntity, IReportable
     {
         [Key] public int Id { get; set; }
         [Required] public virtual User Author { get; set; }

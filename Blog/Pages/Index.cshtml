@@ -15,13 +15,13 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col">
-            @foreach (var post in Model.Posts.OrderByDescending(p => p.CreationTime).Take(10))
+            @foreach (var post in Model.Posts)
             {
                 <div class="post-preview">
                     <h4>
                         <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
                     </h4>
-                    @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(post, true)); }
+                    @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(post, true, false)); }
                     <h6>
                         Posted by <a asp-page="/Account/Profile" asp-route-id="@post.Author.Id">@post.Author.UserName</a>
 

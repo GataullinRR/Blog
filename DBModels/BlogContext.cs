@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Utilities.Types;
 
 namespace DBModels
 {
@@ -19,8 +20,20 @@ namespace DBModels
         public DbSet<Report> Reports { get; set; }
         public DbSet<ViewStatistic> ViewStatistics { get; set; }
         public DbSet<UserAction> UsersActions { get; set; }
-        public DbSet<ModeratorPannel> ModeratorsPannels { get; set; }
+        public DbSet<ModeratorsGroup> ModeratorsGroups { get; set; }
         public DbSet<TokenMetadata> TokenMetadatas { get; set; }
+        public DbSet<EntityToCheck<Post>> PostsToCheck { get; set; }
+        public DbSet<EntityToCheck<Commentary>> CommentariesToCheck { get; set; }
+        public DbSet<EntityToCheck<Profile>> ProfilesToCheck { get; set; }
+        public DbSet<EntityToCheck<PostEdit>> PostEditsToCheck { get; set; }
+        public IEnumerable<IEntityToCheck> EntitiesToCheck =>
+            new Enumerable<IEntityToCheck>()
+            {
+                PostEditsToCheck,
+                PostsToCheck,
+                ProfilesToCheck,
+                CommentariesToCheck
+            };
 
         public BlogContext(DbContextOptions<BlogContext> options)
             : base(options)

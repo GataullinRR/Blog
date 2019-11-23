@@ -39,7 +39,7 @@ namespace Blog.Pages
             await initialize(async () => await S.Db.ProfilesInfos.FirstOrDefaultByIdAsync(id));
         }
 
-        async Task initialize(Func<Task<IModeratableObject>> getter)
+        async Task initialize(Func<Task<IReportable>> getter)
         {
             if (ModelState.IsValid)
             {
@@ -57,7 +57,7 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                var reportObject = await S.Db.FindObjectByTokenOrNullAsync<IModeratableObject>(FinderToken.DeserializeFromString(ReportObjectToken));
+                var reportObject = await S.Db.FindObjectByTokenOrNullAsync<IReportable>(FinderToken.DeserializeFromString(ReportObjectToken));
                 await Permissions.ValidateReportViolationAsync(reportObject);
                 var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 var violation = new Violation(currentUser, reportObject.Author, reportObject, Description);

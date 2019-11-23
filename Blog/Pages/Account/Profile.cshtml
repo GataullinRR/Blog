@@ -71,15 +71,40 @@
                 <div>@targetUser.Profile.About</div>
             }
 
-            @if (targetUser.Posts.Any())
-            {
+            <div include-if="targetUser.Posts.Any(p => p.State.IsOneOf(ModerationState.MODERATED))">
                 <h3>Posts</h3>
 
-                @foreach (var post in targetUser.Posts.OrderByDescending(p => p.CreationTime))
+                @foreach (var post in targetUser.Posts
+                   .Where(p => p.State.IsOneOf(ModerationState.MODERATED))
+                   .OrderByDescending(p => p.CreationTime))
                 {
                     <div><a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a></div>
                 }
-            }
+            </div>
+
+            <div include-if="canSeePrivateInformation && targetUser.Posts.Any(p => p.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))">
+                <h3>Posts under moderation</h3>
+
+                @foreach (var post in targetUser.Posts
+                    .Where(p => p.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))
+                    .OrderByDescending(p => p.CreationTime))
+                {
+                    {
+                        var routeParams = new Dictionary<string, string>()
+                        {
+                            { "id", post.Id.ToString() }
+                        };
+                        if (post.Edits.Count != 0 && post.LastEdit.State != ModerationState.MODERATED)
+                        {
+                            routeParams.Add("lastEdit", "true");
+                        }
+                        
+                        <div>
+                            <a asp-page="/Post" asp-all-route-data="@routeParams">@post.Title</a>
+                        </div>
+                    }
+                }
+            </div>
 
             @if (await Model.Permissions.CanSeeServiceInformationAsync())
             {

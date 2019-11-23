@@ -2,10 +2,8 @@
 
 namespace DBModels
 {
-    public interface IModeratableObject : IDbEntity
+    public interface IReportable : IDbEntity, IViewable, IAuthored
     {
-        User Author { get; }
-        ViewStatistic ViewStatistic { get; }
         List<Report> Reports { get; }
         List<Violation> Violations { get; }
     }

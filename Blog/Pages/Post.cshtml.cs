@@ -10,11 +10,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Utilities.Extensions;
 
 namespace Blog.Pages
 {
     public class PostModel : PageModelBase
     {
+        public bool ShowLastEdit { get; private set; }
         public Post Post { get; private set; }
         public IEnumerable<Commentary> Commentaries { get; private set; }
 
@@ -23,28 +25,36 @@ namespace Blog.Pages
 
         }
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync([Required]int id, bool? lastEdit)
         {
-            Post = await S.Db.Posts.FirstOrDefaultAsync(p => p.Id == id);
-            
-            if (Post == null)
+            if (ModelState.IsValid)
             {
-                return RedirectToPage("/Index");
+                ShowLastEdit = lastEdit.NullToFalse();
+                Post = await S.Db.Posts.FirstOrDefaultAsync(p => p.Id == id);
+                if (Post == null)
+                {
+                    throw new NotFoundException();
+                }
+                else
+                {
+                    await S.Permissions.ValidateViewPostAsync(Post, ShowLastEdit);
+                    var currentUser = await S.UserManager.GetUserAsync(User);
+
+                    Commentaries = S.Db.Commentaries.Where(c => c.Post == Post);
+                    foreach (var commentary in Commentaries)
+                    {
+                        commentary.ViewStatistic.UpdateStatistic(currentUser);
+                    }
+                    Post.ViewStatistic.UpdateStatistic(currentUser);
+
+                    var x = await S.Db.SaveChangesAsync();
+
+                    return Page();
+                }
             }
             else
             {
-                var currentUser = await S.UserManager.GetUserAsync(User);
-
-                Commentaries = S.Db.Commentaries.Where(c => c.Post == Post);
-                foreach (var commentary in Commentaries)
-                {
-                    commentary.ViewStatistic.UpdateStatistic(currentUser);
-                }
-                Post.ViewStatistic.UpdateStatistic(currentUser);
-
-                var x = await S.Db.SaveChangesAsync();
-
-                return Page();
+                throw new Exception();
             }
         }
 

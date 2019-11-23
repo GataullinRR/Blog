@@ -10,14 +10,22 @@
     <div class="row">
         <div class="col">
             <h2>
-                @Model.Post.Title
+                <span exclude-if="Model.ShowLastEdit">@Model.Post.Title</span>
+                <span include-if="Model.ShowLastEdit">@Model.Post.LastEdit.NewTitle</span>
                 @await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/PostEdit", "id", Model.Post.Id, await Model.Permissions.CanEditPostAsync(Model.Post)))
                 @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportPostAsync), "id", Model.Post.Id, await Model.Permissions.CanReportAsync(Model.Post)))
                 <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Post)">| <a asp-page="/ViolationReport" asp-page-handler="Post" asp-route-id="@Model.Post.Id">Report violation</a></span>
+                <span include-if="!Model.ShowLastEdit && await Model.Permissions.CanMarkAsModeratedAsync(Model.Post)">| <a asp-controller="@nameof(ModerationController).GetController()" asp-action="@nameof(ModerationController.MarkPostAsModeratedAsync)" asp-route-id="@Model.Post.Id">Mark as moderated</a></span>
+                <span include-if="Model.ShowLastEdit && await Model.Permissions.CanMarkAsModeratedAsync(Model.Post.LastEdit)">| <a asp-controller="@nameof(ModerationController).GetController()" asp-action="@nameof(ModerationController.MarkPostEditAsModeratedAsync)" asp-route-id="@Model.Post.LastEdit.Id">Mark as moderated</a></span>
             </h2>
 
             <div>
-                @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(Model.Post, false)); }
+                <span include-if="@Model.Post.State == ModerationState.UNDER_MODERATION" class="text-danger">Post is under moderation and accessible only via link</span>
+                <span include-if="@Model.Post.State == ModerationState.MODERATION_NOT_PASSED" class="text-danger">Post hasn't passed moderation. Edit to fix problems.</span>
+            </div>
+
+            <div>
+                @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(Model.Post, false, Model.ShowLastEdit)); }
             </div>
             <div>
                 <span>Posted by <a asp-page="/Account/Profile" asp-route-id="@Model.Post.Author.Id">@Model.Post.Author.UserName</a> at @Model.Post.CreationTime.ToHoursDateString()</span>
@@ -26,7 +34,7 @@
             @foreach (var edit in Model.Post.Edits.NullToEmpty())
             {
                 <div>
-                    <span>Edited at @edit.EditTime.ToString("hh:mm dd.MM.yy") by <a asp-page="/Account/Profile" asp-route-id="@edit.EditAuthor.Id">@edit.EditAuthor.UserName</a></span>
+                    <span>Edited at @edit.EditTime.ToString("hh:mm dd.MM.yy") by <a asp-page="/Account/Profile" asp-route-id="@edit.Author.Id">@edit.Author.UserName</a></span>
                     <span>Reason: @edit.Reason</span>
                 </div>
             }

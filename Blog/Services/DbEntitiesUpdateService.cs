@@ -13,21 +13,5 @@ namespace Blog.Services
         {
 
         }
-
-        public async Task EnsureHasEnoughModeratorsInChargeAsync(User user)
-        {
-            var moderatorsRequired = (2 - user.ModeratorsInCharge.Count).NegativeToZero();
-            if (moderatorsRequired > 0)
-            {
-                var moderatorsToAssign = (await S.Db.GetUsersInRoleAsync(Roles.MODERATOR))
-                    .OrderBy(m => S.Db.Users.Count(u => u.ModeratorsInCharge.Contains(m)))
-                    .Where(m => user.ModeratorsInCharge.NotContains(m))
-                    .Where(m => m != user)
-                    .Take(moderatorsRequired);
-                user.ModeratorsInCharge.AddRange(moderatorsToAssign);
-
-                await S.Db.SaveChangesAsync();
-            }
-        }
     }
 }

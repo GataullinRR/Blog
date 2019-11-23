@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DBModels
 {
-    public class Profile : IDbEntity, IModeratableObject
+    public class Profile : IDbEntity, IReportable
     {
         [Key]
         public int Id { get; set; }

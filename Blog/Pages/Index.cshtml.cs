@@ -30,11 +30,12 @@ namespace Blog.Pages
         {
             CurrentPage = pageIndex ?? 0;
             Posts = await S.Db.Posts
+                .Where(p => p.State == ModerationState.MODERATED)
                 .OrderByDescending(p => p.CreationTime)
                 .Skip(CurrentPage * NUM_OF_POSTS_ON_PAGE)
                 .Take(NUM_OF_POSTS_ON_PAGE)
                 .ToArrayAsync();
-            NumOfPages = S.Db.Posts.Count();
+            NumOfPages = S.Db.Posts.Count(p => p.State == ModerationState.MODERATED);
             NumOfPages = NumOfPages / NUM_OF_POSTS_ON_PAGE + ((NumOfPages % NUM_OF_POSTS_ON_PAGE == 0) ? 0 : 1);
 
             if (Posts.Length == 0 && CurrentPage != 0)

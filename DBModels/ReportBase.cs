@@ -15,7 +15,7 @@ namespace DBModels
         public virtual Post PostObject { get; set; }
         public virtual Profile ProfileObject { get; set; }
 
-        public IModeratableObject Object => CommentaryObject ?? (IModeratableObject)ProfileObject ?? PostObject;
+        public IReportable Object => CommentaryObject ?? (IReportable)ProfileObject ?? PostObject;
 
         public ReportBase() { }
 

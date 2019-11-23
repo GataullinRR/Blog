@@ -31,6 +31,10 @@ namespace Blog.Middlewares
             {
                 httpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             }
+            catch (NotFoundException)
+            {
+                httpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            }
             catch
             {
                 httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

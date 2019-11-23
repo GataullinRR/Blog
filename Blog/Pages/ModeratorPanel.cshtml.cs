@@ -14,7 +14,7 @@ namespace Blog.Pages
 {
     public class ModeratorPanelModel : PageModelBase
     {
-        public ModeratorPannel Panel { get; private set; }
+        public ModeratorsGroup Group { get; private set; }
         public IEnumerable<IEntityToCheck> Entities { get; private set; }
         public User Owner { get; private set; }
         public IEnumerable<User> TargetUsers { get; private set; }
@@ -38,9 +38,9 @@ namespace Blog.Pages
             await S.Permissions.ValidateAccessModeratorsPanelAsync(Owner);
             ReadOnlyAccess = Owner != currentUser;
 
-            Panel = Owner.ModeratorPanel;
-            Entities = Panel.EntitiesToCheck.Where(e => !e.IsResolved).OrderBy(e => e.AddTime);
-            TargetUsers = S.Db.Users.Where(u => u.ModeratorsInCharge.Contains(Owner));
+            Group = Owner.ModeratorsGroup;
+            Entities = Group.EntitiesToCheck.Where(e => !e.IsResolved).OrderBy(e => e.AddTime);
+            TargetUsers = Owner.ModeratorsGroup.TargetUsers;
         }
 
         public async Task<IActionResult> OnPostAssign()
@@ -71,7 +71,7 @@ namespace Blog.Pages
             if (ModelState.IsValid)
             {
                 await OnGet(TargetModeratorId);
-                var entity = Panel.EntitiesToCheck.First(e => e.Id == id);
+                var entity = Group.EntitiesToCheck.First(e => e.Id == id);
                 entity.ResolvingTime = DateTime.UtcNow;
                 Owner.Actions.Add(new UserAction(ActionType.REPORT_CHECKED, entity));
 

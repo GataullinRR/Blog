@@ -27,7 +27,7 @@ namespace Blog.Services
 
             if (await S.UserManager.IsInRoleAsync(targetUser, Roles.MODERATOR))
             {
-                foreach (var entity in targetUser.ModeratorPanel.EntitiesToCheck)
+                foreach (var entity in targetUser.ModeratorsGroup.EntitiesToCheck)
                 {
                     if (!entity.IsResolved && entity.AssignedModerator == targetUser)
                     {

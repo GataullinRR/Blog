@@ -50,7 +50,7 @@ namespace Blog.Pages.Account
                     await S.Banning.BanAsync(targetUser, BannedTill, Reason);
                     LayoutModel.AddMessage($"User \"{targetUser.UserName}\" has been banned");
 
-                    return Redirect(S.History.GetLastURL());
+                    return Redirect("/Index");
                 }
             }
             else

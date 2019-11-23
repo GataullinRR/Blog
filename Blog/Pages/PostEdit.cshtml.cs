@@ -7,6 +7,7 @@ using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Utilities.Extensions;
 
 namespace Blog.Pages
 {
@@ -46,19 +47,20 @@ namespace Blog.Pages
             if (ModelState.IsValid)
             {
                 var editingPost = await S.Db.Posts.FirstOrDefaultByIdAsync(PostId);
-
                 await S.Permissions.ValidateEditPostAsync(editingPost);
 
                 var author = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-                editingPost.Body = getEscapedPostBody();
-                editingPost.BodyPreview = getPostBodyPreview(editingPost.Body);
-                if (await S.Permissions.CanEditPostTitleAsync(editingPost))
+                if (!await S.Permissions.CanEditPostTitleAsync(editingPost))
                 {
-                    editingPost.Title = Title;
+                    Title = editingPost.Title;
                 }
-                editingPost.Edits.Add(new PostEdit(author, EditReason, DateTime.UtcNow));
+                var edit = new PostEdit(author, EditReason, DateTime.UtcNow, Title, Body, getPostBodyPreview(editingPost.Body));
+                editingPost.Edits.Add(edit);
+                author.ModeratorsInChargeGroup.AddEntityToCheck(edit, CheckReason.NEED_MODERATION);
                 author.Actions.Add(new UserAction(ActionType.POST_EDITED, editingPost));
                 await S.Db.SaveChangesAsync();
+
+                LayoutModel.AddMessage("Your changes will be applied after moderation");
 
                 return RedirectToPage("/Post", new { id = editingPost.Id });
             }

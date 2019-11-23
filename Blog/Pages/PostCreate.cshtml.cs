@@ -45,7 +45,9 @@ namespace Blog.Pages
                     var body = getEscapedPostBody();
                     var preview = getPostBodyPreview(body);
                     var post = new Post(DateTime.UtcNow, author, Title, body, preview);
+                    post.State = ModerationState.UNDER_MODERATION;
                     S.Db.Posts.Add(post);
+                    post.Author.ModeratorsInChargeGroup.AddEntityToCheck(post, CheckReason.NEED_MODERATION);
                     await S.Db.SaveChangesAsync();
                     author.Actions.Add(new UserAction(ActionType.POST_CREATED, post));
                     await S.Db.SaveChangesAsync();

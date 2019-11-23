@@ -55,7 +55,7 @@ namespace BlogTests
             using (getServices(out var services))
             {
                 var moderator = await services.UserManager.GetUsersInRoleAsync(Roles.MODERATOR).ThenDo(ms => ms.Single());
-                var target = testingEntity.Select<IEnumerable<IModeratableObject>>(
+                var target = testingEntity.Select<IEnumerable<IReportable>>(
                     (te => (string)te == "Commentary", services.Db.Commentaries),
                     (te => (string)te == "Post", services.Db.Posts),
                     (te => (string)te == "Profile", services.Db.ProfilesInfos))
@@ -82,9 +82,9 @@ namespace BlogTests
                 {
                     Assert.True(commentary.IsHidden);
                 }
-                Assert.Equal(target.Id, moderator.ModeratorPanel.EntitiesToCheck.LastItem().Entity.To<IDbEntity>().Id);
-                Assert.Equal(moderator, target.Author.ModeratorsInCharge.Single());
-                Assert.Empty(moderator.ModeratorsInCharge);
+                Assert.Equal(target.Id, moderator.ModeratorsGroup.EntitiesToCheck.LastItem().Entity.To<IDbEntity>().Id);
+                Assert.Equal(moderator, target.Author.ModeratorsInChargeGroup.Moderators.Single());
+                Assert.Empty(moderator.ModeratorsInChargeGroup.Moderators);
 
                 async Task<IDisposable> loggedUserScope(string userName)
                 {

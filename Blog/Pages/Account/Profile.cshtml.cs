@@ -77,7 +77,6 @@ namespace Blog.Pages.Account
 
             IsCurrentUser = currentUser?.Id == UserModel.Id;
             UserModel.Posts = await S.Db.Posts
-                .IncludeAuthor()
                 .Where(p => p.Author == UserModel)
                 .ToListAsync();
             Role = (await S.UserManager.GetRolesAsync(UserModel)).Single();

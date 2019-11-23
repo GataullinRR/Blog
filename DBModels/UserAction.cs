@@ -34,6 +34,7 @@ namespace DBModels
         
         REPORT_CHECKED = 1400,
         VIOLATION_REPORTED = 1500,
+        MARKED_AS_MODERATED = 2000,
     }
 
     public class UserAction : IDbEntity
@@ -45,7 +46,7 @@ namespace DBModels
         public virtual Commentary CommentaryObject { get; set; }
         public virtual Post PostObject { get; set; }
         public virtual Profile ProfileObject { get; set; }
-        public IModeratableObject ReportObject => CommentaryObject ?? (IModeratableObject)PostObject ?? ProfileObject;
+        public IReportable ReportObject => CommentaryObject ?? (IReportable)PostObject ?? ProfileObject;
 
         public UserAction() { }
 

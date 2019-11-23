@@ -1,26 +1,27 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace DBModels
 {
-    public class PostEdit : IDbEntity
+    public class PostEdit : EditBase, IModeratable
     {
-        [Key]
-        public int Id { get; set; }
-        [Required]
-        public virtual User EditAuthor { get; set; }
-        [Required]
-        public string Reason { get; set; }
-        [Required]
-        public DateTime EditTime { get; set; }
+        [Required] public string NewTitle { get; set; }
+        [Required] public string NewBody { get; set; }
+        [Required] public string NewBodyPreview { get; set; }
+        public virtual Post Post { get; set; }
+        public ModerationState State { get; set; }
 
         public PostEdit() { }
 
-        public PostEdit(User editAuthor, string reason, DateTime editTime)
+        public PostEdit(User editAuthor, string reason, DateTime editTime, string newTitle, string newBody, string newBodyPreview)
         {
-            EditAuthor = editAuthor ?? throw new ArgumentNullException(nameof(editAuthor));
+            Author = editAuthor ?? throw new ArgumentNullException(nameof(editAuthor));
             Reason = reason ?? throw new ArgumentNullException(nameof(reason));
             EditTime = editTime;
+            NewBody = newBody ?? throw new ArgumentNullException(nameof(reason));
+            NewTitle = newTitle ?? throw new ArgumentNullException(nameof(reason));
+            NewBodyPreview = newBodyPreview ?? throw new ArgumentNullException(nameof(reason));
         }
     }
 }
