@@ -12,7 +12,9 @@
             await Model.Permissions.CanReportAsync(Model.Commentary)))
         <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Commentary)">| <a asp-page="/ViolationReport" asp-page-handler="Commentary" asp-route-id="@Model.Commentary.Id">Report violation</a></span>
         <span include-if="await Model.Permissions.CanDeleteCommentaryAsync(Model.Commentary)">| <a class="operation-danger" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.DeleteCommentaryAsync)" asp-route-id="@Model.Commentary.Id">Delete</a></span>
+        <span include-if="await Model.Permissions.CanUndeleteCommentaryAsync(Model.Commentary)">| <a class="operation-primary" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.UndeleteCommentaryAsync)" asp-route-id="@Model.Commentary.Id">Restore</a></span>
     </h4>
+
     <div class="d-flex flex-row">
         <div class="d-flex flex-column align-self-center" style="margin-right:20px">
             @await Html.PartialAsync("_ProfileImage", Model.Commentary.Author)

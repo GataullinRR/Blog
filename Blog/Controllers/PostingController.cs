@@ -36,8 +36,29 @@ namespace Blog.Controllers
                 var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 var post = await S.Db.Posts.FirstOrDefaultByIdAsync(id);
                 await S.Permissions.ValidateDeletePostAsync(post);
+
                 post.IsDeleted = true;
                 currentUser.Actions.Add(new UserAction(ActionType.POST_DELETED, post));
+                await S.Db.SaveChangesAsync();
+
+                return RedirectToPage("/Post", new { id = id });
+            }
+            else
+            {
+                throw new Exception();
+            }
+        }
+
+        public async Task<IActionResult> UndeletePostAsync([Required]int id)
+        {
+            if (ModelState.IsValid)
+            {
+                var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+                var post = await S.Db.Posts.FirstOrDefaultByIdAsync(id);
+                await S.Permissions.ValidateUndeletePostAsync(post);
+
+                post.IsDeleted = false;
+                currentUser.Actions.Add(new UserAction(ActionType.POST_UNDELETED, post));
                 await S.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Post", new { id = id });

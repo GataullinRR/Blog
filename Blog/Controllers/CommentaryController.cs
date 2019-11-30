@@ -97,5 +97,26 @@ namespace Blog.Controllers
                 throw new Exception();
             }
         }
+
+        [HttpGet()]
+        public async Task<IActionResult> UndeleteCommentaryAsync([Required]int id)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+                var commentary = await S.Db.Commentaries.FirstOrDefaultByIdAsync(id);
+                await S.Permissions.ValidateUndeleteCommentaryAsync(commentary);
+
+                user.Actions.Add(new UserAction(ActionType.COMMENTARY_UNDELETE, commentary));
+                commentary.IsDeleted = false;
+                await S.Db.SaveChangesAsync();
+
+                return Redirect(S.History.GetLastURL());
+            }
+            else
+            {
+                throw new Exception();
+            }
+        }
     }
 }

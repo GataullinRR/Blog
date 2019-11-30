@@ -33,7 +33,7 @@ namespace Blog.Services
             var document = new HtmlDocument();
             document.LoadHtml(intermediate);
             var nodes = document.DocumentNode.SelectNodes("//img");
-            foreach (var node in nodes)
+            foreach (var node in nodes.NullToEmpty())
             {
                 var ATTRIBUTE = "class";
 
