@@ -66,11 +66,8 @@
             @if (await Model.Permissions.CanAddCommentaryAsync(Model.Post))
             {
                 <form method="post" asp-page-handler="AddCommentary">
-                    <input type="hidden" value="@Model.NewCommentary" asp-for="NewCommentary"/>
                     <input type="hidden" value="@Model.NewCommentary.PostId" asp-for="NewCommentary.PostId"/>
-                    @*<input type="hidden" value="@Model.NewCommentary" asp-for="NewCommentary"/>*@
 
-                    @*<textarea name="commentBody" rows="3" placeholder="Your comment"></textarea>*@
                     <div class="form-group">
                         <textarea class="form-control" rows="3" placeholder="Your comment" asp-for="NewCommentary.Body"></textarea>
                         <span class="text-danger" asp-validation-for="NewCommentary.Body"></span>

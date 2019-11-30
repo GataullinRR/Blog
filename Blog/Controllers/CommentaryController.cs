@@ -55,7 +55,7 @@ namespace Blog.Controllers
         }
 
         [HttpPost()]
-        public async Task<IActionResult> UpdateCommentaryAsync([Required]int id, [Required]string body, string editReason)
+        public async Task<IActionResult> UpdateCommentaryAsync([Required]int id, [Required]string body, [Required]string editReason)
         {
             if (ModelState.IsValid)
             {

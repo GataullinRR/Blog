@@ -65,28 +65,30 @@ namespace Blog.Pages
         [HttpPost]
         public async Task<IActionResult> OnPostAddCommentaryAsync()
         {
-            return null;
+            if (ModelState.IsValid)
+            {
+                var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+                var post = await S.Db.Posts.FirstOrDefaultByIdAsync(NewCommentary.PostId);
+                await Permissions.ValidateAddCommentaryAsync(post);
+                if (NewCommentary.Body != null)
+                {
+                    var comment = new Commentary(
+                        await S.Db.Users.FirstAsync(u => u.UserName == User.Identity.Name),
+                        DateTime.UtcNow,
+                        await S.Db.Posts.FindAsync(NewCommentary.PostId),
+                        NewCommentary.Body);
+                    S.Db.Commentaries.Add(comment);
+                    await S.Db.SaveChangesAsync();
+                    currentUser.Actions.Add(new UserAction(ActionType.ADD_COMMENTARY, comment));
+                    await S.Db.SaveChangesAsync();
+                }
 
-            //if (ModelState.IsValid)
-            //{
-            //    var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-            //    var post = await S.Db.Posts.FirstOrDefaultByIdAsync(postId);
-            //    await Permissions.ValidateAddCommentaryAsync(post);
-            //    if (commentBody != null)
-            //    {
-            //        var comment = new Commentary(
-            //            await S.Db.Users.FirstAsync(u => u.UserName == User.Identity.Name), 
-            //            DateTime.UtcNow, 
-            //            await S.Db.Posts.FindAsync(postId), 
-            //            commentBody);
-            //        S.Db.Commentaries.Add(comment);
-            //        await S.Db.SaveChangesAsync();
-            //        currentUser.Actions.Add(new UserAction(ActionType.ADD_COMMENTARY, comment));
-            //        await S.Db.SaveChangesAsync();
-            //    }
-            //}
-         
-            //return RedirectToPage("/Post", new { id = postId });
+                return RedirectToPage("/Post", new { id = NewCommentary.PostId });
+            }
+            else
+            {
+                return Redirect(S.History.GetLastURL());
+            }
         }
     }
 }
