@@ -26,13 +26,13 @@
         </div>
     </div>
 
-    <nav class="navbar navbar-expand-sm navbar-light bg-white">
+    <nav class="navbar navbar-expand-md navbar-light bg-white">
         <a class="navbar-brand" asp-page="/Index">Home</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="collapsibleNavbar">
-            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <ul class="navbar-nav mr-auto">
                 @if (User.Identity.IsAuthenticated)
                 {
                     <li class="nav-item">
@@ -71,9 +71,11 @@
                 }
             </ul>
 
-            <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" />
-                <button class="btn btn-light my-2 my-sm-0" type="submit">Search</button>
+            <form class="form-inline my-2">
+                <div class="input-group">
+                    <input class="form-control mr-2" type="search" placeholder="Search" aria-label="Search" />
+                    <button class="btn btn-light" type="submit">Search</button>
+                </div>
             </form>
         </div>
     </nav>
@@ -87,7 +89,7 @@
     @RenderBody()
 
     <footer>
-        <strong>Created by <a href="https://github.com/GataullinRR">GataullinRR</a></strong>
+        <span>Created by <a href="https://github.com/GataullinRR">GataullinRR</a></span>
         <span style="float:right">Powered by ASP .NET Core 2.2</span>
     </footer>
 

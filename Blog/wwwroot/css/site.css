@@ -23,6 +23,10 @@ span.comment-deleted {
     visibility: collapse;
 }
 
+.container-main {
+    max-width: 900px;
+}
+
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
