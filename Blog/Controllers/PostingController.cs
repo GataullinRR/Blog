@@ -21,7 +21,7 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                return S.Sanitizer.AllowAllButNotExecutable.Sanitize(rawBody);
+                return await S.Sanitizer.SanitizePostBodyAsync(rawBody);
             }
             else
             {

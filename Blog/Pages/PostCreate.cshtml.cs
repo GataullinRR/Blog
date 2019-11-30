@@ -42,7 +42,7 @@ namespace Blog.Pages
                 else
                 {
                     var author = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-                    var body = getEscapedPostBody();
+                    var body = await getEscapedPostBodyAsync();
                     var preview = getPostBodyPreview(body);
                     var post = new Post(DateTime.UtcNow, author, Title, body, preview);
                     post.State = ModerationState.UNDER_MODERATION;

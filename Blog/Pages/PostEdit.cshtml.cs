@@ -54,7 +54,8 @@ namespace Blog.Pages
                 {
                     Title = editingPost.Title;
                 }
-                var edit = new PostEdit(author, EditReason, DateTime.UtcNow, Title, Body, getPostBodyPreview(editingPost.Body));
+                var sanitizedBody = await S.Sanitizer.SanitizePostBodyAsync(Body);
+                var edit = new PostEdit(author, EditReason, DateTime.UtcNow, Title, sanitizedBody, getPostBodyPreview(editingPost.Body));
                 editingPost.Edits.Add(edit);
                 author.ModeratorsInChargeGroup.AddEntityToCheck(edit, CheckReason.NEED_MODERATION);
                 author.Actions.Add(new UserAction(ActionType.POST_EDITED, editingPost));

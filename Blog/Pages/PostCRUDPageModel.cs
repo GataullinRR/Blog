@@ -26,9 +26,9 @@ namespace Blog.Pages
 
         }
 
-        protected string getEscapedPostBody()
+        protected async Task<string> getEscapedPostBodyAsync()
         {
-            return S.Sanitizer.AllowAllButNotExecutable.Sanitize(Body);
+            return await S.Sanitizer.SanitizePostBodyAsync(Body);
         }
         protected string getPostBodyPreview(string escapedBody)
         {

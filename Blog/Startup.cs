@@ -89,7 +89,7 @@ namespace Blog
             services.AddScoped<SessionMutatorsManagerService>();
             services.AddScoped<BanningService>();
             services.AddScoped<UtilitiesService>();
-            services.AddSingleton<HtmlSanitizerService>();
+            services.AddSingleton<PostSanitizerService>();
             services.AddScoped<EntitiesProviderService>();
         }
 

@@ -27,6 +27,10 @@ span.comment-deleted {
     max-width: 900px;
 }
 
+.validation-message {
+    margin-top: 100px;
+}
+
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */

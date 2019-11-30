@@ -19,10 +19,13 @@ namespace Blog.Pages
         public bool ShowLastEdit { get; private set; }
         public Post Post { get; private set; }
         public IEnumerable<Commentary> Commentaries { get; private set; }
+        
+        [BindProperty]
+        public CommentaryCreateModel NewCommentary { get; set; }
 
         public PostModel(ServicesProvider serviceProvider) : base(serviceProvider)
         {
-
+            NewCommentary = new CommentaryCreateModel();
         }
 
         public async Task<IActionResult> OnGetAsync([Required]int id, bool? lastEdit)
@@ -48,6 +51,7 @@ namespace Blog.Pages
                     Post.ViewStatistic.UpdateStatistic(currentUser);
 
                     var x = await S.Db.SaveChangesAsync();
+                    NewCommentary.PostId = id;
 
                     return Page();
                 }
@@ -59,28 +63,30 @@ namespace Blog.Pages
         }
 
         [HttpPost]
-        public async Task<IActionResult> OnPostAddCommentaryAsync([Required]int postId, [Required(), MinLength(6), MaxLength(1000)]string commentBody)
+        public async Task<IActionResult> OnPostAddCommentaryAsync()
         {
-            if (ModelState.IsValid)
-            {
-                var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-                var post = await S.Db.Posts.FirstOrDefaultByIdAsync(postId);
-                await Permissions.ValidateAddCommentaryAsync(post);
-                if (commentBody != null)
-                {
-                    var comment = new Commentary(
-                        await S.Db.Users.FirstAsync(u => u.UserName == User.Identity.Name), 
-                        DateTime.UtcNow, 
-                        await S.Db.Posts.FindAsync(postId), 
-                        commentBody);
-                    S.Db.Commentaries.Add(comment);
-                    await S.Db.SaveChangesAsync();
-                    currentUser.Actions.Add(new UserAction(ActionType.ADD_COMMENTARY, comment));
-                    await S.Db.SaveChangesAsync();
-                }
-            }
+            return null;
+
+            //if (ModelState.IsValid)
+            //{
+            //    var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+            //    var post = await S.Db.Posts.FirstOrDefaultByIdAsync(postId);
+            //    await Permissions.ValidateAddCommentaryAsync(post);
+            //    if (commentBody != null)
+            //    {
+            //        var comment = new Commentary(
+            //            await S.Db.Users.FirstAsync(u => u.UserName == User.Identity.Name), 
+            //            DateTime.UtcNow, 
+            //            await S.Db.Posts.FindAsync(postId), 
+            //            commentBody);
+            //        S.Db.Commentaries.Add(comment);
+            //        await S.Db.SaveChangesAsync();
+            //        currentUser.Actions.Add(new UserAction(ActionType.ADD_COMMENTARY, comment));
+            //        await S.Db.SaveChangesAsync();
+            //    }
+            //}
          
-            return RedirectToPage("/Post", new { id = postId });
+            //return RedirectToPage("/Post", new { id = postId });
         }
     }
 }

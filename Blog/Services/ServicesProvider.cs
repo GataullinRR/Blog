@@ -31,7 +31,7 @@ namespace Blog.Services
         readonly Lazy<SessionMutatorsManagerService> _mutatorsManager;
         readonly Lazy<UtilitiesService> _utilities;
         readonly Lazy<BanningService> _banning;
-        readonly Lazy<HtmlSanitizerService> _sanitizer;
+        readonly Lazy<PostSanitizerService> _sanitizer;
         readonly Lazy<EntitiesProviderService> _entities;
 
         public IServiceProvider ServiceProvider { get; }
@@ -53,7 +53,7 @@ namespace Blog.Services
         public SessionMutatorsManagerService MutatorsManager => _mutatorsManager.Value;
         public UtilitiesService Utilities => _utilities.Value;
         public BanningService Banning => _banning.Value;
-        public HtmlSanitizerService Sanitizer => _sanitizer.Value;
+        public PostSanitizerService Sanitizer => _sanitizer.Value;
         public EntitiesProviderService Entities => _entities.Value;
 
         public ServicesProvider(IServiceProvider serviceProvider)
@@ -78,7 +78,7 @@ namespace Blog.Services
             _mutatorsManager = ServiceProvider.GetLazyService<SessionMutatorsManagerService>();
             _utilities = ServiceProvider.GetLazyService<UtilitiesService>();
             _banning = ServiceProvider.GetLazyService<BanningService>();
-            _sanitizer = ServiceProvider.GetLazyService<HtmlSanitizerService>();
+            _sanitizer = ServiceProvider.GetLazyService<PostSanitizerService>();
             _entities = ServiceProvider.GetLazyService<EntitiesProviderService>();
         }
     }

@@ -6,7 +6,7 @@
     ViewData["Title"] = Model.Post.Title;
 }
 
-<div class="container-fluid">
+<div class="container container-main">
     <div class="row">
         <div class="col">
                 <h2>
@@ -26,7 +26,7 @@
                 <span include-if="@Model.Post.State == ModerationState.MODERATION_NOT_PASSED" class="text-danger">Post hasn't passed moderation. Edit to fix problems.</span>
             </div>
 
-            <div>
+            <div class="mb-3">
                 @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(Model.Post, false, Model.ShowLastEdit)); }
             </div>
             <div>
@@ -41,7 +41,7 @@
                 </div>
             }
             <div>
-                Seen @Model.Post.ViewStatistic.TotalViews times
+                <span class="mb-2">Seen @Model.Post.ViewStatistic.TotalViews times</span>
             </div>
 
             <hr />
@@ -59,17 +59,24 @@
                 count++;
             }
 
-            <div>
+            <div class="mb-3">
                 <span>@count of @Model.Commentaries.Count() commentaries have been shown</span>
             </div>
 
-            @if (User.Identity.IsAuthenticated)
+            @if (await Model.Permissions.CanAddCommentaryAsync(Model.Post))
             {
-                <form include-if="await Model.Permissions.CanAddCommentaryAsync(Model.Post)" method="post" asp-page-handler="AddCommentary">
-                    <input type="hidden" name="postId" value="@Model.Post.Id" />
-                    <textarea name="commentBody" rows="3" placeholder="Your comment"></textarea>
+                <form method="post" asp-page-handler="AddCommentary">
+                    <input type="hidden" value="@Model.NewCommentary" asp-for="NewCommentary"/>
+                    <input type="hidden" value="@Model.NewCommentary.PostId" asp-for="NewCommentary.PostId"/>
+                    @*<input type="hidden" value="@Model.NewCommentary" asp-for="NewCommentary"/>*@
 
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    @*<textarea name="commentBody" rows="3" placeholder="Your comment"></textarea>*@
+                    <div class="form-group">
+                        <textarea class="form-control" rows="3" placeholder="Your comment" asp-for="NewCommentary.Body"></textarea>
+                        <span class="text-danger" asp-validation-for="NewCommentary.Body"></span>
+                    </div>
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger validation-message"></div>
 
                     <button type="submit" class="btn btn-primary">Send</button>
                 </form>

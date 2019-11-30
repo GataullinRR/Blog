@@ -3,13 +3,15 @@
 @{
     ViewData["Title"] = "Commentary";
 }
-<div class="container-fluid">
+<div class="container container-main">
     <div class="row">
         <div class="col">
             @{ await Html.RenderPartialAsync("_CommentaryContainer", Model.Commentary); }
 
             @if (await Model.Permissions.CanSeeServiceInformationAsync())
             {
+                <hr />
+
                 <h4>Info</h4>
                 var parameters = new Dictionary<string, object>()
                 {
