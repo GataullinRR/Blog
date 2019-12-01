@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Misc;
 using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Identity;
@@ -19,6 +20,7 @@ namespace Blog.Controllers
 
         }
 
+        [HttpPost, AJAX]
         public async Task<IActionResult> ReportProfileAsync([Required]int id)
         {
             if (ModelState.IsValid)
@@ -31,6 +33,7 @@ namespace Blog.Controllers
             }
         }
 
+        [HttpPost, AJAX]
         public async Task<IActionResult> ReportPostAsync([Required]int id)
         {
             if (ModelState.IsValid)
@@ -43,6 +46,7 @@ namespace Blog.Controllers
             }
         }
 
+        [HttpPost, AJAX]
         public async Task<IActionResult> ReportCommentaryAsync([Required]int id)
         {
             if (ModelState.IsValid)

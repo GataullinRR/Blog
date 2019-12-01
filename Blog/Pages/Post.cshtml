@@ -13,7 +13,7 @@
                 <span exclude-if="Model.ShowLastEdit">@Model.Post.Title</span>
                 <span include-if="Model.ShowLastEdit">@Model.Post.LastEdit.NewTitle</span>
                 @await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/PostEdit", "id", Model.Post.Id, await Model.Permissions.CanEditPostAsync(Model.Post)))
-                @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportPostAsync), "id", Model.Post.Id, await Model.Permissions.CanReportAsync(Model.Post)))
+                <span include-if="await Model.Permissions.CanReportAsync(Model.Post)" class="btn-report">| <a class="no-redirect" href="" onclick="reportPost(this, @Model.Post.Id)">Report</a></span>
                 <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Post)">| <a asp-page="/ViolationReport" asp-page-handler="Post" asp-route-id="@Model.Post.Id">Report violation</a></span>
                 <span include-if="!Model.ShowLastEdit && await Model.Permissions.CanMarkAsModeratedAsync(Model.Post)">| <a asp-controller="@nameof(ModerationController).GetController()" asp-action="@nameof(ModerationController.MarkPostAsModeratedAsync)" asp-route-id="@Model.Post.Id">Mark as moderated</a></span>
                 <span include-if="Model.ShowLastEdit && await Model.Permissions.CanMarkAsModeratedAsync(Model.Post.LastEdit)">| <a asp-controller="@nameof(ModerationController).GetController()" asp-action="@nameof(ModerationController.MarkPostEditAsModeratedAsync)" asp-route-id="@Model.Post.LastEdit.Id">Mark as moderated</a></span>
@@ -50,10 +50,10 @@
 
             @{ var count = 0; }
             @foreach (var commentary in Model.Commentaries
-             .OrderByDescending(c => c.CreationTime)
-             .Take(100)
-             .Select(c => Html.PartialAsync("_CommentaryContainer", c))
-             .ToArray())
+.OrderByDescending(c => c.CreationTime)
+.Take(100)
+.Select(c => Html.PartialAsync("_CommentaryContainer", c))
+.ToArray())
             {
                 @await commentary;
 
@@ -67,7 +67,7 @@
             @if (await Model.Permissions.CanAddCommentaryAsync(Model.Post))
             {
                 <form method="post" asp-page-handler="AddCommentary">
-                    <input type="hidden" value="@Model.NewCommentary.PostId" asp-for="NewCommentary.PostId"/>
+                    <input type="hidden" value="@Model.NewCommentary.PostId" asp-for="NewCommentary.PostId" />
 
                     <div class="form-group">
                         <textarea class="form-control" rows="3" placeholder="Your comment" asp-for="NewCommentary.Body"></textarea>
@@ -92,4 +92,14 @@
 
 @section Scripts {
     <partial name="_CommentartyScripts" />
+
+    <script>
+        @{
+            var target = new ControllerAction(nameof(ReportingController), nameof(ReportingController.ReportPostAsync));
+        }
+
+        function reportPost(element, id) {
+            report(element, "@target.GetURI()", id);
+        }
+    </script>
 }

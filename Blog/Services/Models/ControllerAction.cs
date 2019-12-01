@@ -16,5 +16,10 @@ namespace Blog.Services.Models
             ControllerName = controllerName?.GetController() ?? throw new ArgumentNullException(nameof(controllerName));
             ActionName = actionName ?? throw new ArgumentNullException(nameof(actionName));
         }
+
+        public string GetURI()
+        {
+            return $"/{ControllerName}/{ActionName}";
+        }
     }
 }

@@ -178,7 +178,7 @@
                 async: isAsync,
                 success: function (data, textStatus, jqXHR) {
                     if (onSuccess) {
-                        onSuccess(data);
+                        onSuccess(data, jqXHR);
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
@@ -213,8 +213,6 @@
         }
 
         function removeParent(element) {
-            //var container = element.parentElement;
-            //container.parentElement.removeChild(container);
             var message = element.parentElement.closest(".message");
             message.parentElement.removeChild(message);
 
@@ -230,6 +228,21 @@
             };
             xhr.open(requestType, route);
             xhr.send();
+        }
+
+        function report(element, route, id) {
+            makePost(route, { "id": id }, true,
+                function () {
+                    renderMessage("Report has been submitted");
+                    var reportButton = element.parentElement.closest(".btn-report");
+                    reportButton.parentElement.removeChild(reportButton);
+                },
+                reportError
+            );
+
+            function reportError() {
+                renderMessage("An error occurred during submitting the report :(");
+            }
         }
     </script>
 

@@ -101,33 +101,18 @@ namespace Blog
             if (env.IsDevelopment())
             {
                 app.UseBrowserLink();
-                app.UseStatusCodePagesWithRedirects("/Errors/Error?code={0}");
-                //app.UseExceptionHandler("/Errors/Error");
-                //app.UseDeveloperExceptionPage();
+                //app.UseStatusCodePagesWithRedirects("/Errors/Error?code={0}");
             }
             else
             {
 
             }
 
+            app.UseMiddleware<ErrorsHandlerMiddleware>();
             app.UseAuthentication();
             app.UseStaticFiles();
             app.UseSession();
-            app.UseMiddleware<ExceptionToStatusCodeMiddleware>();
-            //app.Use(async (ctx, next) =>
-            //{
-            //    await next();
-
-            //    if (ctx.Response.StatusCode == 404 && !ctx.Response.HasStarted)
-            //    {
-            //        ctx.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-            //        ////Re-execute the request so the user gets the error page
-            //        //string originalPath = ctx.Request.Path.Value;
-            //        //ctx.Items["originalPath"] = originalPath;
-            //        //ctx.Request.Path = "/error/404";
-            //        await next();
-            //    }
-            //});
+            //app.UseMiddleware<ExceptionToStatusCodeMiddleware>();
             app.UseMvc(routes =>
             {
                 routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");

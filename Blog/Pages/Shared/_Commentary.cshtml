@@ -6,11 +6,8 @@
         <a asp-page="/Account/Profile" asp-route-id="@Model.Commentary.Author.Id">@Model.Commentary.Author.UserName</a>
         <span style="float:right">@Model.Commentary.CreationTime.ToString("hh:mm dd.MM.yyyy")</span>
         <span include-if="await Model.Permissions.CanEditCommentaryAsync(Model.Commentary)">| <a href="" class="no-redirect commentary-edit-button">Edit</a></span>
-        @await Html.PartialAsync("_Anchor", AnchorModel.ToController(
-            "Report", nameof(ReportingController), nameof(ReportingController.ReportCommentaryAsync),
-            "id", Model.Commentary.Id,
-            await Model.Permissions.CanReportAsync(Model.Commentary)))
-        <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Commentary)">| <a asp-page="/ViolationReport" asp-page-handler="Commentary" asp-route-id="@Model.Commentary.Id">Report violation</a></span>
+        <span include-if="await Model.Permissions.CanReportAsync(Model.Commentary)" class="btn-report">| <a class="no-redirect" href="" onclick="reportCommentary(this, @Model.Commentary.Id)">Report</a></span>
+        <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Commentary)">| <a class="" asp-page="/ViolationReport" asp-page-handler="Commentary" asp-route-id="@Model.Commentary.Id">Report violation</a></span>
         <span include-if="await Model.Permissions.CanDeleteCommentaryAsync(Model.Commentary)">| <a class="operation-danger" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.DeleteCommentaryAsync)" asp-route-id="@Model.Commentary.Id">Delete</a></span>
         <span include-if="await Model.Permissions.CanUndeleteCommentaryAsync(Model.Commentary)">| <a class="operation-primary" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.UndeleteCommentaryAsync)" asp-route-id="@Model.Commentary.Id">Restore</a></span>
     </h4>

@@ -16,11 +16,8 @@
         <div class="col">
             <h2>
                 Profile information @await generateEditButtonAsync(targetUser.Id, canEdit)
-                @if (await Model.Permissions.CanUnbanUserAsync(targetUser))
-                {
-                    <span>| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
-                }
-                @await Html.PartialAsync("_Anchor", AnchorModel.ToController("Report", nameof(ReportingController), nameof(ReportingController.ReportProfileAsync), "id", targetUser.Profile.Id, await Model.Permissions.CanReportAsync(targetUser.Profile)))
+                <span include-if="await Model.Permissions.CanUnbanUserAsync(targetUser)">| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
+                <span include-if="await Model.Permissions.CanReportAsync(targetUser.Profile)" class="btn-report">| <a class="no-redirect" href="" onclick="reportProfile(this, @targetUser.Profile.Id)">Report</a></span>
                 <span include-if="await Model.Permissions.CanReportViolationAsync(targetUser.Profile)">| <a asp-page="/ViolationReport" asp-page-handler="Profile" asp-route-id="@targetUser.Profile.Id">Report violation</a></span>
                 <span include-if="await Model.Permissions.CanBanUserAsync(targetUser)">| <a class="operation-danger" asp-page="/Account/BanConfirmation" asp-route-id="@targetUser.Id">Ban</a></span>
             </h2>
@@ -75,8 +72,8 @@
                 <h3>Posts</h3>
 
                 @foreach (var post in targetUser.Posts
-                   .Where(p => p.State.IsOneOf(ModerationState.MODERATED))
-                   .OrderByDescending(p => p.CreationTime))
+                  .Where(p => p.State.IsOneOf(ModerationState.MODERATED))
+                  .OrderByDescending(p => p.CreationTime))
                 {
                     <div><a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a></div>
                 }
@@ -86,19 +83,19 @@
                 <h3>Posts under moderation</h3>
 
                 @foreach (var post in targetUser.Posts
-                    .Where(p => p.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))
-                    .OrderByDescending(p => p.CreationTime))
+                   .Where(p => p.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))
+                   .OrderByDescending(p => p.CreationTime))
                 {
                     {
                         var routeParams = new Dictionary<string, string>()
-                        {
+                            {
                             { "id", post.Id.ToString() }
                         };
                         if (post.Edits.Count != 0 && post.LastEdit.State != ModerationState.MODERATED)
                         {
                             routeParams.Add("lastEdit", "true");
                         }
-                        
+
                         <div>
                             <a asp-page="/Post" asp-all-route-data="@routeParams">@post.Title</a>
                         </div>
@@ -183,4 +180,17 @@
     {
         return await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/Account/ProfileEdit", userId, showLink));
     }
+}
+
+@section Scripts
+{
+    <script>
+        @{
+            var target = new ControllerAction(nameof(ReportingController), nameof(ReportingController.ReportProfileAsync));
+        }
+
+        function reportProfile(element, id) {
+            report(element, "@target.GetURI()", id);
+        }
+    </script>
 }
