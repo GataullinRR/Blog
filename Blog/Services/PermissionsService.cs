@@ -422,8 +422,9 @@ namespace Blog.Services
             else
             {
                 return await isNotDeletedAsync(reportObject)
+                    && currentUser != reportObject.Author
                     && !reportObject.Reports.Any(r => r.Reporter.Id == currentUser.Id)
-                    && !(reportObject.As<Commentary>()?.IsDeleted).NullToFalse()
+                    && (reportObject.As<IModeratable>()?.State ?? ModerationState.MODERATION_NOT_PASSED) == ModerationState.MODERATED
                     && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR)).ThenDo(r => !r);
             }
         }
