@@ -213,8 +213,10 @@
         }
 
         function removeParent(element) {
-            var container = element.parentElement;
-            container.parentElement.removeChild(container);
+            //var container = element.parentElement;
+            //container.parentElement.removeChild(container);
+            var message = element.parentElement.closest(".message");
+            message.parentElement.removeChild(message);
 
             return true;
         }

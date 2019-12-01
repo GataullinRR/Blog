@@ -10,15 +10,33 @@ namespace Blog.Models
         RENDERED = 2
     }
 
+    public enum AnchorAnctionType
+    {
+        REGULAR = 0,
+        PRIMARY,
+        DANGER,
+    }
+
     [Serializable]
-    public class JSHandledAction
+    public abstract class ActionBase
     {
         public string Name { get; }
-        public string FunctionName { get; }
+        public AnchorAnctionType ActionType { get; }
 
-        public JSHandledAction(string name, string functionName)
+        protected ActionBase(string name, AnchorAnctionType actionType)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
+            ActionType = actionType;
+        }
+    }
+
+    [Serializable]
+    public class JSHandledAction : ActionBase
+    {
+        public string FunctionName { get; }
+
+        public JSHandledAction(string name, string functionName, AnchorAnctionType actionType = default) : base(name, actionType)
+        {
             FunctionName = functionName ?? throw new ArgumentNullException(nameof(functionName));
         }
 
@@ -37,13 +55,13 @@ namespace Blog.Models
     [Serializable]
     public class MessageModel
     {
+        public string Text { get; }
+        public List<JSHandledAction> JSActions { get; } = new List<JSHandledAction>();
+        internal CreationStage Stage { get; set; } = CreationStage.JUST_CREATED;
+
         public MessageModel(string text)
         {
             Text = text ?? throw new ArgumentNullException(nameof(text));
         }
-
-        public string Text { get; }
-        public List<JSHandledAction> JSActions { get; } = new List<JSHandledAction>();
-        internal CreationStage Stage { get; set; } = CreationStage.JUST_CREATED;
     }
 }
