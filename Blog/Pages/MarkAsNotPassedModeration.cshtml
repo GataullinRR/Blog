@@ -1,0 +1,21 @@
+﻿@page
+@model Blog.Pages.MarkAsNotPassedModerationModel
+
+<div class="form-sm">
+    <form method="post">
+        <input type="hidden" asp-for="PostId" value="@Model.PostId" />
+        <input type="hidden" asp-for="LastEdit" value="@Model.LastEdit" />
+
+        <h2>Not passed moderation</h2>
+
+        <div class="form-group">
+            <label>Reason</label>
+            <textarea asp-for="Reason" class="form-control" placeholder="What was wrong?"></textarea>
+            <span asp-validation-for="Reason" class="text-danger"></span>
+        </div>
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <button class="btn btn-primary" type="submit">Mark as not moderated</button>
+    </form>
+</div>

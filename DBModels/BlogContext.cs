@@ -34,6 +34,7 @@ namespace DBModels
                 ProfilesToCheck,
                 CommentariesToCheck
             };
+        public DbSet<ModerationInfo> ModerationInfos { get; set; }
 
         public BlogContext(DbContextOptions<BlogContext> options)
             : base(options)

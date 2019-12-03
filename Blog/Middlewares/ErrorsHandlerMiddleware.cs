@@ -53,8 +53,9 @@ namespace Blog.Middlewares
                     var isAjaxEndpoint = endpoint.Metadata.GetMetadata<AJAXAttribute>() != null;
                     if (!isAjaxEndpoint) // For AJAX error page wont be rendered
                     {
+                        var statusCode = httpContext.Response.StatusCode;
                         httpContext.Response.Clear();
-                        httpContext.Response.Redirect($"/Errors/Error?code={httpContext.Response.StatusCode}", false);
+                        httpContext.Response.Redirect($"/Errors/Error?code={statusCode}", false);
                     }
                 }
             }

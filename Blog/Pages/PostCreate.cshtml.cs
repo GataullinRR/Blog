@@ -45,10 +45,16 @@ namespace Blog.Pages
                     var body = await getEscapedPostBodyAsync();
                     var preview = getPostBodyPreview(body);
                     var post = new Post(DateTime.UtcNow, author, Title, body, preview);
-                    post.State = ModerationState.UNDER_MODERATION;
                     S.Db.Posts.Add(post);
-                    post.Author.ModeratorsInChargeGroup.AddEntityToCheck(post, CheckReason.NEED_MODERATION);
-                    await S.Db.SaveChangesAsync();
+                    if (await S.Permissions.CanCreateOrEditPostsWithoutModerationAsync())
+                    {
+                        await S.Moderation.MarkPostAsModeratedAsync(post);
+                    }
+                    else
+                    {
+                        post.ModerationInfo.State = ModerationState.UNDER_MODERATION;
+                        post.Author.ModeratorsInChargeGroup.AddEntityToCheck(post, CheckReason.NEED_MODERATION);
+                    }
                     author.Actions.Add(new UserAction(ActionType.POST_CREATED, post));
                     await S.Db.SaveChangesAsync();
 

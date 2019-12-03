@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 using AspNetCore.IServiceCollection.AddIUrlHelper;
 using Blog.Middlewares;
@@ -91,6 +92,32 @@ namespace Blog
             services.AddScoped<UtilitiesService>();
             services.AddSingleton<PostSanitizerService>();
             services.AddScoped<EntitiesProviderService>();
+            services.AddScoped<ModerationService>();
+            registerServices();
+
+            void registerServices()
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                foreach (var type in assembly.DefinedTypes)
+                {
+                    var serviceType = type.GetCustomAttribute<ServiceAttribute>()?.ServiceType;
+                    if (serviceType.HasValue)
+                    {
+                        switch (serviceType.Value)
+                        {
+                            case ServiceType.SCOPED:
+                                services.AddScoped(type);
+                                break;
+                            case ServiceType.SINGLETON:
+                                services.AddSingleton(type);
+                                break;
+
+                            default:
+                                throw new NotSupportedException();
+                        }
+                    }
+                }
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -101,7 +128,6 @@ namespace Blog
             if (env.IsDevelopment())
             {
                 app.UseBrowserLink();
-                //app.UseStatusCodePagesWithRedirects("/Errors/Error?code={0}");
             }
             else
             {
@@ -112,7 +138,6 @@ namespace Blog
             app.UseAuthentication();
             app.UseStaticFiles();
             app.UseSession();
-            //app.UseMiddleware<ExceptionToStatusCodeMiddleware>();
             app.UseMvc(routes =>
             {
                 routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");

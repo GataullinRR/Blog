@@ -38,6 +38,7 @@ namespace DBModels
         REPORT_CHECKED = 1400,
         VIOLATION_REPORTED = 1500,
         MARKED_AS_MODERATED = 2000,
+        MARKED_AS_NOT_PASSED_MODERATION = 2100,
     }
 
     public class UserAction : IDbEntity

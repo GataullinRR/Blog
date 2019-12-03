@@ -23,8 +23,8 @@ namespace DBModels
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
         [InverseProperty(nameof(Violation.PostObject))]
         [Required] public virtual List<Violation> Violations { get; set; } = new List<Violation>();
-        [Required] public ModerationState State { get; set; }
         public bool IsDeleted { get; set; }
+        [Required] public virtual ModerationInfo ModerationInfo { get; set; }
 
         public Post() 
         { 
@@ -39,7 +39,7 @@ namespace DBModels
             Body = body ?? throw new ArgumentNullException(nameof(body));
             BodyPreview = bodyPreview ?? throw new ArgumentNullException(nameof(bodyPreview));
             ViewStatistic = new ViewStatistic();
-            State = ModerationState.UNDER_MODERATION;
+            ModerationInfo = new ModerationInfo();
         }
     }
 }

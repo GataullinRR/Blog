@@ -1,4 +1,8 @@
-﻿.btn-report { 
+﻿.message {
+    background: #eFeFeF;
+}
+
+.btn-report { 
 
 }
 
@@ -73,6 +77,9 @@ span.comment-deleted {
     margin-left: auto;
     margin-right: auto;
 }
+/*.form-sm label {
+    font-weight: bold;
+}*/
 .form-sm button {
     width: 100%;
 }

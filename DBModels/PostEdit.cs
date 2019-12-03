@@ -10,7 +10,7 @@ namespace DBModels
         [Required] public string NewBody { get; set; }
         [Required] public string NewBodyPreview { get; set; }
         public virtual Post Post { get; set; }
-        public ModerationState State { get; set; }
+        [Required] public virtual ModerationInfo ModerationInfo { get; set; }
 
         public PostEdit() { }
 
@@ -22,6 +22,7 @@ namespace DBModels
             NewBody = newBody ?? throw new ArgumentNullException(nameof(reason));
             NewTitle = newTitle ?? throw new ArgumentNullException(nameof(reason));
             NewBodyPreview = newBodyPreview ?? throw new ArgumentNullException(nameof(reason));
+            ModerationInfo = new ModerationInfo();
         }
     }
 }

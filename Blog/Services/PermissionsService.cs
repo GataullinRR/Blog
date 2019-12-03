@@ -41,12 +41,13 @@ namespace Blog.Services
             else
             {
                 return await isNotDeletedAsync(post)
-                       && ((user.UserName == post.Author.UserName
-                            && post.CreationTime - DateTime.Now < TimeSpan.FromDays(3)
-                            && post.Edits.Where(e => e.Author == post.Author).Count() < MAX_POST_EDITS_FOR_STANDARD_USER
-                            && post.State == ModerationState.MODERATED)
-                       || (await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR))
-                            && user != post.Author));
+                    && await canPostBeEditedAsync(post)
+                    && ((user.UserName == post.Author.UserName
+                        && post.CreationTime - DateTime.Now < TimeSpan.FromDays(3)
+                        && post.Edits.Where(e => e.Author == post.Author).Count() < MAX_POST_EDITS_FOR_STANDARD_USER
+                        && post.ModerationInfo.State.IsOneOf(ModerationState.MODERATED, ModerationState.MODERATION_NOT_PASSED))
+                    || (await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.MODERATOR)
+                        && user != post.Author));
             }
         }
 
@@ -60,8 +61,29 @@ namespace Blog.Services
             else
             {
                 return await isNotDeletedAsync(post)
+                    && await canPostBeEditedAsync(post)
                     && await CanEditPostAsync(post)
                     && await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
+            }
+        }
+        async Task<bool> canPostBeEditedAsync(Post post)
+        {
+            return post.ModerationInfo.State == ModerationState.MODERATED
+                && post.Edits.All(e => e.ModerationInfo.State == ModerationState.MODERATED)
+                || post.ModerationInfo.State == ModerationState.MODERATION_NOT_PASSED
+                || (post.LastEdit?.ModerationInfo?.State ?? ModerationState.MODERATED) == ModerationState.MODERATION_NOT_PASSED;
+        }
+
+        public async Task<bool> CanCreateOrEditPostsWithoutModerationAsync()
+        {
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
+            {
+                return false;
+            }
+            else
+            {
+                return await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
             }
         }
 
@@ -95,7 +117,7 @@ namespace Blog.Services
         public async Task<bool> CanViewPostAsync(Post post, bool showLastEdit)
         {
             var user = await getCurrentUserOrNullAsync();
-            var result = post.State == ModerationState.MODERATED
+            var result = post.ModerationInfo.State == ModerationState.MODERATED
                     && !showLastEdit
                     && !post.IsDeleted;
             if (user == null)
@@ -423,8 +445,8 @@ namespace Blog.Services
             {
                 return await isNotDeletedAsync(reportObject)
                     && currentUser != reportObject.Author
-                    && !reportObject.Reports.Any(r => r.Reporter.Id == currentUser.Id)
-                    && (reportObject.As<IModeratable>()?.State ?? ModerationState.MODERATION_NOT_PASSED) == ModerationState.MODERATED
+                    && !reportObject.Reports.Any(r => r.Reporter.Id == currentUser.Id) // Already reported
+                    && (reportObject.As<IModeratable>()?.ModerationInfo?.State ?? ModerationState.MODERATED) == ModerationState.MODERATED
                     && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR)).ThenDo(r => !r);
             }
         }
@@ -446,7 +468,9 @@ namespace Blog.Services
             else
             {
                 return await isNotDeletedAsync(reportObject)
+                    && currentUser != reportObject.Author
                     && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
+                    && (reportObject.As<IModeratable>()?.ModerationInfo?.State ?? ModerationState.MODERATED) == ModerationState.MODERATED
                     && reportObject.Violations.All(v => v.Reporter != currentUser);
             }
         }
@@ -458,7 +482,7 @@ namespace Blog.Services
                 throw buildException();
             }
         }
-        public async Task<bool> CanMarkAsModeratedAsync(IModeratable reportObject)
+        public async Task<bool> CanMarkAsModeratedAsync(IModeratable entity)
         {
             var currentUser = await getCurrentUserOrNullAsync();
             if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
@@ -467,10 +491,10 @@ namespace Blog.Services
             }
             else
             {
-                return await isNotDeletedAsync(reportObject)
-                    && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
-                    && reportObject.State.IsOneOf(ModerationState.UNDER_MODERATION)
-                    && currentUser != reportObject.Author;
+                return await isNotDeletedAsync(entity)
+                    //&& currentUser != entity.Author
+                    && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.MODERATOR)
+                    && entity.ModerationInfo.State.IsOneOf(ModerationState.UNDER_MODERATION);
             }
         }
 
@@ -527,6 +551,29 @@ namespace Blog.Services
         public async Task<bool> CanGenerateActivationLinkAsync(ActivationLinkAction activationLinkAction)
         {
             return await CanAccessBlogControlPanelAsync();
+        }
+
+        public async Task ValidateMarkAsNotPassedModerationAsync(IModeratable entity)
+        {
+            if (!await CanMarkAsNotPassedModerationAsync(entity))
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanMarkAsNotPassedModerationAsync(IModeratable entity)
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
+            {
+                return false;
+            }
+            else
+            {
+                return await isNotDeletedAsync(entity)
+                    && currentUser != entity.Author
+                    && entity.ModerationInfo.State == ModerationState.UNDER_MODERATION
+                    && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.MODERATOR);
+            }
         }
 
         async Task<bool> isNotDeletedAsync(object entity)

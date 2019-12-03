@@ -66,16 +66,27 @@
                     }
                 </ul>
 
-                <form if exclude-if="@Model.ReadOnlyAccess" method="post" asp-page-handler="Assign" style="max-width:300px">
+                <form exclude-if="@Model.ReadOnlyAccess" method="post" asp-page-handler="Assign" class="container-fluid">
                     <input type="hidden" asp-for="@Model.TargetModeratorId" />
 
-                    <div class="form-group">
-                        <label>Number of entities to assign</label>
-                        <input class="form-control" asp-for="NumOfEntitiesToAssign" type="number" />
-                        <span class="text-danger" asp-validation-for="NumOfEntitiesToAssign"></span>
+                    <div class="row">
+                        <div class="col">
+                            <span>Number of entities to assign</span>
+                        </div>
+                        <div class="col">
+                            <input class="form-control" asp-for="NumOfEntitiesToAssign" type="number" />
+                        </div>
+
+                        <div class="col">
+                            <button type="submit" style="width:100%" class="btn btn-primary">Assign</button>
+                        </div>
                     </div>
 
-                    <button type="submit" style="width:100%" class="btn btn-primary">Assign</button>
+                    <div class="row">
+                        <div class="col">
+                            <span class="text-danger" asp-validation-for="NumOfEntitiesToAssign"></span>
+                        </div>
+                    </div>
                 </form>
             }
             else

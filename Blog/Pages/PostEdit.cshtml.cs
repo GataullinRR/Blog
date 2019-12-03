@@ -57,11 +57,21 @@ namespace Blog.Pages
                 var sanitizedBody = await S.Sanitizer.SanitizePostBodyAsync(Body);
                 var edit = new PostEdit(author, EditReason, DateTime.UtcNow, Title, sanitizedBody, getPostBodyPreview(editingPost.Body));
                 editingPost.Edits.Add(edit);
-                author.ModeratorsInChargeGroup.AddEntityToCheck(edit, CheckReason.NEED_MODERATION);
+                if (await Permissions.CanCreateOrEditPostsWithoutModerationAsync())
+                {
+                    await S.Db.SaveChangesAsync();
+                    await S.Moderation.MarkPostEditAsModeratedAsync(edit);
+
+                    LayoutModel.AddMessage("Changes applied!");
+                }
+                else
+                {
+                    author.ModeratorsInChargeGroup.AddEntityToCheck(edit, CheckReason.NEED_MODERATION);
+                 
+                    LayoutModel.AddMessage("Your changes will be applied after moderation");
+                }
                 author.Actions.Add(new UserAction(ActionType.POST_EDITED, editingPost));
                 await S.Db.SaveChangesAsync();
-
-                LayoutModel.AddMessage("Your changes will be applied after moderation");
 
                 return RedirectToPage("/Post", new { id = editingPost.Id });
             }

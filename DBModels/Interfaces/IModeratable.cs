@@ -9,6 +9,6 @@
 
     public interface IModeratable : IDbEntity, IAuthored
     {
-        ModerationState State { get; set; }
+        ModerationInfo ModerationInfo { get; set; }
     }
 }

@@ -29,13 +29,14 @@ namespace Blog.Pages
         public async Task<IActionResult> OnGet(int? pageIndex)
         {
             CurrentPage = pageIndex ?? 0;
-            Posts = await S.Db.Posts
-                .Where(p => p.State == ModerationState.MODERATED && !p.IsDeleted)
+            var viewablePosts = S.Db.Posts
+                .Where(p => p.ModerationInfo.State == ModerationState.MODERATED && !p.IsDeleted);
+            Posts = await viewablePosts
                 .OrderByDescending(p => p.CreationTime)
                 .Skip(CurrentPage * NUM_OF_POSTS_ON_PAGE)
                 .Take(NUM_OF_POSTS_ON_PAGE)
                 .ToArrayAsync();
-            NumOfPages = S.Db.Posts.Count(p => p.State == ModerationState.MODERATED && !p.IsDeleted);
+            NumOfPages = await viewablePosts.CountAsync();
             NumOfPages = NumOfPages / NUM_OF_POSTS_ON_PAGE + ((NumOfPages % NUM_OF_POSTS_ON_PAGE == 0) ? 0 : 1);
 
             if (Posts.Length == 0 && CurrentPage != 0)

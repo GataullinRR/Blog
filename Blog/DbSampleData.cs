@@ -29,7 +29,7 @@ namespace Blog
                 var moderatorGroup2 = new ModeratorsGroup();
 
                 var radmir = new User(
-                    new Profile(new DateTime(2018, 1, 20)), 
+                    new Profile(new DateTime(2018, 1, 20)),
                     new ProfileStatus(ProfileState.ACTIVE))
                 {
                     Email = "QTU100@yandex.ru",
@@ -125,7 +125,7 @@ C# can be used to create almost anything but is particularly strong at building 
                     "C# is a modern object-oriented programming language developed in 2000 by Anders Hejlsberg at Microsoft as a rival to Java (which it is quite similar to)."
                     )
                 {
-                    State = ModerationState.MODERATED
+                    ModerationInfo = new ModerationInfo() { State = ModerationState.MODERATED }
                 };
                 var radmirsPost2 = new Post(
                     new DateTime(2018, 2, 5, 12, 40, 23),

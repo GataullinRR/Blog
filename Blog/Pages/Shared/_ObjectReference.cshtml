@@ -19,8 +19,7 @@ else if (Model.Object is Profile profile)
 else if (Model.Object is PostEdit edit)
 {
     var toLast = edit.Post.LastEdit == edit;
-    <a include-if="toLast" asp-page="/Post" asp-route-id="@edit.Post.Id" asp-route-lastEdit="true">post edit</a>
-    <span exclude-if="toLast">post edit</span>
+    <a asp-page="/Post" asp-route-id="@edit.Post.Id" asp-route-lastEdit="@toLast">post edit</a>
 }
 else
 {

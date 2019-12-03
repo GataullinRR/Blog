@@ -68,22 +68,22 @@
                 <div>@targetUser.Profile.About</div>
             }
 
-            <div include-if="targetUser.Posts.Any(p => p.State.IsOneOf(ModerationState.MODERATED))">
+            <div include-if="targetUser.Posts.Any(p => p.ModerationInfo.State.IsOneOf(ModerationState.MODERATED))">
                 <h3>Posts</h3>
 
                 @foreach (var post in targetUser.Posts
-                  .Where(p => p.State.IsOneOf(ModerationState.MODERATED))
+                  .Where(p => p.ModerationInfo.State.IsOneOf(ModerationState.MODERATED))
                   .OrderByDescending(p => p.CreationTime))
                 {
                     <div><a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a></div>
                 }
             </div>
 
-            <div include-if="canSeePrivateInformation && targetUser.Posts.Any(p => p.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))">
+            <div include-if="canSeePrivateInformation && targetUser.Posts.Any(p => p.ModerationInfo.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))">
                 <h3>Posts under moderation</h3>
 
                 @foreach (var post in targetUser.Posts
-                   .Where(p => p.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))
+                   .Where(p => p.ModerationInfo.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))
                    .OrderByDescending(p => p.CreationTime))
                 {
                     {
@@ -91,7 +91,7 @@
                             {
                             { "id", post.Id.ToString() }
                         };
-                        if (post.Edits.Count != 0 && post.LastEdit.State != ModerationState.MODERATED)
+                        if (post.Edits.Count != 0 && post.LastEdit.ModerationInfo.State != ModerationState.MODERATED)
                         {
                             routeParams.Add("lastEdit", "true");
                         }
