@@ -20,7 +20,7 @@ namespace DBModels
         public DateTime AddTime { get; set; }
         public DateTime? AssignationTime { get; set; }
         public DateTime? ResolvingTime { get; set; }
-        public bool IsResolved => ResolvingTime != null;
+        public bool IsResolved => ResolvingTime.HasValue;
         public CheckReason CheckReason { get; set; }
         object IEntityToCheck.Entity => Entity;
         public User AssignedModerator { get; set; }

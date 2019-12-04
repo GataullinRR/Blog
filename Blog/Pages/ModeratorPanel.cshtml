@@ -29,8 +29,9 @@
             }
 
             @{
-                var assignedEntities = Model.Entities.Where(e => e.AssignedModerator == Model.Owner);
-                var unassignedEntities = Model.Entities.Where(e => e.AssignedModerator == null);
+                var assignedEntities = Model.Entities.Where(e => e.AssignedModerator == Model.Owner && !e.IsResolved);
+                var unassignedEntities = Model.Entities.Where(e => e.AssignedModerator == null && !e.IsResolved);
+                var resolvedEntities = Model.Entities.Where(e => e.AssignedModerator == Model.Owner && e.IsResolved);
             }
 
             <h3>Entities you are assigned for</h3>
@@ -92,6 +93,24 @@
             else
             {
                 <div>There are no entities to process. Come back later!</div>
+            }
+
+            <h3>Resolved by you entities</h3>
+
+            @if (resolvedEntities.Any())
+            {
+                <ul>
+                    @foreach (var entity in resolvedEntities.Take(100))
+                    {
+                        <li>
+                            @{ await Html.RenderPartialAsync("_EntityToCheck", entity); }
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <div>None at the moment :(</div>
             }
         </div>
     </div>

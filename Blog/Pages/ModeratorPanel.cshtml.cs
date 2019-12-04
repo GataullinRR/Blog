@@ -39,7 +39,7 @@ namespace Blog.Pages
             ReadOnlyAccess = Owner != currentUser;
 
             Group = Owner.ModeratorsGroup;
-            Entities = Group.EntitiesToCheck.Where(e => !e.IsResolved).OrderBy(e => e.AddTime);
+            Entities = Group.EntitiesToCheck.OrderBy(e => e.AddTime);
             TargetUsers = Owner.ModeratorsGroup.TargetUsers;
         }
 
