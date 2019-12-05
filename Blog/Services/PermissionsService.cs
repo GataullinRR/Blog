@@ -24,6 +24,55 @@ namespace Blog.Services
 
         }
 
+        #region ### Posts permissions ###
+
+        public async Task ValidateViewPostAsync(Post post, bool showLastEdit)
+        {
+            if (!await CanViewPostAsync(post, showLastEdit))
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanViewPostAsync(Post post, bool showLastEdit)
+        {
+            var user = await getCurrentUserOrNullAsync();
+            var result = post.ModerationInfo.State == ModerationState.MODERATED
+                    && !showLastEdit
+                    && !post.IsDeleted;
+            if (user == null)
+            {
+                return result;
+            }
+            else
+            {
+                return (await S.UserManager.IsInRoleAsync(user, Roles.USER)
+                    && !post.IsDeleted)
+                    || result
+                    || await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR))
+                    || user == post.Author && !post.IsDeleted;
+            }
+        }
+
+        public async Task ValidateCreatePostAsync()
+        {
+            if (!await CanCreatePostAsync())
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanCreatePostAsync()
+        {
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
+            {
+                return false;
+            }
+            else
+            {
+                return await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.USER));
+            }
+        }
+
         public async Task ValidateEditPostAsync(Post post)
         {
             if (!await CanEditPostAsync(post))
@@ -66,123 +115,13 @@ namespace Blog.Services
                     && await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
             }
         }
+
         async Task<bool> canPostBeEditedAsync(Post post)
         {
             return post.ModerationInfo.State == ModerationState.MODERATED
                 && post.Edits.All(e => e.ModerationInfo.State == ModerationState.MODERATED)
                 || post.ModerationInfo.State == ModerationState.MODERATION_NOT_PASSED
                 || (post.LastEdit?.ModerationInfo?.State ?? ModerationState.MODERATED) == ModerationState.MODERATION_NOT_PASSED;
-        }
-
-        public async Task<bool> CanCreateOrEditPostsWithoutModerationAsync()
-        {
-            var user = await getCurrentUserOrNullAsync();
-            if (user == null || user.Status.State != ProfileState.ACTIVE)
-            {
-                return false;
-            }
-            else
-            {
-                return await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
-            }
-        }
-
-        public async Task ValidateCreatePostAsync()
-        {
-            if (!await CanCreatePostAsync())
-            {
-                throw buildException();
-            }
-        }
-        public async Task<bool> CanCreatePostAsync()
-        {
-            var user = await getCurrentUserOrNullAsync();
-            if (user == null || user.Status.State != ProfileState.ACTIVE)
-            {
-                return false;
-            }
-            else
-            {
-                return await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.USER));
-            }
-        }
-
-        public async Task ValidateViewPostAsync(Post post, bool showLastEdit)
-        {
-            if (!await CanViewPostAsync(post, showLastEdit))
-            {
-                throw buildException();
-            }
-        }
-        public async Task<bool> CanViewPostAsync(Post post, bool showLastEdit)
-        {
-            var user = await getCurrentUserOrNullAsync();
-            var result = post.ModerationInfo.State == ModerationState.MODERATED
-                    && !showLastEdit
-                    && !post.IsDeleted;
-            if (user == null)
-            {
-                return result;
-            }
-            else
-            {
-                return (await S.UserManager.IsInRoleAsync(user, Roles.USER) 
-                    && !post.IsDeleted)
-                    || result
-                    || await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR))
-                    || user == post.Author && !post.IsDeleted;
-            }
-        }
-
-        public async Task ValidateUndeleteCommentaryAsync(Commentary comment)
-        {
-            if (!await CanUndeleteCommentaryAsync(comment))
-            {
-                throw buildException();
-            }
-        }
-        public async Task<bool> CanUndeleteCommentaryAsync(Commentary comment)
-        {
-            var user = await getCurrentUserOrNullAsync();
-            if (user == null || user.Status.State != ProfileState.ACTIVE)
-            {
-                return false;
-            }
-            else
-            {
-                return comment.IsDeleted
-                    && comment.Author != user
-                    && await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR))
-                    && !await CanDeleteCommentaryAsync(comment);
-            }
-        }
-
-        public async Task ValidateEditCommentaryAsync(Commentary comment)
-        {
-            if (!await CanEditCommentaryAsync(comment))
-            {
-                throw buildException($"The commentary \"{comment.Id}\" can not be edited by current user");
-            }
-        }
-        public async Task<bool> CanEditCommentaryAsync(Commentary comment)
-        {
-            var user = await getCurrentUserOrNullAsync();
-            if (user == null || user.Status.State != ProfileState.ACTIVE)
-            {
-                return false;
-            }
-            else
-            {
-                return await isNotDeletedAsync(comment)
-                        && !comment.IsDeleted
-                            && ((!comment.IsHidden
-                                && !comment.IsDeleted
-                                && user.UserName == comment.Author.UserName
-                                && user.Status.State == ProfileState.ACTIVE
-                                && comment.CreationTime - DateTime.Now < TimeSpan.FromDays(1)
-                                && comment.Edits.Count(e => e.Author == user) < 1)
-                            || await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR)));
-            }
         }
 
         public async Task ValidateDeletePostAsync(Post post)
@@ -220,18 +159,7 @@ namespace Blog.Services
             }
         }
 
-        public async Task ValidateDeleteCommentaryAsync(Commentary comment)
-        {
-            if (!await CanDeleteCommentaryAsync(comment))
-            {
-                throw buildException();
-            }
-        }
-        public async Task<bool> CanDeleteCommentaryAsync(Commentary comment)
-        {
-            return await canDeleteAsync(comment);
-        }
-        async Task<bool> canDeleteAsync(IDeletable deletable)
+        public async Task<bool> CanCreateOrEditPostsWithoutModerationAsync()
         {
             var user = await getCurrentUserOrNullAsync();
             if (user == null || user.Status.State != ProfileState.ACTIVE)
@@ -240,11 +168,13 @@ namespace Blog.Services
             }
             else
             {
-                return await isNotDeletedAsync(deletable)
-                    && !deletable.IsDeleted
-                    && await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
+                return await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
             }
         }
+
+        #endregion
+
+        #region ### Commentaries permissions ###
 
         public async Task ValidateAddCommentaryAsync(Post post)
         {
@@ -265,6 +195,73 @@ namespace Blog.Services
                 return await isNotDeletedAsync(post);
             }
         }
+
+        public async Task ValidateEditCommentaryAsync(Commentary comment)
+        {
+            if (!await CanEditCommentaryAsync(comment))
+            {
+                throw buildException($"The commentary \"{comment.Id}\" can not be edited by current user");
+            }
+        }
+        public async Task<bool> CanEditCommentaryAsync(Commentary comment)
+        {
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
+            {
+                return false;
+            }
+            else
+            {
+                return await isNotDeletedAsync(comment)
+                        && !comment.IsDeleted
+                            && ((!comment.IsHidden
+                                && !comment.IsDeleted
+                                && user.UserName == comment.Author.UserName
+                                && user.Status.State == ProfileState.ACTIVE
+                                && comment.CreationTime - DateTime.Now < TimeSpan.FromDays(1)
+                                && comment.Edits.Count(e => e.Author == user) < 1)
+                            || await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR)));
+            }
+        }
+
+        public async Task ValidateDeleteCommentaryAsync(Commentary comment)
+        {
+            if (!await CanDeleteCommentaryAsync(comment))
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanDeleteCommentaryAsync(Commentary comment)
+        {
+            return await canDeleteAsync(comment);
+        }
+
+        public async Task ValidateUndeleteCommentaryAsync(Commentary comment)
+        {
+            if (!await CanUndeleteCommentaryAsync(comment))
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanUndeleteCommentaryAsync(Commentary comment)
+        {
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
+            {
+                return false;
+            }
+            else
+            {
+                return comment.IsDeleted
+                    && comment.Author != user
+                    && await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR))
+                    && !await CanDeleteCommentaryAsync(comment);
+            }
+        }
+
+        #endregion
+
+        #region ### Misc permissions ###
 
         public async Task ValidateResetPasswordAsync(User targetUser)
         {
@@ -573,6 +570,23 @@ namespace Blog.Services
                     && currentUser != entity.Author
                     && entity.ModerationInfo.State == ModerationState.UNDER_MODERATION
                     && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.MODERATOR);
+            }
+        }
+
+        #endregion
+
+        async Task<bool> canDeleteAsync(IDeletable deletable)
+        {
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
+            {
+                return false;
+            }
+            else
+            {
+                return await isNotDeletedAsync(deletable)
+                    && !deletable.IsDeleted
+                    && await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
             }
         }
 
