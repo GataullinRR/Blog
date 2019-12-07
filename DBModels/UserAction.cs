@@ -5,6 +5,7 @@ using Utilities;
 using Utilities.Types;
 using Utilities.Extensions;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace DBModels
 {
@@ -41,16 +42,18 @@ namespace DBModels
         MARKED_AS_NOT_PASSED_MODERATION = 2100,
     }
 
-    public class UserAction : IDbEntity
+    public class UserAction : IDbEntity, IAuthored
     {
         [Key]
         public int Id { get; set; }
+        public User Author { get; set; }
         public ActionType ActionType { get; set; }
         public DateTime ActionDate { get; set; }
         public virtual Commentary CommentaryObject { get; set; }
         public virtual Post PostObject { get; set; }
         public virtual Profile ProfileObject { get; set; }
-        public IReportable ReportObject => CommentaryObject ?? (IReportable)PostObject ?? ProfileObject;
+        public virtual User UserObject { get; set; }
+        public object ActionObject => new object[] { CommentaryObject, PostObject, ProfileObject, UserObject }.SkipNulls().SingleOrDefault();
 
         public UserAction() { }
 
@@ -61,6 +64,7 @@ namespace DBModels
             CommentaryObject = @object as Commentary;
             PostObject = @object as Post;
             ProfileObject = @object as Profile;
+            UserObject = @object as User;
         }
     }
 }

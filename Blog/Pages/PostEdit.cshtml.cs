@@ -54,24 +54,27 @@ namespace Blog.Pages
                 {
                     Title = editingPost.Title;
                 }
+                var edit = new PostEdit(author, EditReason, DateTime.UtcNow, editingPost);
                 var sanitizedBody = await S.Sanitizer.SanitizePostBodyAsync(Body);
-                var edit = new PostEdit(author, EditReason, DateTime.UtcNow, Title, sanitizedBody, getPostBodyPreview(editingPost.Body));
+                editingPost.Body = sanitizedBody;
+                editingPost.Title = Title;
+                editingPost.BodyPreview = getPostBodyPreview(sanitizedBody);
                 editingPost.Edits.Add(edit);
-                if (await Permissions.CanCreateOrEditPostsWithoutModerationAsync())
+                if (editingPost.ModerationInfo.State == ModerationState.MODERATION_NOT_PASSED)
                 {
-                    await S.Db.SaveChangesAsync();
-                    await S.Moderation.MarkPostEditAsModeratedAsync(edit);
-
-                    LayoutModel.AddMessage("Changes applied!");
+                    editingPost.ModerationInfo.State = ModerationState.UNDER_MODERATION;
+                    editingPost.ModerationInfo.StateReasoning = "Post was edited";
+                    author.ModeratorsInChargeGroup.AddEntityToCheck(editingPost, CheckReason.NEED_MODERATION);
                 }
-                else
+                else if (editingPost.ModerationInfo.State == ModerationState.MODERATED)
                 {
-                    author.ModeratorsInChargeGroup.AddEntityToCheck(edit, CheckReason.NEED_MODERATION);
-                 
-                    LayoutModel.AddMessage("Your changes will be applied after moderation");
+                    author.ModeratorsInChargeGroup.AddEntityToCheck(editingPost, CheckReason.CHECK_REQUIRED);
                 }
+                await S.Db.SaveChangesAsync();
                 author.Actions.Add(new UserAction(ActionType.POST_EDITED, editingPost));
                 await S.Db.SaveChangesAsync();
+                
+                LayoutModel.AddMessage("Changes applied!");
 
                 return RedirectToPage("/Post", new { id = editingPost.Id });
             }

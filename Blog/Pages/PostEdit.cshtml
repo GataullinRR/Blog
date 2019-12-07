@@ -39,7 +39,6 @@
 
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                <div exclude-if="await Model.Permissions.CanCreateOrEditPostsWithoutModerationAsync()" class="mb-3">Changes will be applied after moderation</div>
                 <button class="btn btn-primary" type="submit">Update</button>
             </form>
         </div>

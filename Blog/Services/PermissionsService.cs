@@ -17,6 +17,7 @@ namespace Blog.Services
     public class PermissionsService : ServiceBase
     {
         public const int MAX_POST_EDITS_FOR_STANDARD_USER = 3;
+        public const int NUM_OF_DAYS_USER_CAN_EDIT_OWN_POST = 3;
         public const int MAX_COMMENTARY_EDITS_FOR_STANDARD_USER = 1;
 
         public PermissionsService(ServicesProvider services) : base(services)
@@ -26,18 +27,17 @@ namespace Blog.Services
 
         #region ### Posts permissions ###
 
-        public async Task ValidateViewPostAsync(Post post, bool showLastEdit)
+        public async Task ValidateViewPostAsync(Post post)
         {
-            if (!await CanViewPostAsync(post, showLastEdit))
+            if (!await CanViewPostAsync(post))
             {
                 throw buildException();
             }
         }
-        public async Task<bool> CanViewPostAsync(Post post, bool showLastEdit)
+        public async Task<bool> CanViewPostAsync(Post post)
         {
             var user = await getCurrentUserOrNullAsync();
             var result = post.ModerationInfo.State == ModerationState.MODERATED
-                    && !showLastEdit
                     && !post.IsDeleted;
             if (user == null)
             {
@@ -89,12 +89,12 @@ namespace Blog.Services
             }
             else
             {
+                var notYetPublished = post.ModerationInfo.State != ModerationState.MODERATED;
                 return await isNotDeletedAsync(post)
-                    && await canPostBeEditedAsync(post)
                     && ((user.UserName == post.Author.UserName
-                        && post.CreationTime - DateTime.Now < TimeSpan.FromDays(3)
-                        && post.Edits.Where(e => e.Author == post.Author).Count() < MAX_POST_EDITS_FOR_STANDARD_USER
-                        && post.ModerationInfo.State.IsOneOf(ModerationState.MODERATED, ModerationState.MODERATION_NOT_PASSED))
+                        && (notYetPublished || (DateTime.UtcNow - post.CreationTime) < TimeSpan.FromDays(NUM_OF_DAYS_USER_CAN_EDIT_OWN_POST))
+                        && post.Edits.Where(e => e.Author == post.Author && e.MadeWhilePublished).Count() < MAX_POST_EDITS_FOR_STANDARD_USER
+                        && post.ModerationInfo.State.IsOneOf(ModerationState.MODERATED, ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))
                     || (await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.MODERATOR)
                         && user != post.Author));
             }
@@ -109,19 +109,10 @@ namespace Blog.Services
             }
             else
             {
-                return await isNotDeletedAsync(post)
-                    && await canPostBeEditedAsync(post)
-                    && await CanEditPostAsync(post)
-                    && await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
+                return await CanEditPostAsync(post)
+                    && (await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR))
+                        || post.ModerationInfo.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION));
             }
-        }
-
-        async Task<bool> canPostBeEditedAsync(Post post)
-        {
-            return post.ModerationInfo.State == ModerationState.MODERATED
-                && post.Edits.All(e => e.ModerationInfo.State == ModerationState.MODERATED)
-                || post.ModerationInfo.State == ModerationState.MODERATION_NOT_PASSED
-                || (post.LastEdit?.ModerationInfo?.State ?? ModerationState.MODERATED) == ModerationState.MODERATION_NOT_PASSED;
         }
 
         public async Task ValidateDeletePostAsync(Post post)
@@ -159,7 +150,7 @@ namespace Blog.Services
             }
         }
 
-        public async Task<bool> CanCreateOrEditPostsWithoutModerationAsync()
+        public async Task<bool> CanCreatePostsWithoutModerationAsync()
         {
             var user = await getCurrentUserOrNullAsync();
             if (user == null || user.Status.State != ProfileState.ACTIVE)
@@ -192,7 +183,8 @@ namespace Blog.Services
             }
             else
             {
-                return await isNotDeletedAsync(post);
+                return await isNotDeletedAsync(post)
+                    && post.ModerationInfo.State == ModerationState.MODERATED;
             }
         }
 
@@ -421,6 +413,20 @@ namespace Blog.Services
                     && await CanSeePrivateInformationAsync(targetUser)
                     && ((await S.UserManager.GetRolesAsync(targetUser)).Single().IsLess((await S.UserManager.GetRolesAsync(currentUser)).Single())
                         || currentUser.Id == targetUser.Id);
+            }
+        }
+        public async Task<bool> CanEditProfileWithoutCheckAsync(User targetUser)
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null)
+            {
+                return false;
+            }
+            else
+            {
+                return await CanEditProfileAsync(targetUser)
+                    && currentUser != targetUser
+                    && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR));
             }
         }
 

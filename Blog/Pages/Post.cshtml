@@ -10,18 +10,12 @@
     <div class="row">
         <div class="col">
             <h2>
-                <span exclude-if="Model.ShowLastEdit">@Model.Post.Title</span>
-                <span include-if="Model.ShowLastEdit">@Model.Post.LastEdit.NewTitle</span>
+                <span>@Model.Post.Title</span>
                 @await Html.PartialAsync("_Anchor", new AnchorModel("Edit", "/PostEdit", "id", Model.Post.Id, await Model.Permissions.CanEditPostAsync(Model.Post)))
                 <span include-if="await Model.Permissions.CanReportAsync(Model.Post)" class="btn-report">| <a class="no-redirect" href="" onclick="reportPost(this, @Model.Post.Id)">Report</a></span>
                 <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Post)">| <a asp-page="/ViolationReport" asp-page-handler="Post" asp-route-id="@Model.Post.Id">Report violation</a></span>
-                <span include-if="!Model.ShowLastEdit">
-                    <span include-if="await Model.Permissions.CanMarkAsModeratedAsync(Model.Post)">| <a class="operation-primary" asp-controller="@nameof(ModerationController).GetController()" asp-action="@nameof(ModerationController.MarkPostAsModeratedAsync)" asp-route-id="@Model.Post.Id">Mark as moderated</a></span>
-                </span>
-                <span include-if="Model.ShowLastEdit">
-                    <span include-if="await Model.Permissions.CanMarkAsModeratedAsync(Model.Post.LastEdit)">| <a class="operation-primary" asp-controller="@nameof(ModerationController).GetController()" asp-action="@nameof(ModerationController.MarkPostEditAsModeratedAsync)" asp-route-id="@Model.Post.LastEdit.Id">Mark as moderated</a></span>
-                </span>
-                <span include-if="await Model.Permissions.CanMarkAsNotPassedModerationAsync(Model.Post)">| <a class="operation-danger" asp-page="/MarkAsNotPassedModeration" asp-route-id="@Model.Post.Id" asp-route-lastEdit="@Model.ShowLastEdit">Mark as not moderated</a></span>
+                <span include-if="await Model.Permissions.CanMarkAsModeratedAsync(Model.Post)">| <a class="operation-primary" asp-controller="@nameof(ModerationController).GetController()" asp-action="@nameof(ModerationController.MarkPostAsModeratedAsync)" asp-route-id="@Model.Post.Id">Mark as moderated</a></span>
+                <span include-if="await Model.Permissions.CanMarkAsNotPassedModerationAsync(Model.Post)">| <a class="operation-danger" asp-page="/MarkAsNotPassedModeration" asp-route-id="@Model.Post.Id">Mark as not moderated</a></span>
                 <span include-if="await Model.Permissions.CanDeletePostAsync(Model.Post)">| <a class="operation-danger" asp-controller="@nameof(PostingController).GetController()" asp-action="@nameof(PostingController.DeletePostAsync)" asp-route-id="@Model.Post.Id">Delete</a></span>
                 <span include-if="await Model.Permissions.CanUndeletePostAsync(Model.Post)">| <a class="operation-primary" asp-controller="@nameof(PostingController).GetController()" asp-action="@nameof(PostingController.UndeletePostAsync)" asp-route-id="@Model.Post.Id">Restore</a></span>
             </h2>
@@ -30,11 +24,10 @@
                 <div include-if="@Model.Post.IsDeleted" class="text-danger">The post is deleted and accessible only via link</div>
                 <div include-if="@Model.Post.ModerationInfo.State == ModerationState.UNDER_MODERATION" class="text-danger">Post is under moderation and accessible only via link</div>
                 <div include-if="@Model.Post.ModerationInfo.State == ModerationState.MODERATION_NOT_PASSED" class="text-danger">Post hasn't passed moderation. Edit to fix problems.</div>
-                <div include-if="(Model.Post.LastEdit?.ModerationInfo?.State ?? ModerationState.MODERATED) != ModerationState.MODERATED">Your last edit is under moderation</div>
             </div>
 
             <div class="mb-3">
-                @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(Model.Post, false, Model.ShowLastEdit)); }
+                @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(Model.Post, false)); }
             </div>
             <div>
                 <span>Posted by <a asp-page="/Account/Profile" asp-route-id="@Model.Post.Author.Id">@Model.Post.Author.UserName</a> at @Model.Post.CreationTime.ToHoursDateString()</span>
@@ -51,47 +44,49 @@
                 <span class="mb-2">Seen @Model.Post.ViewStatistic.TotalViews times</span>
             </div>
 
-            <hr />
-            <h3>Commentaries</h3>
+            <div include-if="Model.Post.ModerationInfo.State == ModerationState.MODERATED">
+                <hr />
+                <h3>Commentaries</h3>
 
-            @{ var count = 0; }
-            @foreach (var commentary in Model.Commentaries
+                @{ var count = 0; }
+                @foreach (var commentary in Model.Commentaries
 .OrderByDescending(c => c.CreationTime)
 .Take(100)
 .Select(c => Html.PartialAsync("_CommentaryContainer", c))
 .ToArray())
-            {
-                @await commentary;
+                {
+                    @await commentary;
 
-                count++;
-            }
+                    count++;
+                }
 
-            <div class="mb-3">
-                <span>@count of @Model.Commentaries.Count() commentaries have been shown</span>
+                <div class="mb-3">
+                    <span>@count of @Model.Commentaries.Count() commentaries have been shown</span>
+                </div>
+
+                @if (await Model.Permissions.CanAddCommentaryAsync(Model.Post))
+                {
+                    <form method="post" asp-page-handler="AddCommentary">
+                        <input type="hidden" value="@Model.NewCommentary.PostId" asp-for="NewCommentary.PostId" />
+
+                        <div class="form-group">
+                            <textarea class="form-control" rows="3" placeholder="Your comment" asp-for="NewCommentary.Body"></textarea>
+                            <span class="text-danger" asp-validation-for="NewCommentary.Body"></span>
+                        </div>
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger validation-message"></div>
+
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-page="/Account/Login">Login</a>
+                    <span> or </span>
+                    <a asp-page="/Account/Register">register</a>
+                    <span> to comment</span>
+                }
             </div>
-
-            @if (await Model.Permissions.CanAddCommentaryAsync(Model.Post))
-            {
-                <form method="post" asp-page-handler="AddCommentary">
-                    <input type="hidden" value="@Model.NewCommentary.PostId" asp-for="NewCommentary.PostId" />
-
-                    <div class="form-group">
-                        <textarea class="form-control" rows="3" placeholder="Your comment" asp-for="NewCommentary.Body"></textarea>
-                        <span class="text-danger" asp-validation-for="NewCommentary.Body"></span>
-                    </div>
-
-                    <div asp-validation-summary="ModelOnly" class="text-danger validation-message"></div>
-
-                    <button type="submit" class="btn btn-primary">Send</button>
-                </form>
-            }
-            else
-            {
-                <a asp-page="/Account/Login">Login</a>
-                <span> or </span>
-                <a asp-page="/Account/Register">register</a>
-                <span> to comment</span>
-            }
         </div>
     </div>
 </div>

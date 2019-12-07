@@ -83,23 +83,16 @@
                 <h3>Posts under moderation</h3>
 
                 @foreach (var post in targetUser.Posts
-                   .Where(p => p.ModerationInfo.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))
-                   .OrderByDescending(p => p.CreationTime))
+                     .Where(p => p.ModerationInfo.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))
+                     .OrderByDescending(p => p.CreationTime))
                 {
-                    {
-                        var routeParams = new Dictionary<string, string>()
-                            {
-                            { "id", post.Id.ToString() }
-                        };
-                        if (post.Edits.Count != 0 && post.LastEdit.ModerationInfo.State != ModerationState.MODERATED)
-                        {
-                            routeParams.Add("lastEdit", "true");
-                        }
-
-                        <div>
-                            <a asp-page="/Post" asp-all-route-data="@routeParams">@post.Title</a>
+                    <div>
+                        <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
+                        <div include-if="post.ModerationInfo.State == ModerationState.MODERATION_NOT_PASSED" class="pl-4 text-danger">
+                            <div>The post hasn't passed moderation</div>
+                            <div>Reason: @post.ModerationInfo.StateReasoning</div>
                         </div>
-                    }
+                    </div>
                 }
             </div>
 
@@ -154,13 +147,20 @@
                     {
                         <li>
                             <span>@action.ActionType.ToString() at @action.ActionDate.ToString("hh:mm dd.MM.yyyy"). Object: </span>
-                            @if (action.ReportObject != null)
+                            @if (action.ActionObject != null)
                             {
-                                await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(action.ReportObject));
+                                if (action.ActionObject == targetUser || action.ActionObject == targetUser.Profile)
+                                {
+                                    <a asp-page="/Account/Profile" asp-route-id="@targetUser.Id">self</a>
+                                }
+                                else
+                                {
+                                    await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(action.ActionObject));
+                                }
                             }
                             else
                             {
-                                <span>unknown</span>
+                                <span>not set</span>
                             }
                         </li>
                     }

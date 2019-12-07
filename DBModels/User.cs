@@ -50,8 +50,8 @@ namespace DBModels
         [InverseProperty(nameof(Report.ObjectOwner))]
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
         
+        [InverseProperty(nameof(UserAction.Author))]
         [Required] public virtual List<UserAction> Actions { get; set; } = new List<UserAction>();
-        //[Required] public virtual Permission Permission { get; set; } = new Permission();
 
         /// <summary>
         /// Not null for User in <see cref="Roles.MODERATOR"/>

@@ -10,7 +10,9 @@ namespace DBModels
         [Description("Too many reports")]
         TOO_MANY_REPORTS = 1000,
         [Description("Moderation is required")]
-        NEED_MODERATION = 2000
+        NEED_MODERATION = 2000,
+        [Description("Check is required")]
+        CHECK_REQUIRED = 3000
     }
 
     public interface IEntityToCheck : IDbEntity

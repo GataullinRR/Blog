@@ -5,10 +5,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DBModels
 {
-    public class Profile : IDbEntity, IReportable
+    public class Profile : IDbEntity, IReportable, IAuthored
     {
         [Key]
         public int Id { get; set; }
+        public virtual User Author { get; set; }
         public DateTime RegistrationDate { get; set; }
         public Gender Gender { get; set; }
         public string Image { get; set; }
@@ -17,7 +18,6 @@ namespace DBModels
         [InverseProperty(nameof(Report.ProfileObject))]
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
         public string AuthorForeignKey { get; set; }
-        public virtual User Author { get; set; }
         [InverseProperty(nameof(Violation.ProfileObject))]
         [Required] public virtual List<Violation> Violations { get; set; } = new List<Violation>();
 

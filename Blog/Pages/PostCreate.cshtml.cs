@@ -46,7 +46,7 @@ namespace Blog.Pages
                     var preview = getPostBodyPreview(body);
                     var post = new Post(DateTime.UtcNow, author, Title, body, preview);
                     S.Db.Posts.Add(post);
-                    if (await S.Permissions.CanCreateOrEditPostsWithoutModerationAsync())
+                    if (await S.Permissions.CanCreatePostsWithoutModerationAsync())
                     {
                         await S.Moderation.MarkPostAsModeratedAsync(post);
                     }

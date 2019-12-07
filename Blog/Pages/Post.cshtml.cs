@@ -16,7 +16,6 @@ namespace Blog.Pages
 {
     public class PostModel : PageModelBase
     {
-        public bool ShowLastEdit { get; private set; }
         public Post Post { get; private set; }
         public IEnumerable<Commentary> Commentaries { get; private set; }
         
@@ -28,11 +27,10 @@ namespace Blog.Pages
             NewCommentary = new CommentaryCreateModel();
         }
 
-        public async Task<IActionResult> OnGetAsync([Required]int id, bool? lastEdit)
+        public async Task<IActionResult> OnGetAsync([Required]int id)
         {
             if (ModelState.IsValid)
             {
-                ShowLastEdit = lastEdit.NullToFalse();
                 Post = await S.Db.Posts.FirstOrDefaultAsync(p => p.Id == id);
                 if (Post == null)
                 {
@@ -40,7 +38,7 @@ namespace Blog.Pages
                 }
                 else
                 {
-                    await S.Permissions.ValidateViewPostAsync(Post, ShowLastEdit);
+                    await S.Permissions.ValidateViewPostAsync(Post);
                     var currentUser = await S.UserManager.GetUserAsync(User);
 
                     Commentaries = S.Db.Commentaries.Where(c => c.Post == Post);

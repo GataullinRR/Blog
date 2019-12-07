@@ -35,7 +35,7 @@ namespace Blog.Pages.Account
             {
                 if (currentUser == null)
                 {
-                    throw new ArgumentOutOfRangeException("Can't determine target user");
+                    throw new UnauthorizedAccessException("Can't determine target user");
                 }
                 else
                 {

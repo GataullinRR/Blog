@@ -30,20 +30,5 @@ namespace Blog.Controllers
                 throw new Exception();
             }
         }
-
-        public async Task<IActionResult> MarkPostEditAsModeratedAsync([Required]int id)
-        {
-            if (ModelState.IsValid)
-            {
-                var edit = await S.Db.PostsEdits.FirstOrDefaultByIdAsync(id);
-                await S.Moderation.MarkPostEditAsModeratedAsync(edit);
-
-                return RedirectToPage("/Post", new { id = edit.Post.Id });
-            }
-            else
-            {
-                throw new Exception();
-            }
-        }
     }
 }

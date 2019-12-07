@@ -10,13 +10,11 @@ namespace Blog.Models
     {
         public Post Post { get; }
         public bool PreviewVersion { get; }
-        public bool LastEditVersion { get; }
 
-        public PostViewModel(Post post, bool previewVersion, bool lastEditVersion)
+        public PostViewModel(Post post, bool previewVersion)
         {
             Post = post ?? throw new ArgumentNullException(nameof(post));
             PreviewVersion = previewVersion;
-            LastEditVersion = lastEditVersion;
         }
     }
 }

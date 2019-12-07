@@ -1,27 +1,12 @@
 ﻿@model PostViewModel
 
-    <div class="mce-content-body">
-        @if (Model.LastEditVersion)
-        {
-            var lastEdit = Model.Post.Edits.OrderByDescending(e => e.EditTime).FirstItem();
-            @if (Model.PreviewVersion)
-            {
-                @Html.Raw(lastEdit.NewBodyPreview);
-            }
-            else
-            {
-                @Html.Raw(lastEdit.NewBody);
-            }
-        }
-        else
-        {
-            @if (Model.PreviewVersion)
-            {
-                @Html.Raw(Model.Post.BodyPreview);
-            }
-            else
-            {
-                @Html.Raw(Model.Post.Body);
-            }
-        }
-    </div>
+<div class="mce-content-body">
+    @if (Model.PreviewVersion)
+    {
+        @Html.Raw(Model.Post.BodyPreview);
+    }
+    else
+    {
+        @Html.Raw(Model.Post.Body);
+    }
+</div>

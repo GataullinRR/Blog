@@ -100,7 +100,7 @@
             @if (resolvedEntities.Any())
             {
                 <ul>
-                    @foreach (var entity in resolvedEntities.Take(100))
+                    @foreach (var entity in resolvedEntities.OrderByDescending(e => e.ResolvingTime).Take(100))
                     {
                         <li>
                             @{ await Html.RenderPartialAsync("_EntityToCheck", entity); }

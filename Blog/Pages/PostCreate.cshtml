@@ -26,7 +26,7 @@
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="form-group">
-                    <div exclude-if="await Model.Permissions.CanCreateOrEditPostsWithoutModerationAsync()" class="mb-3">The post will be checked by moderator and published if no problems are found</div>
+                    <div exclude-if="await Model.Permissions.CanCreatePostsWithoutModerationAsync()" class="mb-3">The post will be checked by moderator and published if no problems are found</div>
                     <button class="btn btn-primary" type="submit">Create</button>
                 </div>
             </form>

@@ -4,12 +4,11 @@
 <div class="form-sm">
     <form method="post">
         <input type="hidden" asp-for="PostId" value="@Model.PostId" />
-        <input type="hidden" asp-for="LastEdit" value="@Model.LastEdit" />
 
-        <h2>Not passed moderation</h2>
+        <h2>Moderation</h2>
 
         <div class="form-group">
-            <label>Reason</label>
+            <label>Post will be marked as not moderated</label>
             <textarea asp-for="Reason" class="form-control" placeholder="What was wrong?"></textarea>
             <span asp-validation-for="Reason" class="text-danger"></span>
         </div>

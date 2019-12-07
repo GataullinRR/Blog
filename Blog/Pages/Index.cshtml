@@ -15,15 +15,13 @@
 <div class="container container-main">
     <div class="row">
         <div class="col">
-                @*<img src="https://dummyimage.com/1900x1400/d6d3d6/fff" class="rounded img-fluid" alt="ffff"/>
-                <img src="https://dummyimage.com/100x100/d6d3d6/fff" class="rounded img-fluid" alt="ffff"/>*@
             @foreach (var post in Model.Posts)
             {
                 <div class="post-preview">
                     <h4>
                         <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
                     </h4>
-                    @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(post, true, false)); }
+                    @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(post, true)); }
                     <h6>
                         Posted by <a asp-page="/Account/Profile" asp-route-id="@post.Author.Id">@post.Author.UserName</a>
 

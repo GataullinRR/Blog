@@ -26,25 +26,25 @@ namespace Blog.Services
             await S.Db.SaveChangesAsync();
         }
 
-        public async Task MarkPostEditAsModeratedAsync(PostEdit edit)
-        {
-            edit.Post.Title = edit.NewTitle;
-            edit.Post.Body = edit.NewBody;
-            edit.Post.BodyPreview = edit.NewBodyPreview;
-            if (await S.Permissions.CanMarkAsModeratedAsync(edit.Post))
-            {
-                await markAsync(edit.Post); // Because edit body becomes post body and if this edit's body is corect so the post will also be correct
-            }
-            await markAsync(edit);
-            foreach (var editToClose in edit.Post.Edits.Where(e => e.EditTime < edit.EditTime))
-            {
-                if (await S.Permissions.CanMarkAsModeratedAsync(editToClose))
-                {
-                    await markAsync(editToClose);
-                }
-            }
-            await S.Db.SaveChangesAsync();
-        }
+        //public async Task MarkPostEditAsModeratedAsync(PostEdit edit)
+        //{
+        //    edit.Post.Title = edit.NewTitle;
+        //    edit.Post.Body = edit.NewBody;
+        //    edit.Post.BodyPreview = edit.NewBodyPreview;
+        //    if (await S.Permissions.CanMarkAsModeratedAsync(edit.Post))
+        //    {
+        //        await markAsync(edit.Post); // Because edit body becomes post body and if this edit's body is corect so the post will also be correct
+        //    }
+        //    await markAsync(edit);
+        //    foreach (var editToClose in edit.Post.Edits.Where(e => e.EditTime < edit.EditTime))
+        //    {
+        //        if (await S.Permissions.CanMarkAsModeratedAsync(editToClose))
+        //        {
+        //            await markAsync(editToClose);
+        //        }
+        //    }
+        //    await S.Db.SaveChangesAsync();
+        //}
 
         async Task markAsync(IModeratable moderatable)
         {

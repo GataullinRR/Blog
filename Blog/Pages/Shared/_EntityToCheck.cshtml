@@ -7,7 +7,7 @@
 @if (Model.IsResolved)
 {
     <span>
-        Added @dT.ToCurrentTimeRelativeString(), resolved @((DateTime.UtcNow - Model.ResolvingTime.Value).ToCurrentTimeRelativeString()) check reason: @Model.CheckReason, check object:
+        Resolved @((DateTime.UtcNow - Model.ResolvingTime.Value).ToCurrentTimeRelativeString()), added @dT.ToCurrentTimeRelativeString(), check reason: @Model.CheckReason, check object:
         @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(Model.Entity)); }
     </span>
 }

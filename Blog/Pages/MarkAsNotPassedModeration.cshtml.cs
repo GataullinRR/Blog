@@ -18,20 +18,17 @@ namespace Blog.Pages
         public int PostId { get; set; }
         [BindProperty, BindRequired, Required, MinLength(8), MaxLength(500)]
         public string Reason { get; set; }
-        [BindProperty, BindRequired, Required]
-        public bool LastEdit { get; set; }
 
         public MarkAsNotPassedModerationModel(ServicesProvider services) : base(services)
         {
 
         }
 
-        public async Task OnGet([Required]int id, [Required]bool lastEdit)
+        public async Task OnGet([Required]int id)
         {
             if (ModelState.IsValid)
             {
                 PostId = id;
-                LastEdit = lastEdit;
 
                 var entity = await getEntityAsync();
                 await Permissions.ValidateMarkAsNotPassedModerationAsync(entity);
@@ -52,7 +49,7 @@ namespace Blog.Pages
 
                 LayoutModel.AddMessage("The post has been marked as not passed moderation");
 
-                return RedirectToPage("/Post", new { id = PostId, lastEdit = LastEdit });
+                return RedirectToPage("/Post", new { id = PostId });
             }
             else
             {
@@ -62,10 +59,7 @@ namespace Blog.Pages
 
         async Task<IModeratable> getEntityAsync()
         {
-            var post = await S.Db.Posts.FirstOrDefaultByIdAsync(PostId);
-            return LastEdit
-                 ? (IModeratable)post.LastEdit
-                 : post;
+            return await S.Db.Posts.FirstOrDefaultByIdAsync(PostId);
         }
     }
 }

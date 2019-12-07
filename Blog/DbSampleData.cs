@@ -263,7 +263,7 @@ Ozone,
 
                 context.Posts.AddRange(radmirsPost1, radmirsPost2, post3, post4, post5);
                 context.Commentaries.AddRange(commentary1, commentary2, commentary3);
-                post3.Edits.Add(new PostEdit(radmir, "Removed typo", post3.CreationTime.AddHours(4), "Test", "La la :(", "Preview"));
+                post3.Edits.Add(new PostEdit(radmir, "Removed typo", post3.CreationTime.AddHours(4), post3));
 
                 context.SaveChanges();
             }

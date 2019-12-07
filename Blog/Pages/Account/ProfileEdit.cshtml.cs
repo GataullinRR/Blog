@@ -74,7 +74,11 @@ namespace Blog.Pages.Account
                     editingUser.Profile.Image = serverLocalPath;
                 }
                 editingUser.Profile.About = About;
-                currentUser.Actions.Add(new UserAction(ActionType.PROFILE_EDIT, editingUser));
+                currentUser.Actions.Add(new UserAction(ActionType.PROFILE_EDIT, editingUser.Profile));
+                if (!await S.Permissions.CanEditProfileWithoutCheckAsync(editingUser))
+                {
+                    currentUser.ModeratorsInChargeGroup.AddEntityToCheck(editingUser.Profile, CheckReason.CHECK_REQUIRED);
+                }
                 await S.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Account/Profile", new { id = editingUser.Id });

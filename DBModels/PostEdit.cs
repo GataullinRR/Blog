@@ -4,25 +4,25 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DBModels
 {
-    public class PostEdit : EditBase, IModeratable
+    public class PostEdit : EditBase
     {
-        [Required] public string NewTitle { get; set; }
-        [Required] public string NewBody { get; set; }
-        [Required] public string NewBodyPreview { get; set; }
+        [Required] public string OldTitle { get; set; }
+        [Required] public string OldBody { get; set; }
+        [Required] public string OldBodyPreview { get; set; }
+        public bool MadeWhilePublished { get; set; }
         public virtual Post Post { get; set; }
-        [Required] public virtual ModerationInfo ModerationInfo { get; set; }
 
         public PostEdit() { }
 
-        public PostEdit(User editAuthor, string reason, DateTime editTime, string newTitle, string newBody, string newBodyPreview)
+        public PostEdit(User editAuthor, string reason, DateTime editTime, Post oldPost)
         {
             Author = editAuthor ?? throw new ArgumentNullException(nameof(editAuthor));
             Reason = reason ?? throw new ArgumentNullException(nameof(reason));
             EditTime = editTime;
-            NewBody = newBody ?? throw new ArgumentNullException(nameof(reason));
-            NewTitle = newTitle ?? throw new ArgumentNullException(nameof(reason));
-            NewBodyPreview = newBodyPreview ?? throw new ArgumentNullException(nameof(reason));
-            ModerationInfo = new ModerationInfo();
+            OldBody = oldPost.Body;
+            OldTitle = oldPost.Title;
+            OldBodyPreview = oldPost.BodyPreview;
+            MadeWhilePublished = oldPost.ModerationInfo.State == ModerationState.MODERATED;
         }
     }
 }

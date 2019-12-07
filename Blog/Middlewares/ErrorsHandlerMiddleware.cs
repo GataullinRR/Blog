@@ -40,7 +40,7 @@ namespace Blog.Middlewares
             {
                 httpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
             }
-            catch
+            catch (Exception ex)
             {
                 httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             }

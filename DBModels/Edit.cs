@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DBModels
 {
-    public abstract class EditBase
+    public abstract class EditBase : IDbEntity, IAuthored
     {
         [Key] public int Id { get; set; }
         [Required] public virtual User Author { get; set; }
