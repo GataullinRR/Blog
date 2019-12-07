@@ -1,48 +1,60 @@
 ﻿@model CommentaryModel
 
-<div style="margin-bottom:20px">
-    <h4 id="#@Model.Commentary.Id">
-        <a asp-page="/Commentary" asp-route-id="@Model.Commentary.Id">#@Model.Commentary.Id</a>
-        <a asp-page="/Account/Profile" asp-route-id="@Model.Commentary.Author.Id">@Model.Commentary.Author.UserName</a>
-        <span style="float:right">@Model.Commentary.CreationTime.ToString("hh:mm dd.MM.yyyy")</span>
-        <span include-if="await Model.Permissions.CanEditCommentaryAsync(Model.Commentary)">| <a href="" class="no-redirect commentary-edit-button">Edit</a></span>
-        <span include-if="await Model.Permissions.CanReportAsync(Model.Commentary)" class="btn-report">| <a class="no-redirect" href="" onclick="reportCommentary(this, @Model.Commentary.Id)">Report</a></span>
-        <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Commentary)">| <a class="" asp-page="/ViolationReport" asp-page-handler="Commentary" asp-route-id="@Model.Commentary.Id">Report violation</a></span>
-        <span include-if="await Model.Permissions.CanDeleteCommentaryAsync(Model.Commentary)">| <a class="operation-danger" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.DeleteCommentaryAsync)" asp-route-id="@Model.Commentary.Id">Delete</a></span>
-        <span include-if="await Model.Permissions.CanUndeleteCommentaryAsync(Model.Commentary)">| <a class="operation-primary" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.UndeleteCommentaryAsync)" asp-route-id="@Model.Commentary.Id">Restore</a></span>
-    </h4>
-
+<div class="my-4">
     <div class="d-flex flex-row">
-        <div class="d-flex flex-column align-self-center" style="margin-right:20px">
+        <div class="d-flex flex-column align-self-center mr-4">
             @await Html.PartialAsync("_ProfileImage", Model.Commentary.Author)
         </div>
-        <div class="d-flex flex-column w-100 align-self-center">
-            @if (!Model.Commentary.IsDeleted)
-            {
-                @if (Model.Commentary.IsHidden)
-                {
-                    <span class="comment-hidden">@Model.Commentary.Body</span>
-                }
-                else
-                {
-                    <span>@Model.Commentary.Body</span>
-                }
-            }
-            else
-            {
-                <span class="comment-deleted">This commentary has been deleted</span>
-            }
+        <div class="d-flex flex-column w-100">
+            <div class="d-flex flex-row justify-content-between">
+                <div class="d-flex flex-column">
+                    <h4 id="#@Model.Commentary.Id" class="font-weight-normal">
+                        <a asp-page="/Commentary" asp-route-id="@Model.Commentary.Id">#@Model.Commentary.Id</a>
+                        <a asp-page="/Account/Profile" asp-route-id="@Model.Commentary.Author.Id">@Model.Commentary.Author.UserName</a>
+                        <span include-if="await Model.Permissions.CanEditCommentaryAsync(Model.Commentary)">| <a href="" class="no-redirect commentary-edit-button">Edit</a></span>
+                        <span include-if="await Model.Permissions.CanReportAsync(Model.Commentary)" class="btn-report">| <a class="no-redirect" href="" onclick="reportCommentary(this, @Model.Commentary.Id)">Report</a></span>
+                        <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Commentary)">| <a class="" asp-page="/ViolationReport" asp-page-handler="Commentary" asp-route-id="@Model.Commentary.Id">Report violation</a></span>
+                        <span include-if="await Model.Permissions.CanDeleteCommentaryAsync(Model.Commentary)">| <a class="operation-danger" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.DeleteCommentaryAsync)" asp-route-id="@Model.Commentary.Id">Delete</a></span>
+                        <span include-if="await Model.Permissions.CanUndeleteCommentaryAsync(Model.Commentary)">| <a class="operation-primary" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.UndeleteCommentaryAsync)" asp-route-id="@Model.Commentary.Id">Restore</a></span>
+                    </h4>
+                </div>
+                <div class="d-none d-md-flex flex-column">
+                    <h4 class="text-right font-weight-normal">@Model.Commentary.CreationTime.ToString("hh:mm dd.MM.yyyy")</h4>
+                </div>
+            </div>
 
-            @foreach (var edit in Model.Commentary.Edits)
-            {
-                <div>
-                    <span>Edited at @edit.EditTime.ToString("hh:mm dd.MM.yy") by <a asp-page="/Account/Profile" asp-route-id="@edit.Author.Id">@edit.Author.UserName</a></span>
-                    @if (edit.Reason.IsNotNullOrWhiteSpace())
+            <div class="d-flex flex-row">
+                <div class="d-flex flex-column text-justify">
+                    @if (!Model.Commentary.IsDeleted)
                     {
-                        <span>Reason: @edit.Reason</span>
+                        @if (Model.Commentary.IsHidden)
+                        {
+                            <span class="comment-hidden">@Model.Commentary.Body</span>
+                        }
+                        else
+                        {
+                            <span>@Model.Commentary.Body</span>
+                        }
+
+                        <div class="mt-1">
+                            @foreach (var edit in Model.Commentary.Edits)
+                            {
+                                <div>
+                                    <span>Edited at @edit.EditTime.ToString("hh:mm dd.MM.yy") by <a asp-page="/Account/Profile" asp-route-id="@edit.Author.Id">@edit.Author.UserName</a></span>
+                                    @if (edit.Reason.IsNotNullOrWhiteSpace())
+                                    {
+                                        <span>Reason: @edit.Reason</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="comment-deleted">This commentary has been deleted</span>
                     }
                 </div>
-            }
+            </div>
         </div>
     </div>
 </div>
