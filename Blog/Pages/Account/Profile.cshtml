@@ -69,10 +69,10 @@
             }
 
             <div include-if="targetUser.Posts.Any(p => p.ModerationInfo.State.IsOneOf(ModerationState.MODERATED))">
-                <h3>Posts</h3>
+                <h4>Posts</h4>
 
                 @foreach (var post in targetUser.Posts
-                  .Where(p => p.ModerationInfo.State.IsOneOf(ModerationState.MODERATED))
+                  .Where(p => p.ModerationInfo.State.IsOneOf(ModerationState.MODERATED) && !p.IsDeleted)
                   .OrderByDescending(p => p.CreationTime))
                 {
                     <div><a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a></div>
@@ -80,11 +80,11 @@
             </div>
 
             <div include-if="canSeePrivateInformation && targetUser.Posts.Any(p => p.ModerationInfo.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))">
-                <h3>Posts under moderation</h3>
+                <h4>Posts under moderation</h4>
 
                 @foreach (var post in targetUser.Posts
-                     .Where(p => p.ModerationInfo.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))
-                     .OrderByDescending(p => p.CreationTime))
+                    .Where(p => p.ModerationInfo.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))
+                    .OrderByDescending(p => p.CreationTime))
                 {
                     <div>
                         <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
@@ -92,6 +92,17 @@
                             <div>The post hasn't passed moderation</div>
                             <div>Reason: @post.ModerationInfo.StateReasoning</div>
                         </div>
+                    </div>
+                }
+
+                <h4>Deleted posts</h4>
+
+                @foreach (var post in targetUser.Posts
+                    .Where(p => p.IsDeleted)
+                    .OrderByDescending(p => p.CreationTime))
+                {
+                    <div>
+                        <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
                     </div>
                 }
             </div>

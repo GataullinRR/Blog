@@ -36,20 +36,21 @@ namespace Blog.Services
         }
         public async Task<bool> CanViewPostAsync(Post post)
         {
-            var user = await getCurrentUserOrNullAsync();
-            var result = post.ModerationInfo.State == ModerationState.MODERATED
-                    && !post.IsDeleted;
-            if (user == null)
+            var currentUser = await getCurrentUserOrNullAsync();
+            var canNotAuthenticatedUserViewPost = post.ModerationInfo.State == ModerationState.MODERATED
+                && !post.IsDeleted;
+            if (currentUser == null)
             {
-                return result;
+                return canNotAuthenticatedUserViewPost;
             }
             else
             {
-                return (await S.UserManager.IsInRoleAsync(user, Roles.USER)
-                    && !post.IsDeleted)
-                    || result
-                    || await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR))
-                    || user == post.Author && !post.IsDeleted;
+                return (await S.UserManager.IsInRoleAsync(currentUser, Roles.USER)
+                    && (!post.IsDeleted 
+                        || post.Author == currentUser))
+                    || canNotAuthenticatedUserViewPost
+                    || await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
+                    || currentUser == post.Author && !post.IsDeleted;
             }
         }
 
