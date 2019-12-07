@@ -103,6 +103,9 @@
                 {
                     <div>
                         <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
+                        <div class="pl-4 text-danger">
+                            <div>Reason: @post.DeleteReason</div>
+                        </div>
                     </div>
                 }
             </div>

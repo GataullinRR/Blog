@@ -20,6 +20,7 @@ namespace DBModels
         [Required] public virtual ViewStatistic ViewStatistic { get; set; }
         public bool IsHidden { get; set; }
         public bool IsDeleted { get; set; }
+        public string DeleteReason { get; set; }
 
         public Commentary() { }
 

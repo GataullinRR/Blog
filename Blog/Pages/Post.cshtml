@@ -16,17 +16,20 @@
                 <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Post)">| <a asp-page="/ViolationReport" asp-page-handler="Post" asp-route-id="@Model.Post.Id">Report violation</a></span>
                 <span include-if="await Model.Permissions.CanMarkAsModeratedAsync(Model.Post)">| <a class="operation-primary" asp-controller="@nameof(ModerationController).GetController()" asp-action="@nameof(ModerationController.MarkPostAsModeratedAsync)" asp-route-id="@Model.Post.Id">Mark as moderated</a></span>
                 <span include-if="await Model.Permissions.CanMarkAsNotPassedModerationAsync(Model.Post)">| <a class="operation-danger" asp-page="/MarkAsNotPassedModeration" asp-route-id="@Model.Post.Id">Mark as not moderated</a></span>
-                <span include-if="await Model.Permissions.CanDeletePostAsync(Model.Post)">| <a class="operation-danger" asp-controller="@nameof(PostingController).GetController()" asp-action="@nameof(PostingController.DeletePostAsync)" asp-route-id="@Model.Post.Id">Delete</a></span>
+                <span include-if="await Model.Permissions.CanDeletePostAsync(Model.Post)">| <a class="operation-danger" asp-page="/PostDeleteConfirmation" asp-route-id="@Model.Post.Id">Delete</a></span>
                 <span include-if="await Model.Permissions.CanUndeletePostAsync(Model.Post)">| <a class="operation-primary" asp-controller="@nameof(PostingController).GetController()" asp-action="@nameof(PostingController.UndeletePostAsync)" asp-route-id="@Model.Post.Id">Restore</a></span>
             </h2>
 
             <div>
-                <div include-if="@Model.Post.IsDeleted" class="text-danger">The post is deleted and accessible only via link</div>
+                <div include-if="@Model.Post.IsDeleted" class="text-danger">
+                    <div>The post has been deleted and accessible only via link</div>
+                    <div>Delete reason: @Model.Post.DeleteReason</div>
+                </div>
                 <div include-if="@Model.Post.ModerationInfo.State == ModerationState.UNDER_MODERATION" class="text-danger">Post is under moderation and accessible only via link</div>
                 <div include-if="@Model.Post.ModerationInfo.State == ModerationState.MODERATION_NOT_PASSED" class="text-danger">Post hasn't passed moderation. Edit to fix problems.</div>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-3 mt-3">
                 @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(Model.Post, false)); }
             </div>
             <div>

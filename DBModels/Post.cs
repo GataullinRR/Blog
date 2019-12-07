@@ -24,7 +24,9 @@ namespace DBModels
         [InverseProperty(nameof(Violation.PostObject))]
         [Required] public virtual List<Violation> Violations { get; set; } = new List<Violation>();
         public bool IsDeleted { get; set; }
+        public string DeleteReason { get; set; }
         [Required] public virtual ModerationInfo ModerationInfo { get; set; }
+
 
         public Post() 
         { 

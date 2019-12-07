@@ -29,26 +29,6 @@ namespace Blog.Controllers
             }
         }
 
-        public async Task<IActionResult> DeletePostAsync([Required]int id)
-        {
-            if (ModelState.IsValid)
-            {
-                var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-                var post = await S.Db.Posts.FirstOrDefaultByIdAsync(id);
-                await S.Permissions.ValidateDeletePostAsync(post);
-
-                post.IsDeleted = true;
-                currentUser.Actions.Add(new UserAction(ActionType.POST_DELETED, post));
-                await S.Db.SaveChangesAsync();
-
-                return RedirectToPage("/Post", new { id = id });
-            }
-            else
-            {
-                throw new Exception();
-            }
-        }
-
         public async Task<IActionResult> UndeletePostAsync([Required]int id)
         {
             if (ModelState.IsValid)
