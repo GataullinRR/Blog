@@ -96,7 +96,9 @@ namespace Blog.Services
                         && post.Edits.Where(e => e.Author == post.Author && e.MadeWhilePublished).Count() < MAX_POST_EDITS_FOR_STANDARD_USER
                         && post.ModerationInfo.State.IsOneOf(ModerationState.MODERATED, ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION))
                     || (await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.MODERATOR)
-                        && user != post.Author));
+                        && user != post.Author)
+                    || (await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR))
+                        && user == post.Author));
             }
         }
 
@@ -144,7 +146,6 @@ namespace Blog.Services
             else
             {
                 return post.IsDeleted
-                    && post.Author != user
                     && await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR))
                     && !await CanDeletePostAsync(post);
             }

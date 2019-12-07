@@ -1,7 +1,11 @@
-﻿using Ganss.XSS;
+﻿using Blog.Misc;
+using DBModels;
+using Ganss.XSS;
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,11 +14,14 @@ using Utilities.Extensions;
 
 namespace Blog.Services
 {
-    public class PostSanitizerService
+    [Service(ServiceType.SCOPED)]
+    public class PostSanitizerService : ServiceBase
     {
+        public const int MAX_IMAGE_SIZE = 3 * 1024 * 1024;
+
         readonly IHtmlSanitizer _allowAllButNotExecutable;
 
-        public PostSanitizerService()
+        public PostSanitizerService(ServicesProvider services) : base(services)
         {
             _allowAllButNotExecutable = new HtmlSanitizer(
                 allowedTags: "code i b s img li ul ol link p em strong tr td table tbody a br span code pre sup sub blockquote caption".Split(" "),
@@ -35,22 +42,78 @@ namespace Blog.Services
             var nodes = document.DocumentNode.SelectNodes("//img");
             foreach (var node in nodes.NullToEmpty())
             {
-                var ATTRIBUTE = "class";
-
-                if (node.Attributes.NotContains(a => a.Name == ATTRIBUTE))
+                var srcAttr = node.Attributes.Single(a => a.Name == "src");
+                var src = srcAttr.Value;
+                src = await trySanitizeImage(src);
+                if (src == null)
                 {
-                    node.Attributes.Add(ATTRIBUTE, "");
+                    node.Remove();
                 }
-                node.Attributes[ATTRIBUTE].Value += " rounded img-fluid";
+                else
+                {
+                    srcAttr.Value = src;
+
+                    const string ATTRIBUTE = "class";
+                    if (node.Attributes.NotContains(a => a.Name == ATTRIBUTE))
+                    {
+                        node.Attributes.Add(ATTRIBUTE, "");
+                    }
+                    node.Attributes[ATTRIBUTE].Value += " rounded img-fluid";
+                }
             }
             var ms = new MemoryStream();
             var writer = new StreamWriter(ms);
             document.Save(writer);
             writer.Flush();
             ms.Position = 0;
-            var sanitized = new StreamReader(ms).ReadAllText().Aggregate();
+            var sanitized = new StreamReader(ms)
+                .ReadAllText()
+                .Aggregate();
             
             return sanitized;
+        }
+
+        async Task<string> trySanitizeImage(string imageSrc)
+        {
+            var formats = new (string Prefix, string Extension, ImageFormat Format)[]
+            {
+                ("data:image/jpeg;base64,", "jpg", ImageFormat.Jpeg),
+                ("data:image/png;base64,", "png", ImageFormat.Png),
+                ("data:image/gif;base64,", "gif", ImageFormat.Gif),
+            };
+            foreach (var format in formats)
+            {
+                if (imageSrc.StartsWith(format.Prefix))
+                {
+                    var length = imageSrc.Length - format.Prefix.Length / 4 * 3;
+                    if (length < MAX_IMAGE_SIZE)
+                    {
+                        try
+                        {
+                            var image = imageSrc
+                                .Skip(format.Prefix.Length)
+                                .Aggregate()
+                                .FromBase64()
+                                .ToMemoryStream();
+                            var i = Image.FromStream(image);
+
+                            if (format.Format.Equals(i.RawFormat))
+                            {
+                                image.Position = 0;
+                                var localPath = await S.Storage.SavePostImageAsync(image, format.Extension);
+                                
+                                return S.UrlHelper.AbsoluteContent(localPath);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
 
         public string IgnoreNonTextNodes(string richHtml)

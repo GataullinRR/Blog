@@ -63,15 +63,7 @@ namespace Blog.Pages.Account
                 var editingUser = await getEditingUserIfAuthorizedAsync(EditUserId);
                 if (ProfileImage != null)
                 {
-                    var serverLocalPath = Path.Combine("images", "users", editingUser.Id.ToString(), $"{Guid.NewGuid()}.{Path.GetExtension(ProfileImage.FileName)}");
-                    var serverPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", serverLocalPath);
-                    using (var toServerStream = IOUtils.CreateFile(serverPath))
-                    using (var fromClientStream = ProfileImage.OpenReadStream())
-                    {
-                        await toServerStream.WriteAsync(await fromClientStream.ReadToEndAsync());
-                    }
-
-                    editingUser.Profile.Image = serverLocalPath;
+                    editingUser.Profile.Image = await S.Storage.SaveProfileImageAsync(ProfileImage, editingUser);
                 }
                 editingUser.Profile.About = About;
                 currentUser.Actions.Add(new UserAction(ActionType.PROFILE_EDIT, editingUser.Profile));

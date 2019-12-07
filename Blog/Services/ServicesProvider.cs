@@ -34,6 +34,7 @@ namespace Blog.Services
         readonly Lazy<PostSanitizerService> _sanitizer;
         readonly Lazy<EntitiesProviderService> _entities;
         readonly Lazy<ModerationService> _moderation;
+        readonly Lazy<StorageService> _storage;
 
         public IServiceProvider ServiceProvider { get; }
         public BlogContext Db => _db.Value;
@@ -57,6 +58,7 @@ namespace Blog.Services
         public PostSanitizerService Sanitizer => _sanitizer.Value;
         public EntitiesProviderService Entities => _entities.Value;
         public ModerationService Moderation => _moderation.Value;
+        public StorageService Storage => _storage.Value;
 
         public ServicesProvider(IServiceProvider serviceProvider)
         {
@@ -83,6 +85,7 @@ namespace Blog.Services
             _sanitizer = ServiceProvider.GetLazyService<PostSanitizerService>();
             _entities = ServiceProvider.GetLazyService<EntitiesProviderService>();
             _moderation = ServiceProvider.GetLazyService<ModerationService>();
+            _storage = ServiceProvider.GetLazyService<StorageService>();
         }
     }
 }

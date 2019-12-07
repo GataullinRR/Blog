@@ -79,7 +79,7 @@
                         <button type="submit" class="btn btn-primary">Send</button>
                     </form>
                 }
-                else
+                else if (!User.Identity.IsAuthenticated)
                 {
                     <a asp-page="/Account/Login">Login</a>
                     <span> or </span>
