@@ -20,6 +20,11 @@
                 <span include-if="await Model.Permissions.CanUndeletePostAsync(Model.Post)">| <a class="operation-primary" asp-controller="@nameof(PostingController).GetController()" asp-action="@nameof(PostingController.UndeletePostAsync)" asp-route-id="@Model.Post.Id">Restore</a></span>
             </h2>
 
+            <div class="text-secondary mb-2">
+                <span>Posted at @Model.Post.CreationTime.ToHoursDateString()</span>
+                <span>, seen @Model.Post.ViewStatistic.TotalViews times</span>
+            </div>
+
             <div>
                 <div include-if="@Model.Post.IsDeleted" class="text-danger">
                     <div>The post has been deleted and accessible only via link</div>
@@ -41,15 +46,6 @@
                 </div>
             }
 
-            <div class="">
-                <div>
-                    <span>Posted at @Model.Post.CreationTime.ToHoursDateString()</span>
-                </div>
-                <div>
-                    <span>Seen @Model.Post.ViewStatistic.TotalViews times</span>
-                </div>
-            </div>
-
             <div class="my-4">
                 <div class="d-flex flex-row">
                     <div class="d-flex flex-column align-self-center mr-4">
@@ -67,10 +63,10 @@
 
                 @{ var count = 0; }
                 @foreach (var commentary in Model.Commentaries
-.OrderByDescending(c => c.CreationTime)
-.Take(100)
-.Select(c => Html.PartialAsync("_CommentaryContainer", c))
-.ToArray())
+                   .OrderByDescending(c => c.CreationTime)
+                   .Take(100)
+                   .Select(c => Html.PartialAsync("_CommentaryContainer", c))
+                   .ToArray())
                 {
                     @await commentary;
 
