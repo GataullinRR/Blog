@@ -18,12 +18,12 @@
             @foreach (var post in Model.Posts)
             {
                 <div class="post-preview">
-                    <h4>
+                    <h4 class="font-weight-normal">
                         <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
                     </h4>
                     @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(post, true)); }
-                    <h6>
-                        Posted by <a asp-page="/Account/Profile" asp-route-id="@post.Author.Id">@post.Author.UserName</a>
+                    <h6 class="font-weight-normal text-secondary">
+                        Written by <a asp-page="/Account/Profile" asp-route-id="@post.Author.Id">@post.Author.UserName</a>
 
                         <span style="float:right">@post.CreationTime.ToString("dd.MM.yyyy")</span>
                     </h6>
