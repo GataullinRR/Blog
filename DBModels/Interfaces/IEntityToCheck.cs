@@ -9,9 +9,9 @@ namespace DBModels
         NOT_SET = 0,
         [Description("Too many reports")]
         TOO_MANY_REPORTS = 1000,
-        [Description("Moderation is required")]
+        [Description("Moderation required")]
         NEED_MODERATION = 2000,
-        [Description("Check is required")]
+        [Description("Check required")]
         CHECK_REQUIRED = 3000
     }
 
