@@ -319,26 +319,17 @@ namespace Blog.Services
 
         public async Task ValidateResetPasswordAsync(User targetUser)
         {
-            if (!await CanRestorePasswordAsync(targetUser))
+            if (!await CanResetPasswordAsync(targetUser))
             {
                 throw buildException();
             }
         }
-        public async Task<bool> CanRestorePasswordAsync(User targetUser)
+        public async Task<bool> CanResetPasswordAsync(User targetUser)
         {
-            var currentUser = await getCurrentUserOrNullAsync();
-            if (currentUser == null)
-            {
-                return false;
-            }
-            else
-            {
-                return ((targetUser.Status.LastPasswordRestoreAttempt ?? DateTime.UtcNow.AddDays(-999)) - DateTime.UtcNow).TotalMinutes.Abs() > 30
-                            && targetUser.EmailConfirmed
-                            && targetUser.Status.State == ProfileState.ACTIVE
-                            && await S.UserManager.IsInOneOfTheRolesAsync(targetUser, Roles.NOT_RESTRICTED)
-                        && currentUser.Id == targetUser.Id;
-            }
+            return ((targetUser.Status.LastPasswordRestoreAttempt ?? DateTime.UtcNow.AddDays(-999)) - DateTime.UtcNow).TotalMinutes.Abs() > 30
+                        && targetUser.EmailConfirmed
+                        && targetUser.Status.State == ProfileState.ACTIVE
+                        && await S.UserManager.IsInOneOfTheRolesAsync(targetUser, Roles.NOT_RESTRICTED);
         }
 
         public async Task ValidateChangePasswordAsync(User targetUser)

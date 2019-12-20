@@ -21,7 +21,7 @@ namespace Blog.Pages.Account
         readonly EMailService _email;
         readonly ConfirmationLinksGeneratorService _confirmation;
 
-        [BindProperty(), Required()]
+        [BindProperty(), Required(ErrorMessage = "Profile name is not provided")]
         public string UserName { get; set; }
 
         public PasswordRestoreModel(EMailService email, ConfirmationLinksGeneratorService confirmation, ServicesProvider serviceProvider) : base(serviceProvider)
@@ -34,25 +34,21 @@ namespace Blog.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var user = await S.UserManager.FindByNameAsync(UserName);
-                if (user == null)
+                var targetUser = await S.UserManager.FindByNameAsync(UserName);
+                if (targetUser == null || !await S.Permissions.CanResetPasswordAsync(targetUser))
                 {
-                    ModelState.AddModelError("", $"Profile \"{UserName}\" does not exist");
-
-                    return Page();
+                    return RedirectToPage("/Errors/PasswordResetError");
                 }
                 else
                 {
-                    await S.Permissions.ValidateResetPasswordAsync(user);
-                    user.Actions.Add(new UserAction(ActionType.PASSWORD_RESETING, user));
-
-                    var link = await _confirmation.GetPasswordResetConfirmationLinkAsync(user);
-                    var isSent = await _email.TrySendMessageAsync(user, "Password reset", "Confirmation", $@"If you want to continue password reset, follow this link: {link}
+                    targetUser.Actions.Add(new UserAction(ActionType.PASSWORD_RESETING, targetUser));
+                    var link = await _confirmation.GetPasswordResetConfirmationLinkAsync(targetUser);
+                    var isSent = await _email.TrySendMessageAsync(targetUser, "Password reset", "Confirmation", $@"If you want to continue password reset, follow this link: {link}
 After openning the link, new password will be sent to this E-Mail");
                     if (isSent)
                     {
-                        user.Status.LastPasswordRestoreAttempt = DateTime.UtcNow;
-                        await S.UserManager.UpdateAsync(user);
+                        targetUser.Status.LastPasswordRestoreAttempt = DateTime.UtcNow;
+                        await S.UserManager.UpdateAsync(targetUser);
 
                         LayoutModel.AddMessage("Password reset confirmation link has been sent");
 
@@ -60,7 +56,7 @@ After openning the link, new password will be sent to this E-Mail");
                     }
                     else
                     {
-                        LayoutModel.AddMessage("Error while sending pasword reset confirmation link");
+                        LayoutModel.AddMessage("Error while sending confirmation link");
 
                         return Page();
                     }
@@ -68,8 +64,6 @@ After openning the link, new password will be sent to this E-Mail");
             }
             else
             {
-                LayoutModel.AddMessage("Profile name is not provided");
-
                 return Page();
             }
         }
