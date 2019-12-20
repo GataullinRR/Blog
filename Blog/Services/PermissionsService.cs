@@ -257,6 +257,66 @@ namespace Blog.Services
 
         #region ### Misc permissions ###
 
+        public async Task<bool> CanSeeProfileTabsAsync(User targetUser)
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null)
+            {
+                return false;
+            }
+            else
+            {
+                return currentUser == targetUser
+                    || await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR));
+            }
+        }
+        public async Task<bool> CanSeeProfileGeneralInformationAsync(User targetUser)
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null)
+            {
+                return false;
+            }
+            else
+            {
+                return currentUser == targetUser
+                    || (await CanSeeProfileTabsAsync(targetUser) 
+                        && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR)));
+            }
+        }
+        public async Task<bool> CanSeeProfileSettingsTabAsync(User targetUser)
+        {
+            return await CanSeeProfileTabsAsync(targetUser);
+        }
+        public async Task<bool> CanSeeProfileAnalyticsTabAsync(User targetUser)
+        {
+            return await CanSeeProfileTabsAsync(targetUser);
+        }
+        public async Task<bool> CanSeeProfileActionsTabAsync(User targetUser)
+        {
+            return await CanSeeProfileTabsAsync(targetUser);
+        }
+
+        public async Task<bool> CanViewProfilePreviewTabAsync(Post post)
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            var canNotAuthenticatedUserViewPost = post.ModerationInfo.State == ModerationState.MODERATED
+                && !post.IsDeleted;
+            if (currentUser == null)
+            {
+                return canNotAuthenticatedUserViewPost;
+            }
+            else
+            {
+                return (await S.UserManager.IsInRoleAsync(currentUser, Roles.USER)
+                    && (!post.IsDeleted
+                        || post.Author == currentUser))
+                    || canNotAuthenticatedUserViewPost
+                    || await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.MODERATOR))
+                    || currentUser == post.Author && !post.IsDeleted;
+            }
+        }
+
         public async Task ValidateResetPasswordAsync(User targetUser)
         {
             if (!await CanRestorePasswordAsync(targetUser))

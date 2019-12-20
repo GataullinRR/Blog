@@ -12,13 +12,13 @@
 }
 
 <div class="container">
-    <div class="row">
-        <div class="col" style="max-width:200px; width:200px;">
+    <div class="row justify-content-center">
+        <div include-if="await Model.Permissions.CanSeeProfileTabsAsync(targetUser)" class="col" style="max-width:200px; width:200px;">
             <div class="nav flex-column nav-pills sticky-top pt-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                 <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-selected="true">Overview</a>
-                <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-publications" role="tab" aria-selected="false">Analytics</a>
-                <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-selected="false">Settings</a>
-                <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-actions" role="tab" aria-selected="false">Actions</a>
+                <a include-if="await Model.Permissions.CanSeeProfileAnalyticsTabAsync(targetUser)" class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-publications" role="tab" aria-selected="false">Analytics</a>
+                <a include-if="await Model.Permissions.CanSeeProfileSettingsTabAsync(targetUser)" class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-selected="false">Settings</a>
+                <a include-if="await Model.Permissions.CanSeeProfileActionsTabAsync(targetUser)" class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-actions" role="tab" aria-selected="false">Actions</a>
             </div>
         </div>
         <div class="col container-main">
@@ -44,7 +44,7 @@
                             </div>
                         </div>
 
-                        <div>
+                        <div include-if="await Model.Permissions.CanSeeProfileGeneralInformationAsync(targetUser)">
                             <h3 class="font-weight-normal">General information</h3>
                             @if (canSeePrivateInformation)
                             {
