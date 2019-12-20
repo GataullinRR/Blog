@@ -102,7 +102,7 @@
 
                             @foreach (var post in postsToShow)
                             {
-                                var isPosted = !post.Any(p => p.IsDeleted || p.ModerationInfo.State != ModerationState.MODERATED);
+                                var isPosted = !post.IsDeleted || post.ModerationInfo.State != ModerationState.MODERATED;
                                 var classValue = @isPosted.Ternar("", "text-muted");
                                 <div class="mb-3">
                                     <div>
