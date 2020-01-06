@@ -209,7 +209,7 @@
                             @foreach (var action in targetUser.Actions.OrderByDescending(r => r.ActionDate))
                             {
                                 <li>
-                                    <span>@action.ActionType.ToString() at @action.ActionDate.ToString("hh:mm dd.MM.yyyy"). Object: </span>
+                                    <span>@action.ActionType.GetEnumValueDescription() at @action.ActionDate.ToString("hh:mm dd.MM.yyyy"). Object: </span>
                                     @if (action.ActionObject != null)
                                     {
                                         if (action.ActionObject == targetUser || action.ActionObject == targetUser.Profile)

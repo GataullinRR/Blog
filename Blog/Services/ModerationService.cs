@@ -55,7 +55,7 @@ namespace Blog.Services
             var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
             if (currentUser != moderatable.Author)
             {
-                currentUser.Actions.Add(new UserAction(ActionType.MARKED_AS_MODERATED, moderatable));
+                await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.MARKED_AS_MODERATED, moderatable));
             }
 
             deleteFromAnyModeratorPanel(moderatable);
@@ -67,7 +67,7 @@ namespace Blog.Services
 
             moderatable.ModerationInfo.State = ModerationState.MODERATION_NOT_PASSED;
             var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-            currentUser.Actions.Add(new UserAction(ActionType.MARKED_AS_NOT_PASSED_MODERATION, moderatable));
+            await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.MARKED_AS_NOT_PASSED_MODERATION, moderatable));
 
             deleteFromAnyModeratorPanel(moderatable);
         }

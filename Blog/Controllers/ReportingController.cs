@@ -87,7 +87,7 @@ namespace Blog.Controllers
             }
 
             S.Db.Reports.Add(report);
-            reportingUser.Actions.Add(new UserAction(ActionType.REPORT, reportObject));
+            await S.Repository.AddUserActionAsync(reportingUser, new UserAction(ActionType.REPORT, reportObject));
             if (S.Decisions.ShouldReportToModerator(reportObject))
             {
                 var moderators = reportObject.Author.ModeratorsInChargeGroup;

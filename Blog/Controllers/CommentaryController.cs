@@ -67,7 +67,7 @@ namespace Blog.Controllers
                 var user = await S.UserManager.GetUserAsync(User);
                 commentary.Body = body;
                 commentary.Edits.Add(new CommentaryEdit(user, editReason, DateTime.UtcNow));
-                currentUser.Actions.Add(new UserAction(ActionType.COMMENTARY_EDIT, commentary));
+                await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.COMMENTARY_EDIT, commentary));
                 await S.Db.SaveChangesAsync();
 
                 return Redirect(S.History.GetLastURL());
@@ -86,8 +86,8 @@ namespace Blog.Controllers
                 var user = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 var commentary = await S.Db.Commentaries.FirstOrDefaultByIdAsync(id);
                 await S.Permissions.ValidateDeleteCommentaryAsync(commentary);
-                
-                user.Actions.Add(new UserAction(ActionType.COMMENTARY_DELETE, commentary));
+               
+                await S.Repository.AddUserActionAsync(user, new UserAction(ActionType.COMMENTARY_DELETE, commentary));
                 commentary.IsDeleted = true;
                 await S.Db.SaveChangesAsync();
 
@@ -107,8 +107,8 @@ namespace Blog.Controllers
                 var user = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 var commentary = await S.Db.Commentaries.FirstOrDefaultByIdAsync(id);
                 await S.Permissions.ValidateUndeleteCommentaryAsync(commentary);
-
-                user.Actions.Add(new UserAction(ActionType.COMMENTARY_UNDELETE, commentary));
+               
+                await S.Repository.AddUserActionAsync(user, new UserAction(ActionType.COMMENTARY_UNDELETE, commentary));
                 commentary.IsDeleted = false;
                 await S.Db.SaveChangesAsync();
 

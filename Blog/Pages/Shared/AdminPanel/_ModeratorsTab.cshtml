@@ -1,0 +1,103 @@
+﻿@model ModeratorsGroup[]
+
+    <div class="conatiner">
+        <div class="row">
+            <div class="col">
+                <select class="selectpicker">
+                    <option>Summary</option>
+                    @{
+                        var i = 1;
+                        foreach (var moderatorsGroup in Model)
+                        {
+                            <option>Group @i</option>
+                            i++;
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col">
+                <input id="toggle" type="checkbox" unchecked data-toggle="toggle" />
+                <select class="selectpicker">
+                    <option>Last month</option>
+                    <option>Last 3 months</option>
+                    <option>Last year</option>
+                    <option>All time</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <canvas id="lineChart"></canvas>
+            </div>
+
+            <div class="col">
+                <canvas id="doughnutChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#toggle').bootstrapToggle({
+            on: 'Derrivative',
+            off: 'Absolute'
+        });
+
+        render2();
+
+        var ctxL = document.getElementById("lineChart").getContext('2d');
+        var myLineChart = new Chart(ctxL, {
+            type: 'line',
+            data: {
+                labels: ["January", "February", "March", "April", "May", "June", "July"],
+                datasets: [{
+                    label: "My First dataset",
+                    data: [65, 59, 80, 81, 56, 55, 40],
+                    backgroundColor: [
+                        'rgba(105, 0, 132, .2)',
+                    ],
+                    borderColor: [
+                        'rgba(200, 99, 132, .7)',
+                    ],
+                    borderWidth: 2
+                },
+                {
+                    label: "My Second dataset",
+                    data: [28, 48, 40, 19, 86, 27, 90],
+                    backgroundColor: [
+                        'rgba(0, 137, 132, .2)',
+                    ],
+                    borderColor: [
+                        'rgba(0, 10, 130, .7)',
+                    ],
+                    borderWidth: 2
+                }
+                ]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    }
+
+    function render2() {
+        var ctxD = document.getElementById("doughnutChart").getContext('2d');
+        var myLineChart = new Chart(ctxD, {
+            type: 'doughnut',
+            data: {
+                labels: ["Red", "Green", "Yellow", "Grey", "Dark Grey"],
+                datasets: [{
+                    data: [300, 50, 100, 40, 120],
+                    backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360"],
+                    hoverBackgroundColor: ["#FF5A5E", "#5AD3D1", "#FFC870", "#A8B3C5", "#616774"]
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    }
+</script>

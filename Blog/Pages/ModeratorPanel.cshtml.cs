@@ -73,7 +73,7 @@ namespace Blog.Pages
                 await OnGet(TargetModeratorId);
                 var entity = Group.EntitiesToCheck.First(e => e.Id == id);
                 entity.ResolvingTime = DateTime.UtcNow;
-                Owner.Actions.Add(new UserAction(ActionType.REPORT_CHECKED, entity));
+                Owner.Actions.Add(new UserAction(ActionType.ENTITY_RESOLVED, entity));
 
                 await S.Db.SaveChangesAsync();
 

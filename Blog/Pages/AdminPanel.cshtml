@@ -1,0 +1,127 @@
+﻿@page
+@model Blog.Pages.AdminPanelModel
+@{
+    ViewData["Title"] = "Blog control";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col" style="max-width:200px; width:200px;">
+            <div class="nav flex-column nav-pills sticky-top pt-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-selected="true">Overview</a>
+                <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-publications" role="tab" aria-selected="false">Moderators</a>
+                <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-selected="false">Publications</a>
+                <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-actions" role="tab" aria-selected="false">Users</a>
+            </div>
+        </div>
+        <div class="col container-main">
+            <div class="tab-content" id="v-pills-tabContent">
+                <div class="tab-pane fade show active" id="v-pills-profile" role="tabpanel">
+                    <h2>Blog control</h2>
+
+                    <div>
+                        <a href="" id="inviteModerator" class="no-redirect" onclick="inviteModerator()">Invite</a> new moderator
+                    </div>
+                    <div>
+                        <a href="" id="inviteOwner" class="no-redirect" onclick="inviteOwner()">Invite</a> new owner
+                    </div>
+
+                    <h3>Currently active moderators</h3>
+
+                    <ul>
+                        @foreach (var moderator in Model.Moderators.Where(m => m.Status.State == ProfileState.ACTIVE))
+                        {
+                            <li>
+                                @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
+                            </li>
+                                    }
+                    </ul>
+
+                    <h3>Inactive moderators</h3>
+
+                    <ul>
+                        @foreach (var moderator in Model.Moderators.Where(m => m.Status.State != ProfileState.ACTIVE))
+                        {
+                            <li>
+                                @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
+                            </li>
+                                    }
+                    </ul>
+                </div>
+
+                <div class="tab-pane fade" id="v-pills-publications" role="tabpanel">
+                    @{ await Html.RenderPartialAsync("/AdminPanel/_ModeratorsTab", await Model.ModeratorsGroups.ToArrayAsync()); }
+                </div>
+
+                <div class="tab-pane fade" id="v-pills-settings" role="tabpanel">
+
+                </div>
+
+                <div class="tab-pane fade" id="v-pills-actions" role="tabpanel">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function inviteModerator() {
+            invite("moderator");
+        }
+        function inviteOwner() {
+            invite("owner");
+        }
+        function invite(who) {
+            var isOwner = who == "owner";
+            var activationLinkType = isOwner
+                ? "@((int)ActivationLinkAction.REGISTER_AS_OWNER)"
+                : "@((int)ActivationLinkAction.REGISTER_AS_MODERATOR)";
+
+            var closer = showBusy("Generating " + (isOwner ? "owner" : "moderator") + " invitation link...");
+            var route = "/ActivationLinks/GenerateLink?actionRaw=" + activationLinkType;
+            makeRequest(route, "get", function (response) {
+                activationLinks[activationLinks.length] = response;
+                renderMessage("Invitation link has been generated. Copy and send it to the user you want to invite.", "Copy link=>copyLastActivationLink(" + (activationLinks.length - 1) + ")");
+                closer();
+            });
+        }
+
+        var activationLinks = [];
+        function copyLastActivationLink(index) {
+            copyToClipboard(activationLinks[index]);
+        }
+
+        // Copies a string to the clipboard. Must be called from within an
+        // event handler such as click. May return false if it failed, but
+        // this is not always possible. Browser support for Chrome 43+,
+        // Firefox 42+, Safari 10+, Edge and Internet Explorer 10+.
+        // Internet Explorer: The clipboard feature may be disabled by
+        // an administrator. By default a prompt is shown the first
+        // time the clipboard is used (per session).
+        function copyToClipboard(text) {
+            if (window.clipboardData && window.clipboardData.setData) {
+                // Internet Explorer-specific code path to prevent textarea being shown while dialog is visible.
+                return clipboardData.setData("Text", text);
+            }
+            else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+                var textarea = document.createElement("textarea");
+                textarea.textContent = text;
+                textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in Microsoft Edge.
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    return document.execCommand("copy");  // Security exception may be thrown by some browsers.
+                }
+                catch (ex) {
+                    console.warn("Copy to clipboard failed.", ex);
+                    return false;
+                }
+                finally {
+                    document.body.removeChild(textarea);
+                }
+            }
+        }
+    </script>
+}

@@ -48,7 +48,7 @@ namespace Blog
 
                 post.IsDeleted = true;
                 post.DeleteReason = Reason;
-                currentUser.Actions.Add(new UserAction(ActionType.POST_DELETED, post));
+                await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.POST_DELETED, post));
                 await S.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Post", new { id = PostId });

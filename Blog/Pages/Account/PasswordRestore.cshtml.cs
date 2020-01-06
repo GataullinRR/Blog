@@ -41,7 +41,7 @@ namespace Blog.Pages.Account
                 }
                 else
                 {
-                    targetUser.Actions.Add(new UserAction(ActionType.PASSWORD_RESETING, targetUser));
+                    await S.Repository.AddUserActionAsync(targetUser, new UserAction(ActionType.PASSWORD_RESETING, targetUser));
                     var link = await _confirmation.GetPasswordResetConfirmationLinkAsync(targetUser);
                     var isSent = await _email.TrySendMessageAsync(targetUser, "Password reset", "Confirmation", $@"If you want to continue password reset, follow this link: {link}
 After openning the link, new password will be sent to this E-Mail");

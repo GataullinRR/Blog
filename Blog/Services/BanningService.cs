@@ -41,7 +41,7 @@ namespace Blog.Services
             targetUser.Status.State = ProfileState.BANNED;
             targetUser.Status.BannedTill = bannedTill.ToUniversalTime();
             targetUser.Status.StateReason = reason;
-            performer.Actions.Add(new UserAction(ActionType.BAN, targetUser));
+            await S.Repository.AddUserActionAsync(performer, new UserAction(ActionType.BANNED, targetUser));
             await S.Db.SaveChangesAsync();
 
             await S.EMail.TrySendMessageAsync(targetUser, "Administration", $"Profile has been banned{isForeverlyBanned.Ternar(" foreverly", "")}", $@"Profile name: {targetUser.UserName}
@@ -59,7 +59,7 @@ Reason: {reason}
                 : ProfileState.RESTRICTED;
             targetUser.Status.StateReason = null;
             targetUser.Status.BannedTill = null;
-            performer.Actions.Add(new UserAction(ActionType.UNBAN, targetUser));
+            await S.Repository.AddUserActionAsync(performer, new UserAction(ActionType.UNBANED, targetUser));
             await S.Db.SaveChangesAsync();
         }
     }

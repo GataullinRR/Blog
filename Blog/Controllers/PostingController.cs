@@ -38,7 +38,7 @@ namespace Blog.Controllers
                 await S.Permissions.ValidateUndeletePostAsync(post);
 
                 post.IsDeleted = false;
-                currentUser.Actions.Add(new UserAction(ActionType.POST_UNDELETED, post));
+                await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.POST_UNDELETED, post));
                 await S.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Post", new { id = id });

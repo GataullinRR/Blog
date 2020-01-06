@@ -11,8 +11,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <IsPackable>false</IsPackable>
-    <AssemblyVersion>2019.12.7.433</AssemblyVersion>
-    <FileVersion>2019.12.7.433</FileVersion>
+    <AssemblyVersion>2020.1.6.446</AssemblyVersion>
+    <FileVersion>2020.1.6.446</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.13.0" />

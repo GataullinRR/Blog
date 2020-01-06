@@ -44,9 +44,9 @@ namespace Blog.Pages
                     Commentaries = S.Db.Commentaries.Where(c => c.Post == Post);
                     foreach (var commentary in Commentaries)
                     {
-                        commentary.ViewStatistic.UpdateStatistic(currentUser);
+                        await S.DbUpdator.UpdateViewStatisticAsync(currentUser, commentary.ViewStatistic);
                     }
-                    Post.ViewStatistic.UpdateStatistic(currentUser);
+                    await S.DbUpdator.UpdateViewStatisticAsync(currentUser, Post.ViewStatistic);
 
                     var x = await S.Db.SaveChangesAsync();
                     NewCommentary.PostId = id;
@@ -77,7 +77,7 @@ namespace Blog.Pages
                         NewCommentary.Body);
                     S.Db.Commentaries.Add(comment);
                     await S.Db.SaveChangesAsync();
-                    currentUser.Actions.Add(new UserAction(ActionType.ADD_COMMENTARY, comment));
+                    currentUser.Actions.Add(new UserAction(ActionType.COMMENTARY_ADDED, comment));
                     await S.Db.SaveChangesAsync();
                 }
 

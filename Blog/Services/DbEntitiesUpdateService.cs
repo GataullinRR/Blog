@@ -13,5 +13,14 @@ namespace Blog.Services
         {
 
         }
+
+        public async Task UpdateViewStatisticAsync(User currentUser, ViewStatistic viewStatistic)
+        {
+            if (currentUser != null)
+            {
+                viewStatistic.RegistredUserViews++;
+            }
+            viewStatistic.TotalViews++;
+        }
     }
 }

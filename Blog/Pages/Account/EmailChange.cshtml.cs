@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Blog.Controllers;
 using Blog.Models;
 using Blog.Services;
+using DBModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -38,7 +39,7 @@ namespace Blog.Pages.Account
                 var user = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 await S.Permissions.ValidateChangeEmailAsync(user);
 
-                user.Actions.Add(new DBModels.UserAction(DBModels.ActionType.EMAIL_CHANGING, user));
+                await S.Repository.AddUserActionAsync(user, new UserAction(ActionType.EMAIL_CHANGING, user));
 
                 if (NewEMail.ToUpperInvariant() == user.NormalizedEmail)
                 {

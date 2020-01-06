@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Utilities;
 using Utilities.Types;
+using Utilities.Extensions;
 
 namespace DBModels
 {
@@ -35,7 +37,8 @@ namespace DBModels
                 CommentariesToCheck
             };
         public DbSet<ModerationInfo> ModerationInfos { get; set; }
-
+        public DbSet<ModeratorsGroupStatistic> ModeratorsGroupStatistics { get; set; }
+        
         public BlogContext(DbContextOptions<BlogContext> options)
             : base(options)
         {
@@ -73,6 +76,60 @@ namespace DBModels
                 .HasOne(p => p.Profile)
                 .WithOne(i => i.Author)
                 .HasForeignKey<Profile>(b => b.AuthorForeignKey);
+
+            modelBuilder.Entity<ModeratorsGroup>(b =>
+            {
+                b.HasOne<ModeratorsGroupStatistic>(e => e.Statistic)
+                    .WithOne(e => e.Owner)
+                    .HasForeignKey<ModeratorsGroupStatistic>(e => e.Id);
+            });
+            modelBuilder.Entity<User>(b =>
+            {
+                b.HasOne<UserStatistic>(e => e.Statistic)
+                    .WithOne(e => e.Owner)
+                    .HasForeignKey<UserStatistic>(e => e.Id);
+            });
+
+            //modelBuilder.Entity<ModeratorsGroup>(b =>
+            //{
+            //    b.OwnsOne<ModeratorsGroupStatistic>(e => e.Statistic);
+            //    b.HasOne<ModeratorsGroupStatistic>(e => e.Statistic)
+            //        .WithOne(e => e.Owner)
+            //        .HasForeignKey<ModeratorsGroupStatistic>(e => e.Id);
+            //});
+            //modelBuilder.Entity<User>(b =>
+            //{
+            //    b.OwnsOne<UserStatistic>(e => e.Statistic);
+            //    b.HasOne<UserStatistic>(e => e.Statistic)
+            //        .WithOne(e => e.Owner)
+            //        .HasForeignKey<UserStatistic>(e => e.Id);
+            //});
+
+            //modelBuilder.Entity<ModeratorsGroupStatistic>(b =>
+            //{
+            //    b.OwnsMany<ModeratorsGroupDayStatistic>(e => e.DayStatistics);
+            //});
+            //modelBuilder.Entity<UserStatistic>(b =>
+            //{
+            //    b.OwnsMany<UserDayStatistic>(e => e.DayStatistics);
+            //});
+            //modelBuilder.Entity<UserStatistic>(b =>
+            //{
+            //    b.HasMany<UserDayStatistic>(e => e.DayStatistics)
+            //        .WithOne(e => e.Owner);
+            //});
+
+            //modelBuilder.Entity<UserAction>()
+            //    .Property(e => e.ActionType)
+            //    .HasConversion(
+            //        v => v.ToString(),
+            //        v => EnumUtils.CastSafe<ActionType>(v.ParseToInt32Invariant())
+            //    );
+
+            //modelBuilder.Entity<ModeratorsGroup>()
+            //    .HasOne(a => a.Statistic)
+            //    .WithOne(b => b.Owner)
+            //    .HasForeignKey<ModeratorsGroupStatistic>(b => b.Owner);
         }
     }
 }

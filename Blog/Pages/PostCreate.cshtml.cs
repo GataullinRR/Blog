@@ -55,7 +55,7 @@ namespace Blog.Pages
                         post.ModerationInfo.State = ModerationState.UNDER_MODERATION;
                         post.Author.ModeratorsInChargeGroup.AddEntityToCheck(post, CheckReason.NEED_MODERATION);
                     }
-                    author.Actions.Add(new UserAction(ActionType.POST_CREATED, post));
+                    await S.Repository.AddUserActionAsync(author, new UserAction(ActionType.POST_CREATED, post));
                     await S.Db.SaveChangesAsync();
 
                     return RedirectToPage("/Post", new { id = post.Id });

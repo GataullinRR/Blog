@@ -38,7 +38,7 @@ namespace Blog.Controllers
             await S.SignInManager.SignOutAsync();
             if (currenUser != null)
             {
-                currenUser.Actions.Add(new DBModels.UserAction(ActionType.SIGNED_OUT, null));
+                await S.Repository.AddUserActionAsync(currenUser, new UserAction(ActionType.SIGNED_OUT, currenUser));
                 await S.Db.SaveChangesAsync();
             }
 
@@ -169,7 +169,7 @@ namespace Blog.Controllers
             {
                 var newEmail = arguments;
                 user.Email = newEmail;
-                user.Actions.Add(new DBModels.UserAction(DBModels.ActionType.EMAIL_CHANGED, user));
+                await S.Repository.AddUserActionAsync(user, new UserAction(ActionType.EMAIL_CHANGED, user));
                 await S.Db.SaveChangesAsync();
 
                 LayoutModel.AddMessage($"Email has been changed to {newEmail}");
@@ -191,7 +191,7 @@ namespace Blog.Controllers
             {
                 user.EmailConfirmed = true;
                 await S.UserManager.AddToRoleAsync(user, Roles.USER);
-                user.Actions.Add(new UserAction(ActionType.EMAIL_CONFIRMED, user));
+                await S.Repository.AddUserActionAsync(user, new UserAction(ActionType.EMAIL_CONFIRMED, user));
                 await S.Db.SaveChangesAsync();
 
                 LayoutModel.AddMessage("Email has been confirmed!");
@@ -209,7 +209,7 @@ Please delete this message so that nobody can see it");
                 user.PasswordHash = S.UserManager.PasswordHasher.HashPassword(user, newPassword);
                 var result = await S.UserManager.UpdateAsync(user);
                 await S.SignInManager.SignOutAsync();
-                user.Actions.Add(new UserAction(ActionType.PASSWORD_RESET, null));
+                await S.Repository.AddUserActionAsync(user, new UserAction(ActionType.PASSWORD_RESET, user));
                 await S.Db.SaveChangesAsync();
 
                 LayoutModel.AddMessage("New password has been sent to your E-Mail");

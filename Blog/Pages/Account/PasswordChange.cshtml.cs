@@ -39,7 +39,7 @@ namespace Blog.Pages.Account
                 {
                     var user = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                     await S.Permissions.ValidateChangePasswordAsync(user);
-                    user.Actions.Add(new UserAction(ActionType.PASSWORD_CHANGING, user));
+                    await S.Repository.AddUserActionAsync(user, new UserAction(ActionType.PASSWORD_CHANGING, user));
                     var result = await S.UserManager.ChangePasswordAsync(user, CurrentPassword, NewPassword);
                     if (result.Succeeded)
                     {

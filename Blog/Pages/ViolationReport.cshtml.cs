@@ -62,7 +62,7 @@ namespace Blog.Pages
                 var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 var violation = new Violation(currentUser, reportObject.Author, reportObject, Description);
                 S.Db.UserRuleViolations.Add(violation);
-                currentUser.Actions.Add(new UserAction(ActionType.VIOLATION_REPORTED, reportObject));
+                await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.VIOLATION_REPORTED, reportObject));
                 await S.Db.SaveChangesAsync();
 
                 LayoutModel.AddMessage("Violation report has been submitted");

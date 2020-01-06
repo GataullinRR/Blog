@@ -71,7 +71,7 @@ namespace Blog.Pages
                     author.ModeratorsInChargeGroup.AddEntityToCheck(editingPost, CheckReason.CHECK_REQUIRED);
                 }
                 await S.Db.SaveChangesAsync();
-                author.Actions.Add(new UserAction(ActionType.POST_EDITED, editingPost));
+                await S.Repository.AddUserActionAsync(author, new UserAction(ActionType.POST_EDITED, editingPost));
                 await S.Db.SaveChangesAsync();
                 
                 LayoutModel.AddMessage("Changes applied!");

@@ -56,15 +56,6 @@ namespace Blog
             return new Lazy<T>(() => (T)serviceProvider.GetService(typeof(T)));
         }
 
-        public static void UpdateStatistic(this ViewStatistic viewStatistic, User currentUser)
-        {
-            if (currentUser != null && currentUser.Status.State == ProfileState.ACTIVE)
-            {
-                viewStatistic.RegistredUserViews++;
-            }
-            viewStatistic.TotalViews++;
-        }
-
         public static async Task<IQueryable<User>> GetUsersInRoleAsync(this BlogContext db, string role)
         {
             var roleId = (await db.Roles.FirstAsync(r => r.Name == role)).Id;

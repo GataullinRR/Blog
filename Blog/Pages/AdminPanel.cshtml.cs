@@ -11,11 +11,12 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Blog.Pages
 {
-    public class BlogControlPanelModel : PageModelBase
+    public class AdminPanelModel : PageModelBase
     {
         public IEnumerable<User> Moderators { get; private set; }
+        public IQueryable<ModeratorsGroup> ModeratorsGroups { get; private set; }
 
-        public BlogControlPanelModel(ServicesProvider services) : base(services)
+        public AdminPanelModel(ServicesProvider services) : base(services)
         {
 
         }
@@ -23,7 +24,9 @@ namespace Blog.Pages
         public async Task OnGetAsync()
         {
             await S.Permissions.ValidateAccessBlogControlPanelAsync();
+
             Moderators = await S.UserManager.GetUsersInRoleAsync(Roles.MODERATOR);
+            ModeratorsGroups = S.Db.ModeratorsGroups;
         }
     }
 }

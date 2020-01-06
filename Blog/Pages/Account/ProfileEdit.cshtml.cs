@@ -66,7 +66,7 @@ namespace Blog.Pages.Account
                     editingUser.Profile.Image = await S.Storage.SaveProfileImageAsync(ProfileImage, editingUser);
                 }
                 editingUser.Profile.About = About;
-                currentUser.Actions.Add(new UserAction(ActionType.PROFILE_EDIT, editingUser.Profile));
+                currentUser.Actions.Add(new UserAction(ActionType.PROFILE_EDITED, editingUser.Profile));
                 if (!await S.Permissions.CanEditProfileWithoutCheckAsync(editingUser))
                 {
                     currentUser.ModeratorsInChargeGroup.AddEntityToCheck(editingUser.Profile, CheckReason.CHECK_REQUIRED);

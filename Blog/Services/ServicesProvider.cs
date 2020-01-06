@@ -35,6 +35,7 @@ namespace Blog.Services
         readonly Lazy<EntitiesProviderService> _entities;
         readonly Lazy<ModerationService> _moderation;
         readonly Lazy<StorageService> _storage;
+        readonly Lazy<RepositoryService> _repository;
 
         public IServiceProvider ServiceProvider { get; }
         public BlogContext Db => _db.Value;
@@ -59,6 +60,7 @@ namespace Blog.Services
         public EntitiesProviderService Entities => _entities.Value;
         public ModerationService Moderation => _moderation.Value;
         public StorageService Storage => _storage.Value;
+        public RepositoryService Repository => _repository.Value;
 
         public ServicesProvider(IServiceProvider serviceProvider)
         {
@@ -86,6 +88,7 @@ namespace Blog.Services
             _entities = ServiceProvider.GetLazyService<EntitiesProviderService>();
             _moderation = ServiceProvider.GetLazyService<ModerationService>();
             _storage = ServiceProvider.GetLazyService<StorageService>();
+            _repository = ServiceProvider.GetLazyService<RepositoryService>();
         }
     }
 }

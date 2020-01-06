@@ -13,6 +13,8 @@ namespace DBModels
         public virtual List<User> Moderators { get; set; } = new List<User>();
         [InverseProperty(nameof(User.ModeratorsInChargeGroup))]
         public virtual List<User> TargetUsers { get; set; } = new List<User>();
+        [Required, InverseProperty(nameof(ModeratorsGroupStatistic.Owner))] 
+        public virtual ModeratorsGroupStatistic Statistic { get; set; } = new ModeratorsGroupStatistic();
 
         public virtual List<EntityToCheck<Commentary>> CommentariesToCheck { get; set; } = new List<EntityToCheck<Commentary>>();
         public virtual List<EntityToCheck<PostEdit>> PostEditsToCheck { get; set; } = new List<EntityToCheck<PostEdit>>();
