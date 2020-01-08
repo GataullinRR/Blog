@@ -4,53 +4,51 @@
     ViewData["Title"] = "Blog control";
 }
 
+@{
+    var overviewTabId = "v-pills-overview";
+}
+
 <div class="container">
     <div class="row justify-content-center">
         <div class="col" style="max-width:200px; width:200px;">
             <div class="nav flex-column nav-pills sticky-top pt-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-selected="true">Overview</a>
+                <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#@overviewTabId" role="tab" aria-selected="true">Overview</a>
                 <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-publications" role="tab" aria-selected="false">Moderators</a>
                 <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-selected="false">Publications</a>
                 <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-actions" role="tab" aria-selected="false">Users</a>
+                <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-controls" role="tab" aria-selected="false">Controls</a>
             </div>
         </div>
         <div class="col container-main">
             <div class="tab-content" id="v-pills-tabContent">
-                <div class="tab-pane fade show active" id="v-pills-profile" role="tabpanel">
-                    <h2>Blog control</h2>
-
-                    <div>
-                        <a href="" id="inviteModerator" class="no-redirect" onclick="inviteModerator()">Invite</a> new moderator
+                <div class="tab-pane fade show active" id="@overviewTabId" role="tabpanel">
+                    <div class="fa-3x">
+                        <p class="text-center">Loading... <i class="fas fa-cog fa-spin"></i></p>
                     </div>
-                    <div>
-                        <a href="" id="inviteOwner" class="no-redirect" onclick="inviteOwner()">Invite</a> new owner
-                    </div>
+                    @*<h3>Currently active moderators</h3>
+                        <ul>
+                            @foreach (var moderator in Model.Moderators.Where(m => m.Status.State == ProfileState.ACTIVE))
+                            {
+                                <li>
+                                    @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
+                                </li>
+                            }
+                        </ul>
 
-                    <h3>Currently active moderators</h3>
+                        <h3>Inactive moderators</h3>
 
-                    <ul>
-                        @foreach (var moderator in Model.Moderators.Where(m => m.Status.State == ProfileState.ACTIVE))
-                        {
-                            <li>
-                                @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
-                            </li>
-                                    }
-                    </ul>
-
-                    <h3>Inactive moderators</h3>
-
-                    <ul>
-                        @foreach (var moderator in Model.Moderators.Where(m => m.Status.State != ProfileState.ACTIVE))
-                        {
-                            <li>
-                                @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
-                            </li>
-                                    }
-                    </ul>
+                        <ul>
+                            @foreach (var moderator in Model.Moderators.Where(m => m.Status.State != ProfileState.ACTIVE))
+                            {
+                                <li>
+                                    @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
+                                </li>
+                            }
+                        </ul>*@
                 </div>
 
                 <div class="tab-pane fade" id="v-pills-publications" role="tabpanel">
-                    @{ await Html.RenderPartialAsync("/AdminPanel/_ModeratorsTab", await Model.ModeratorsGroups.ToArrayAsync()); }
+                    @{ await Html.RenderPartialAsync("AdminPanel/_ModeratorsTab", await Model.ModeratorsGroups.ToArrayAsync()); }
                 </div>
 
                 <div class="tab-pane fade" id="v-pills-settings" role="tabpanel">
@@ -60,13 +58,66 @@
                 <div class="tab-pane fade" id="v-pills-actions" role="tabpanel">
 
                 </div>
+
+                <div class="tab-pane fade" id="v-pills-controls" role="tabpanel">
+                    <p>
+                        From here you can invite a new moderator or administrator by creating an invitation link.
+                        Once generated the link lasts for 30 minutes till it expires
+                    </p>
+
+                    <ul>
+                        <li>
+                            <a href="" id="inviteModerator" class="no-redirect" onclick="inviteModerator()">Invite</a> a new moderator
+                        </li>
+                        <li>
+                            <a href="" id="inviteOwner" class="no-redirect" onclick="inviteOwner()">Invite</a> a new administrator*
+                        </li>
+                    </ul>
+
+                    <p class="text-secondary">* new administrator won't be able to invite other administrators</p>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" integrity="sha256-aa0xaJgmK/X74WM224KMQeNQC2xYKwlAt08oZqjeF0E=" crossorigin="anonymous" />
+    //<link rel="stylesheet" href="~/css/jQRangeSlider/iThing.css" type="text/css" />
+}
+
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js" integrity="sha256-TQq84xX6vkwR0Qs1qH5ADkP+MvH0W+9E7TdHJsoIQiM=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI=" crossorigin="anonymous"></script>
+    //<script src="~/js/jQRangeSlider/jQDateRangeSlider-min.js"></script>
     <script>
+
+        $(document).ready(function () {
+            Chart.defaults.global.title.fontSize = 22;
+            Chart.defaults.global.title.display = true;
+            Chart.defaults.global.defaultFontColor = "#000000";
+            Chart.defaults.global.title.fontStyle = 'normal';
+            Chart.defaults.global.defaultFontStyle = 'normal';
+
+            var uri = "/AdminPanelTabs/LoadOverviewTabAsync"
+            makeRequest(uri, "GET", function (response) {
+                var idSelector = '#@overviewTabId';
+                $(idSelector).html(response);
+                evaluateScripts(idSelector);
+                loadOverviewTabPartial();
+            });
+
+            function evaluateScripts(idSelector)
+            {
+                var scripts = $(idSelector + ' script');
+                for (var i = 0; i < scripts.length; i++) {
+                    eval(scripts[i].innerText);
+                }
+            }
+
+
+        });
+
         function inviteModerator() {
             invite("moderator");
         }
@@ -78,7 +129,6 @@
             var activationLinkType = isOwner
                 ? "@((int)ActivationLinkAction.REGISTER_AS_OWNER)"
                 : "@((int)ActivationLinkAction.REGISTER_AS_MODERATOR)";
-
             var closer = showBusy("Generating " + (isOwner ? "owner" : "moderator") + " invitation link...");
             var route = "/ActivationLinks/GenerateLink?actionRaw=" + activationLinkType;
             makeRequest(route, "get", function (response) {

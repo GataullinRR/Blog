@@ -38,6 +38,10 @@ namespace DBModels
             };
         public DbSet<ModerationInfo> ModerationInfos { get; set; }
         public DbSet<ModeratorsGroupStatistic> ModeratorsGroupStatistics { get; set; }
+        /// <summary>
+        /// Contains single entity
+        /// </summary>
+        public DbSet<BlogInfo> Blog { get; set; }
         
         public BlogContext(DbContextOptions<BlogContext> options)
             : base(options)
@@ -88,6 +92,12 @@ namespace DBModels
                 b.HasOne<UserStatistic>(e => e.Statistic)
                     .WithOne(e => e.Owner)
                     .HasForeignKey<UserStatistic>(e => e.Id);
+            });
+            modelBuilder.Entity<BlogInfo>(b =>
+            {
+                b.HasOne<BlogStatistic>(e => e.Statistic)
+                    .WithOne(e => e.Owner)
+                    .HasForeignKey<BlogStatistic>(e => e.Id);
             });
 
             //modelBuilder.Entity<ModeratorsGroup>(b =>

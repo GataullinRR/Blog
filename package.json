@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "First ASP NET Core 2.2 Web project",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "chart.js": "^2.9.3"
+  },
   "devDependencies": {
     "grunt": "^1.0.4",
     "grunt-cli": "^1.3.2",

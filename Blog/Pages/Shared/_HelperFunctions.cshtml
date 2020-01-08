@@ -1,0 +1,38 @@
+﻿<script>
+    if (!Array.prototype.lastItem) {
+        Array.prototype.lastItem = function () {
+            return this[this.length - 1];
+        };
+    };
+
+    function makePost(route, dataObject, isAsync, onSuccess, onError) {
+        $.ajax({
+            type: "POST",
+            url: route,
+            data: dataObject,
+            dataType: "text",
+            async: isAsync,
+            success: function (data, textStatus, jqXHR) {
+                if (onSuccess) {
+                    onSuccess(data, jqXHR);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (onError) {
+                    onError();
+                }
+            }
+        });
+    }
+
+    function makeRequest(route, requestType, onLoaded) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                onLoaded(this.responseText);
+            }
+        };
+        xhr.open(requestType, route);
+        xhr.send();
+    }
+</script>

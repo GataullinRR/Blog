@@ -1,0 +1,214 @@
+﻿@model BlogDayStatistic[]
+
+@{
+    var viewsChartId = "views-chart";
+    var publicationsChartId = "publications-chart";
+    var usersChartId = "users-chart";
+    var viewsPieChartId = "views-pie-chart";
+    var publicationsPieChartId = "publications-pie-chart";
+    var usersPieChartId = "users-pie-chart";
+}
+
+    <div class="container">
+        @*<div class="row">
+            <div class="col">
+                    <div id="slider"></div>
+                    <hr />
+            </div>
+
+            <div class="col">
+                <input id="toggle" type="checkbox" unchecked data-toggle="toggle" />
+                <select class="selectpicker">
+                    <option>Last month</option>
+                    <option>Last 3 months</option>
+                    <option>Last year</option>
+                    <option>All time</option>
+                </select>
+            </div>
+        </div>*@
+
+        <div class="row mb-3">
+            <div class="col col-lg-9">
+                <div class="chart-container admin-panel-chart">
+                    <canvas id="@viewsChartId"></canvas>
+                </div>
+            </div>
+            <div class="col col-lg-3">
+                <div class="chart-container admin-panel-chart">
+                    <canvas id="@viewsPieChartId"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col col-lg-9">
+                <div class="chart-container admin-panel-chart">
+                    <canvas id="@publicationsChartId"></canvas>
+                </div>
+            </div>
+            <div class="col col-lg-3">
+                <div class="chart-container admin-panel-chart">
+                    <canvas id="@publicationsPieChartId"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col col-lg-9">
+                <div class="chart-container admin-panel-chart">
+                    <canvas id="@usersChartId"></canvas>
+                </div>
+            </div>
+            <div class="col col-lg-3">
+                <div class="chart-container admin-panel-chart">
+                    <canvas id="@usersPieChartId"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@{
+    var registredUserViewsPercent = Model.LastElement().PostsViewStatistic.RegistredUserViews / (double)Model.LastElement().PostsViewStatistic.TotalViews;
+    var otherViewsPercent = 1 - registredUserViewsPercent;
+}
+
+<script>
+    // Source (never changes)
+    var days = @Json.Serialize(Model.Select(ds => ds.Day.ToString("dd.MM.yyyy")).ToArray());
+    var commentaries = @Json.Serialize(Model.Select(ds => ds.CommentariesCount).ToArray());
+    var posts = @Json.Serialize(Model.Select(ds => ds.PostsCount).ToArray());
+    var bannedUsers = @Json.Serialize(Model.Select(ds => ds.BannedUsersCount).ToArray());
+    var unconfirmedUsers = @Json.Serialize(Model.Select(ds => ds.UnconfirmedUsersCount).ToArray());
+    var activeUsers = @Json.Serialize(Model.Select(ds => ds.ActiveUsersCount).ToArray());
+
+    var postViews = @Json.Serialize(Model.Select(ds => ds.PostsViewStatistic.TotalViews).ToArray());
+    var publications = @Json.Serialize(Model.Select(ds => ds.PostsCount + ds.CommentariesCount).ToArray());
+    var users = @Json.Serialize(Model.Select(ds => ds.ActiveUsersCount + ds.BannedUsersCount + ds.UnconfirmedUsersCount).ToArray());
+
+    var commentariesPercentage = 100 * commentaries.lastItem() / publications.lastItem();
+    var postsPercentage = 100 * posts.lastItem() / publications.lastItem();
+
+    var activePercentage = 100 * activeUsers.lastItem() / users.lastItem();
+    var unconfirmedPercentage = 100 * unconfirmedUsers.lastItem() / users.lastItem();
+    var bannedPercentage = 100 * bannedUsers.lastItem() / users.lastItem();
+
+    function loadOverviewTabPartial() {
+        //$("#slider").dateRangeSlider(); // see https://ghusse.github.io/jQRangeSlider/documentation.html
+        plot("@viewsChartId", "Post views", "views", days, postViews);
+        plotPie("@viewsPieChartId", "Viewed by",
+            ["Registred users", "Other"],
+            [@registredUserViewsPercent.Mul(100).Round(1).ToJSON(), @otherViewsPercent.Mul(100).Round(1).ToJSON()],
+            ["#33cc33", "#ffbb33"]
+        );
+
+        plot("@publicationsChartId", "Publications", "publications", days, publications);
+        plotPie("@publicationsPieChartId", "Publications ratio",
+            ["Posts", "Commentaries"],
+            [postsPercentage.toPrecision(2), commentariesPercentage.toPrecision(2)],
+            ["#33cc33", "#ffbb33"]
+        );
+
+        plot("@usersChartId", "Users", "users", days, users);
+        plotPie("@usersPieChartId", "Users states",
+            ["Active", "Unconfirmed", "Banned"],
+            [activePercentage.toPrecision(2), unconfirmedPercentage.toPrecision(2), bannedPercentage.toPrecision(2)],
+            ["#33cc33", "#ffbb33", "#ff6600"]
+        );
+
+        function plot(containerId, title, valueSuffix, xAxis, yAxis) {
+            var ctx = document.getElementById(containerId).getContext('2d');
+            new Chart(ctx, {
+                maintainAspectRatio: false,
+                type: 'line',
+                data: {
+                    labels: xAxis,
+                    datasets: [{
+                        label: valueSuffix,
+                        data: yAxis,
+                        backgroundColor: [
+                            'rgba(0, 0, 255, 0.15)',
+                        ],
+                        borderColor: [
+                            'rgba(0, 0, 255, 0.5)',
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: false
+                            }
+                        }],
+                        xAxes: [{
+                            gridLines: {
+                                display: false
+                            },
+                            ticks: {
+                                autoSkip: true,
+                                //maxTicksLimit: 6,
+                                autoSkipPadding: 20,
+                                maxRotation: 0,
+                                minRotation: 0
+                            }
+                        }]
+                    },
+                    legend: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: title
+                    },
+                    elements: {
+                        point: {
+                            radius: 0
+                        }
+                    }
+                }
+            });
+        }
+
+        function plotPie(containerId, title, categories, values, colors) {
+            var ctx = document.getElementById(containerId).getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors
+                    }],
+                    labels: categories
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: "bottom",
+                        align: "center"
+                    },
+                    title: {
+                        display: true,
+                        text: title
+                    },
+                    layout: {
+                        padding: {
+                            left: 0,
+                            right: 0,
+                            top: 0,
+                            bottom: 0
+                        }
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: function (tooltipItem, data) {
+                                var dataset = data.datasets[tooltipItem.datasetIndex];
+                                var currentValue = dataset.data[tooltipItem.index];
+                                return data.labels[tooltipItem.index] + ": " + currentValue + "%";
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+</script>

@@ -1,4 +1,5 @@
-﻿using DBModels;
+﻿using Blog.Misc;
+using DBModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Blog.Services
 {
+    [Service(ServiceType.SCOPED)]
     public class RepositoryService : ServiceBase
     {
         public RepositoryService(ServicesProvider services) : base(services)

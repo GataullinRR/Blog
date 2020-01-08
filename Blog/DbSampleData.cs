@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Utilities;
 
 namespace Blog
 {
@@ -264,6 +265,39 @@ Ozone,
                 context.Posts.AddRange(radmirsPost1, radmirsPost2, post3, post4, post5);
                 context.Commentaries.AddRange(commentary1, commentary2, commentary3);
                 post3.Edits.Add(new PostEdit(radmir, "Removed typo", post3.CreationTime.AddHours(4), post3));
+
+                var count = 500;
+                var startDate = DateTime.UtcNow.AddDays(-count);
+                var blogInfo = new BlogInfo(new BlogStatistic());
+                context.Blog.Add(blogInfo);
+                blogInfo.Statistic.DayStatistics.Add(new BlogDayStatistic()
+                {
+                    PostsViewStatistic = new ViewStatistic(),
+                    CommentariesViewStatistic = new ViewStatistic()
+                });
+                for (int i = 1; i < count; i++)
+                {
+                    var previous = blogInfo.Statistic.DayStatistics[i - 1];
+                    blogInfo.Statistic.DayStatistics.Add(new BlogDayStatistic()
+                    {
+                        ActiveUsersCount = previous.ActiveUsersCount + Global.Random.Next(-1, 10),
+                        BannedUsersCount = previous.BannedUsersCount + Global.Random.Next(-1, 3),
+                        UnconfirmedUsersCount = previous.UnconfirmedUsersCount + Global.Random.Next(-5, 10),
+                        CommentariesViewStatistic = new ViewStatistic()
+                        {
+                            TotalViews = previous.CommentariesViewStatistic.TotalViews + Global.Random.Next(0, 3000),
+                            RegistredUserViews = previous.CommentariesViewStatistic.RegistredUserViews + Global.Random.Next(0, 1000),
+                        },
+                        PostsViewStatistic = new ViewStatistic()
+                        {
+                            TotalViews = previous.PostsViewStatistic.TotalViews + Global.Random.Next(0, 1000),
+                            RegistredUserViews = previous.PostsViewStatistic.RegistredUserViews + Global.Random.Next(0, 100),
+                        },
+                        CommentariesCount = previous.CommentariesCount + Global.Random.Next(-1, 50),
+                        PostsCount = previous.PostsCount + Global.Random.Next(-1, 10),
+                        Day = startDate.AddDays(i)
+                    }); 
+                }
 
                 context.SaveChanges();
             }

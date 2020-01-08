@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,6 +55,11 @@ namespace Blog
         public static Lazy<T> GetLazyService<T>(this IServiceProvider serviceProvider)
         {
             return new Lazy<T>(() => (T)serviceProvider.GetService(typeof(T)));
+        }
+
+        public static string ToJSON(this object obj)
+        {
+            return JsonConvert.SerializeObject(obj);
         }
 
         public static async Task<IQueryable<User>> GetUsersInRoleAsync(this BlogContext db, string role)
