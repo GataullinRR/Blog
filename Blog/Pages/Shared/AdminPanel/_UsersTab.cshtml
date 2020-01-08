@@ -1,0 +1,41 @@
+﻿
+
+<table id="ddddtable" class="table table-striped table-bordered mt-3" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th class="th">
+                User
+            </th>
+            <th class="th">
+                Role
+            </th>
+            <th class="th">
+                All actions
+            </th>
+            <th class="th">
+                Publications
+            </th>
+            <th class="th">
+                Repors per publication
+            </th>
+        </tr>
+    </thead>
+</table>
+
+<script>
+    function loadUsersTabPartial() {
+        $('#ddddtable').DataTable({
+            ajax: {
+                url: 'PanelsTable/LoadFullUsersTableAsync',
+                dataSrc: ''
+            },
+            columns: [
+                { data: 'name' },
+                { data: 'role' },
+                { data: 'actCnt' },
+                { data: 'pubCnt' },
+                { data: 'repPPub' }
+            ]
+        });
+    }
+</script>

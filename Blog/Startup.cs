@@ -14,11 +14,13 @@ using Ganss.XSS;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Net.Http.Headers;
 using Utilities.Types;
 
 namespace Blog
@@ -71,8 +73,14 @@ namespace Blog
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
                 options.User.RequireUniqueEmail = false;
             });
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddResponseCaching();
+            services.AddMvc(options =>
+            {
+                options.CacheProfiles.Add(ResponseCaching.DAILY, new CacheProfile()
+                {
+                    Duration = 60 * 60 * 24
+                });
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSession();
             services.AddMemoryCache();
@@ -135,7 +143,19 @@ namespace Blog
 
             app.UseMiddleware<ErrorsHandlerMiddleware>();
             app.UseAuthentication();
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = (context) =>
+                {
+                    var headers = context.Context.Response.GetTypedHeaders();
+
+                    headers.CacheControl = new CacheControlHeaderValue
+                    {
+                        Public = true,
+                        MaxAge = TimeSpan.FromDays(365)
+                    };
+                }
+            });
             app.UseSession();
             app.UseMvc(routes =>
             {

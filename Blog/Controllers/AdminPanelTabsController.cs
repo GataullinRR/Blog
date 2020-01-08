@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Misc;
 using Blog.Models;
 using Blog.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ namespace Blog.Controllers
 
         }
 
+        [ResponseCache(CacheProfileName = ResponseCaching.DAILY)]
         public async Task<IActionResult> LoadOverviewTabAsync()
         {
             await S.Permissions.ValidateAccessBlogControlPanelAsync();

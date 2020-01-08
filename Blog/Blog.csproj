@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyVersion>2020.1.8.3096</AssemblyVersion>
-    <FileVersion>2020.1.8.3096</FileVersion>
+    <AssemblyVersion>2020.1.8.3109</AssemblyVersion>
+    <FileVersion>2020.1.8.3109</FileVersion>
     <UserSecretsId>757ccc5e-bb25-428e-ba76-80b25b862f65</UserSecretsId>
   </PropertyGroup>
 
@@ -36,4 +36,6 @@
     <ProjectReference Include="..\ASPCoreUtilities\ASPCoreUtilities.csproj" />
     <ProjectReference Include="..\DBModels\DBModels.csproj" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties wwwroot_4users_1json__JsonSchema="http://json-schema.org/draft-04/schema" /></VisualStudio></ProjectExtensions>
 </Project>

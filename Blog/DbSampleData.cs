@@ -78,7 +78,6 @@ namespace Blog
                 userManager.CreateAsync(oleg, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(oleg, Roles.MODERATOR).Wait();
 
-
                 var muddy = new User(
                     new Profile(new DateTime(1990, 1, 1)),
                     new ProfileStatus(ProfileState.RESTRICTED))
@@ -88,6 +87,7 @@ namespace Blog
                     EmailConfirmed = false
                 };
                 userManager.CreateAsync(muddy, "QTU100@yandex.ru").Wait();
+                userManager.AddToRoleAsync(muddy, Roles.USER).Wait();
 
                 var arslan = new User(
                     new Profile(new DateTime(1996, 10, 2)),

@@ -6,6 +6,7 @@
 
 @{
     var overviewTabId = "v-pills-overview";
+    var usersTabId = "v-pills-users";
 }
 
 <div class="container">
@@ -15,7 +16,7 @@
                 <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#@overviewTabId" role="tab" aria-selected="true">Overview</a>
                 <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-publications" role="tab" aria-selected="false">Moderators</a>
                 <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-selected="false">Publications</a>
-                <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-actions" role="tab" aria-selected="false">Users</a>
+                <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#@usersTabId" role="tab" aria-selected="false">Users</a>
                 <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-controls" role="tab" aria-selected="false">Controls</a>
             </div>
         </div>
@@ -52,17 +53,16 @@
                 </div>
 
                 <div class="tab-pane fade" id="v-pills-settings" role="tabpanel">
-
                 </div>
 
-                <div class="tab-pane fade" id="v-pills-actions" role="tabpanel">
-
+                <div class="tab-pane fade" id="@usersTabId" role="tabpanel">
+                    <partial name="AdminPanel/_UsersTab" />
                 </div>
 
                 <div class="tab-pane fade" id="v-pills-controls" role="tabpanel">
                     <p>
                         From here you can invite a new moderator or administrator by creating an invitation link.
-                        Once generated the link lasts for 30 minutes till it expires
+                        Once generated the link lasts for 30 minutes
                     </p>
 
                     <ul>
@@ -83,16 +83,19 @@
 
 @section Styles {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" integrity="sha256-aa0xaJgmK/X74WM224KMQeNQC2xYKwlAt08oZqjeF0E=" crossorigin="anonymous" />
-    //<link rel="stylesheet" href="~/css/jQRangeSlider/iThing.css" type="text/css" />
+    @*<link rel="stylesheet" href="~/css/jQRangeSlider/iThing.css" type="text/css" />*@
 }
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js" integrity="sha256-TQq84xX6vkwR0Qs1qH5ADkP+MvH0W+9E7TdHJsoIQiM=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI=" crossorigin="anonymous"></script>
-    //<script src="~/js/jQRangeSlider/jQDateRangeSlider-min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+    @*<script src="~/js/jQRangeSlider/jQDateRangeSlider-min.js"></script>*@
     <script>
-
         $(document).ready(function () {
+            loadUsersTabPartial();
+
             Chart.defaults.global.title.fontSize = 22;
             Chart.defaults.global.title.display = true;
             Chart.defaults.global.defaultFontColor = "#000000";
@@ -114,8 +117,6 @@
                     eval(scripts[i].innerText);
                 }
             }
-
-
         });
 
         function inviteModerator() {
