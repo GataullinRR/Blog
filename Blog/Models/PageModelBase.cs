@@ -20,13 +20,13 @@ namespace Blog.Models
 
     public abstract class PageModelBase : PageModel, ILayoutModelProvider
     {
-        public ServicesProvider S { get; set; }
+        public ServicesLocator S { get; set; }
 
         public PermissionsService Permissions => S.Permissions;
         public LayoutModel LayoutModel { get; private set; }
         protected bool autoSaveDbChanges = false;
 
-        public PageModelBase(ServicesProvider services)
+        public PageModelBase(ServicesLocator services)
         {
             S = services;
         }

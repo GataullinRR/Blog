@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Blog.Services
 {
-    public class ServicesProvider
+    public class ServicesLocator
     {
         readonly Lazy<BlogContext> _db;
         readonly Lazy<PermissionsService> _permissions;
@@ -36,6 +37,8 @@ namespace Blog.Services
         readonly Lazy<ModerationService> _moderation;
         readonly Lazy<StorageService> _storage;
         readonly Lazy<RepositoryService> _repository;
+        readonly Lazy<URIProviderService> _uriProvider;
+        readonly Lazy<IMemoryCache> _memoryCache;
 
         public IServiceProvider ServiceProvider { get; }
         public BlogContext Db => _db.Value;
@@ -61,8 +64,10 @@ namespace Blog.Services
         public ModerationService Moderation => _moderation.Value;
         public StorageService Storage => _storage.Value;
         public RepositoryService Repository => _repository.Value;
+        public URIProviderService URIProvider => _uriProvider.Value;
+        public IMemoryCache MemoryCache => _memoryCache.Value;
 
-        public ServicesProvider(IServiceProvider serviceProvider)
+        public ServicesLocator(IServiceProvider serviceProvider)
         {
             ServiceProvider = serviceProvider;
 
@@ -89,6 +94,8 @@ namespace Blog.Services
             _moderation = ServiceProvider.GetLazyService<ModerationService>();
             _storage = ServiceProvider.GetLazyService<StorageService>();
             _repository = ServiceProvider.GetLazyService<RepositoryService>();
+            _uriProvider = ServiceProvider.GetLazyService<URIProviderService>();
+            _memoryCache = ServiceProvider.GetLazyService<IMemoryCache>();
         }
     }
 }

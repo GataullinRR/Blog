@@ -22,7 +22,7 @@ namespace Blog.Pages
         [BindProperty]
         public CommentaryCreateModel NewCommentary { get; set; }
 
-        public PostModel(ServicesProvider serviceProvider) : base(serviceProvider)
+        public PostModel(ServicesLocator serviceProvider) : base(serviceProvider)
         {
             NewCommentary = new CommentaryCreateModel();
         }

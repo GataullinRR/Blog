@@ -23,7 +23,7 @@ namespace Blog.Pages.Account
         /// </summary>
         public bool IsCurrentUser { get; private set; }
 
-        public ProfileModel(ServicesProvider serviceProvider) : base(serviceProvider)
+        public ProfileModel(ServicesLocator serviceProvider) : base(serviceProvider)
         {
 
         }

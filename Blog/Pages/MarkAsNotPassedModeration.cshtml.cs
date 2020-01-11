@@ -19,7 +19,7 @@ namespace Blog.Pages
         [BindProperty, BindRequired, Required, MinLength(8), MaxLength(500)]
         public string Reason { get; set; }
 
-        public MarkAsNotPassedModerationModel(ServicesProvider services) : base(services)
+        public MarkAsNotPassedModerationModel(ServicesLocator services) : base(services)
         {
 
         }

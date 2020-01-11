@@ -41,18 +41,17 @@ namespace Blog
             services.AddDbContext<BlogContext>(options => options
                     .UseLazyLoadingProxies()
                     .UseSqlServer(connection));
+            //services.AddResponseCaching();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     .AddCookie(options => {
                         options.LoginPath = "/Account/Login/";
                     });
-
             services.AddIdentity<User, IdentityRole>(options =>
                     {
                         options.User.RequireUniqueEmail = false;
                     })
                     .AddEntityFrameworkStores<BlogContext>()
                     .AddTokenProvider<BasicTokenProvider>(nameof(BasicTokenProvider));
-
             services.Configure<IdentityOptions>(options =>
             {
                 // Password settings.
@@ -73,13 +72,12 @@ namespace Blog
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
                 options.User.RequireUniqueEmail = false;
             });
-            services.AddResponseCaching();
             services.AddMvc(options =>
             {
-                options.CacheProfiles.Add(ResponseCaching.DAILY, new CacheProfile()
-                {
-                    Duration = 60 * 60 * 24
-                });
+                //options.CacheProfiles.Add(ResponseCaching.DAILY, new CacheProfile()
+                //{
+                //    Duration = 60 * 60 * 24
+                //});
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSession();
@@ -93,7 +91,7 @@ namespace Blog
             services.AddScoped<DecisionsService>();
             services.AddScoped<DbEntitiesUpdateService>();
             services.AddScoped<LinkBuilderService>();
-            services.AddScoped<ServicesProvider>();
+            services.AddScoped<ServicesLocator>();
             services.AddScoped<ActivationLinkGeneratorService>();
             services.AddScoped<SessionMutatorsManagerService>();
             services.AddScoped<BanningService>();
@@ -130,6 +128,7 @@ namespace Blog
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            // Required to run
             app.ApplicationServices.GetService<AutounbanService>();
 
             if (env.IsDevelopment())
@@ -141,8 +140,10 @@ namespace Blog
 
             }
 
+            //app.UseResponseCaching();
             app.UseMiddleware<ErrorsHandlerMiddleware>();
             app.UseAuthentication();
+            app.UseMiddleware<CustomResponseCachingMiddleware>();
             app.UseStaticFiles(new StaticFileOptions
             {
                 OnPrepareResponse = (context) =>

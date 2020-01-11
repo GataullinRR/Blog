@@ -24,7 +24,7 @@ namespace Blog.Pages.Account
         [BindProperty(), Required(ErrorMessage = "Profile name is not provided")]
         public string UserName { get; set; }
 
-        public PasswordRestoreModel(EMailService email, ConfirmationLinksGeneratorService confirmation, ServicesProvider serviceProvider) : base(serviceProvider)
+        public PasswordRestoreModel(EMailService email, ConfirmationLinksGeneratorService confirmation, ServicesLocator serviceProvider) : base(serviceProvider)
         {
             _email = email ?? throw new ArgumentNullException(nameof(email));
             _confirmation = confirmation ?? throw new ArgumentNullException(nameof(confirmation));

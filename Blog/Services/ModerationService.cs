@@ -8,7 +8,7 @@ namespace Blog.Services
 {
     public class ModerationService : ServiceBase
     {
-        public ModerationService(ServicesProvider services) : base(services)
+        public ModerationService(ServicesLocator services) : base(services)
         {
 
         }

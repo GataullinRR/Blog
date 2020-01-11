@@ -21,7 +21,7 @@ namespace Blog.Pages
         public int NumOfPages { get; private set; }
         public int CurrentPage { get; private set; }
 
-        public IndexModel(ServicesProvider serviceProvider) : base(serviceProvider)
+        public IndexModel(ServicesLocator serviceProvider) : base(serviceProvider)
         {
 
         }

@@ -19,7 +19,7 @@ namespace Blog.Controllers
 {
     public class AccountController : ControllerBase
     {
-        public AccountController(ServicesProvider serviceProvider) : base(serviceProvider)
+        public AccountController(ServicesLocator serviceProvider) : base(serviceProvider)
         {
         }
 

@@ -13,7 +13,7 @@ namespace Blog.Controllers
 {
     public class PanelsTableController : ControllerBase
     {
-        public PanelsTableController(ServicesProvider serviceProvider) : base(serviceProvider)
+        public PanelsTableController(ServicesLocator serviceProvider) : base(serviceProvider)
         {
         }
 

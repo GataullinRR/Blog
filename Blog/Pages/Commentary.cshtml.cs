@@ -16,7 +16,7 @@ namespace Blog.Pages
         public Commentary Commentary { get; private set; }   
         public User CurrentUserModel { get; private set; }
 
-        public CommentaryModel(ServicesProvider services) : base(services)
+        public CommentaryModel(ServicesLocator services) : base(services)
         {
 
         }

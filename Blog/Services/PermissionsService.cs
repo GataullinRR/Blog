@@ -20,7 +20,7 @@ namespace Blog.Services
         public const int NUM_OF_DAYS_USER_CAN_EDIT_OWN_POST = 3;
         public const int MAX_COMMENTARY_EDITS_FOR_STANDARD_USER = 1;
 
-        public PermissionsService(ServicesProvider services) : base(services)
+        public PermissionsService(ServicesLocator services) : base(services)
         {
 
         }

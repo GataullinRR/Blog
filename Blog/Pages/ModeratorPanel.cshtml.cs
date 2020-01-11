@@ -25,7 +25,7 @@ namespace Blog.Pages
         [BindProperty]
         public string TargetModeratorId { get; set; }
 
-        public ModeratorPanelModel(ServicesProvider services) : base(services)
+        public ModeratorPanelModel(ServicesLocator services) : base(services)
         {
 
         }

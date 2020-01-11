@@ -80,7 +80,7 @@ namespace Blog.Services
         protected override ControllerAction _targetAction { get; } 
             = new ControllerAction(nameof(AccountController), nameof(AccountController.ConfirmAsync));
 
-        public ConfirmationLinksGeneratorService(ServicesProvider services, IDataProtectionProvider protector) : base(
+        public ConfirmationLinksGeneratorService(ServicesLocator services, IDataProtectionProvider protector) : base(
             services, 
             protector.CreateProtector("ConfirmationTokens"))
         {

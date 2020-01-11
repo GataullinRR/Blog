@@ -33,7 +33,7 @@ namespace Blog.Pages.Account
         public string ConfirmPassword { get; set; }
         public string RegistrationRole { get; private set; }
 
-        public RegisterModel(ServicesProvider services) : base(services)
+        public RegisterModel(ServicesLocator services) : base(services)
         {
 
         }

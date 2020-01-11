@@ -89,10 +89,10 @@ namespace BlogTests
             Assert.DoesNotContain("/Error?code=", response.RequestMessage.RequestUri.AbsoluteUri);
         }
 
-        protected IDisposable getServices(out ServicesProvider services)
+        protected IDisposable getServices(out ServicesLocator services)
         {
             var scope = _factory.Server.Host.Services.CreateScope();
-            services = scope.ServiceProvider.GetRequiredService<ServicesProvider>();
+            services = scope.ServiceProvider.GetRequiredService<ServicesLocator>();
 
             return scope;
         }

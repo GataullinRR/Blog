@@ -8,5 +8,6 @@ namespace Blog.Misc
     public class ResponseCaching
     {
         public const string DAILY = nameof(DAILY);
+        public const string HOURLY = nameof(HOURLY);
     }
 }

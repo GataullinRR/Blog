@@ -9,7 +9,7 @@ namespace Blog.Services
 {
     public class DbEntitiesUpdateService : ServiceBase
     {
-        public DbEntitiesUpdateService(ServicesProvider serviceProvider) : base(serviceProvider)
+        public DbEntitiesUpdateService(ServicesLocator serviceProvider) : base(serviceProvider)
         {
 
         }

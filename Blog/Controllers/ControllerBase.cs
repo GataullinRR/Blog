@@ -15,10 +15,10 @@ namespace Blog.Controllers
 {
     public abstract class ControllerBase : Controller, ILayoutModelProvider
     {
-        internal ServicesProvider S { get; }
+        internal ServicesLocator S { get; }
         public LayoutModel LayoutModel { get; private set; }
 
-        public ControllerBase(ServicesProvider serviceProvider)
+        public ControllerBase(ServicesLocator serviceProvider)
         {
             S = serviceProvider;
         }

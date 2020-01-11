@@ -22,7 +22,7 @@ namespace Blog.Pages.Account
         [Required(ErrorMessage = "Password is required"), DataType(DataType.Password)]
         public string Password { get; set; }
 
-        public LoginModel(ServicesProvider serviceProvider) : base(serviceProvider)
+        public LoginModel(ServicesLocator serviceProvider) : base(serviceProvider)
         {
 
         }

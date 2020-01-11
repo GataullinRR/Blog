@@ -9,7 +9,7 @@ namespace Blog.Services
 {
     public class BanningService : ServiceBase
     {
-        public BanningService(ServicesProvider services) : base(services)
+        public BanningService(ServicesLocator services) : base(services)
         {
 
         }

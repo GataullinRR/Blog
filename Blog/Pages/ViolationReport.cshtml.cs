@@ -19,7 +19,7 @@ namespace Blog.Pages
         [Required, BindProperty]
         public string ReportObjectToken { get; set; }
 
-        public ViolationReportModel(ServicesProvider services) : base(services)
+        public ViolationReportModel(ServicesLocator services) : base(services)
         {
 
         }

@@ -32,7 +32,7 @@ namespace Blog.Pages.Account
         [BindProperty]
         public string EditUserId { get; set; }
 
-        public ProfileEditModel(ServicesProvider serviceProvider) : base(serviceProvider)
+        public ProfileEditModel(ServicesLocator serviceProvider) : base(serviceProvider)
         {
             
         }

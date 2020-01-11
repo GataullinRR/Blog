@@ -20,7 +20,7 @@ namespace Blog.Pages.Account
         public User UserModel { get; private set; }
         public bool IsConfirmationLinkSent { get; private set; }
 
-        public ConfirmEMailModel(ServicesProvider services) : base(services)
+        public ConfirmEMailModel(ServicesLocator services) : base(services)
         {
 
         }

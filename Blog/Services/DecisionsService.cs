@@ -9,7 +9,7 @@ namespace Blog.Services
 {
     public class DecisionsService : ServiceBase
     {
-        public DecisionsService(ServicesProvider serviceProvider) : base(serviceProvider)
+        public DecisionsService(ServicesLocator serviceProvider) : base(serviceProvider)
         {
 
         }

@@ -21,7 +21,7 @@ namespace Blog.Pages
         [BindProperty]
         public int PostId { get; set; }
 
-        public PostCRUDPageModel(ServicesProvider serviceProvider) : base(serviceProvider)
+        public PostCRUDPageModel(ServicesLocator serviceProvider) : base(serviceProvider)
         {
 
         }

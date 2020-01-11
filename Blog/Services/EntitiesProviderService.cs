@@ -8,7 +8,7 @@ namespace Blog.Services
 {
     public class EntitiesProviderService : ServiceBase
     {
-        public EntitiesProviderService(ServicesProvider services) : base(services)
+        public EntitiesProviderService(ServicesLocator services) : base(services)
         {
 
         }

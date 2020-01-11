@@ -19,7 +19,7 @@ namespace Blog.Pages.Account
         [BindProperty, Required, DataType(DataType.EmailAddress)]
         public string NewEMail { get; set; }
 
-        public EmailChangeModel(ServicesProvider services) : base(services)
+        public EmailChangeModel(ServicesLocator services) : base(services)
         {
 
         }

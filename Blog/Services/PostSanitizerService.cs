@@ -21,7 +21,7 @@ namespace Blog.Services
 
         readonly IHtmlSanitizer _allowAllButNotExecutable;
 
-        public PostSanitizerService(ServicesProvider services) : base(services)
+        public PostSanitizerService(ServicesLocator services) : base(services)
         {
             _allowAllButNotExecutable = new HtmlSanitizer(
                 allowedTags: "code i b s img li ul ol link p em strong tr td table tbody a br span code pre sup sub blockquote caption".Split(" "),

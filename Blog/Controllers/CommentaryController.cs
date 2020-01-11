@@ -18,7 +18,7 @@ namespace Blog.Controllers
     [Authorize(Roles = Roles.NOT_RESTRICTED)]
     public class CommentaryController : ControllerBase
     {
-        public CommentaryController(ServicesProvider serviceProvider) : base(serviceProvider)
+        public CommentaryController(ServicesLocator serviceProvider) : base(serviceProvider)
         {
 
         }

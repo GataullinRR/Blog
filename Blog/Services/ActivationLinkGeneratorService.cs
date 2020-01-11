@@ -34,7 +34,7 @@ namespace Blog.Services
         protected override ControllerAction _targetAction { get; } 
             = new ControllerAction(nameof(AccountController), nameof(AccountController.ApplyActivationLinkAsync));
 
-        public ActivationLinkGeneratorService(ServicesProvider services) 
+        public ActivationLinkGeneratorService(ServicesLocator services) 
             : base(services, 
                    services.ProtectionProvider.CreateProtector("ActivationLinks"))
         {

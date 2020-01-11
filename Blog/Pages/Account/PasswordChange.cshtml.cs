@@ -22,7 +22,7 @@ namespace Blog.Pages.Account
         [BindProperty, DataType(DataType.Password), Required]
         public string CurrentPassword { get; set; }
 
-        public PasswordChangeModel(ServicesProvider serviceProvider) : base(serviceProvider)
+        public PasswordChangeModel(ServicesLocator serviceProvider) : base(serviceProvider)
         {
         }
 

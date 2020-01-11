@@ -11,7 +11,7 @@ namespace Blog.Controllers
 {
     public class ModerationController : ControllerBase
     {
-        public ModerationController(ServicesProvider serviceProvider) : base(serviceProvider)
+        public ModerationController(ServicesLocator serviceProvider) : base(serviceProvider)
         {
 
         }

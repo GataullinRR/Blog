@@ -17,7 +17,7 @@ namespace Blog.Pages
 {
     public class PostCreateModel : PostCRUDPageModel
     {
-        public PostCreateModel(ServicesProvider serviceProvider) : base(serviceProvider)
+        public PostCreateModel(ServicesLocator serviceProvider) : base(serviceProvider)
         {
 
         }
