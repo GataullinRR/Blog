@@ -141,9 +141,9 @@ namespace Blog
             }
 
             //app.UseResponseCaching();
-            app.UseMiddleware<ErrorsHandlerMiddleware>();
             app.UseAuthentication();
             app.UseMiddleware<CustomResponseCachingMiddleware>();
+            app.UseMiddleware<ErrorsHandlerMiddleware>();
             app.UseStaticFiles(new StaticFileOptions
             {
                 OnPrepareResponse = (context) =>

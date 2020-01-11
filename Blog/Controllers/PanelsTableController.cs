@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Types;
 using Utilities.Extensions;
+using Blog.Middlewares;
 
 namespace Blog.Controllers
 {
@@ -26,7 +27,7 @@ namespace Blog.Controllers
             public double RepPPub { get; set; }
         }
 
-        [ResponseCache(CacheProfileName = ResponseCaching.DAILY)]
+        [CustomResponseCache(3600, 3600 * 24, CacheMode.USER_SCOPED)]
         public async Task<IActionResult> LoadFullUsersTableAsync()
         {
             var i = 0;

@@ -7,17 +7,19 @@
 @{
     var overviewTabId = "v-pills-overview";
     var usersTabId = "v-pills-users";
+    var publicationsTabId = "v-pills-publications-tab";
+    var moderatorsTabId = "v-pills-moderators";
 }
 
 <div class="container">
     <div class="row justify-content-center">
         <div class="col" style="max-width:200px; width:200px;">
             <div class="nav flex-column nav-pills sticky-top pt-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#@overviewTabId" role="tab" aria-selected="true">Overview</a>
-                <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-publications" role="tab" aria-selected="false">Moderators</a>
-                <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-selected="false">Publications</a>
-                <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#@usersTabId" role="tab" aria-selected="false">Users</a>
-                <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-controls" role="tab" aria-selected="false">Controls</a>
+                <a class="nav-link active" data-toggle="pill" href="#@overviewTabId" role="tab" aria-selected="true">Overview</a>
+                <a class="nav-link" data-toggle="pill" href="#@moderatorsTabId" role="tab" aria-selected="false">Moderators</a>
+                <a class="nav-link" data-toggle="pill" href="#@publicationsTabId " role="tab" aria-selected="false">Publications</a>
+                <a class="nav-link" data-toggle="pill" href="#@usersTabId" role="tab" aria-selected="false">Users</a>
+                <a class="nav-link" data-toggle="pill" href="#v-pills-controls" role="tab" aria-selected="false">Controls</a>
             </div>
         </div>
         <div class="col container-main">
@@ -27,36 +29,37 @@
                         <p class="text-center">Loading... <i class="fas fa-cog fa-spin"></i></p>
                     </div>
                     @*<h3>Currently active moderators</h3>
-                        <ul>
-                            @foreach (var moderator in Model.Moderators.Where(m => m.Status.State == ProfileState.ACTIVE))
-                            {
-                                <li>
-                                    @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
-                                </li>
-                            }
-                        </ul>
+                    <ul>
+                        @foreach (var moderator in Model.Moderators.Where(m => m.Status.State == ProfileState.ACTIVE))
+                        {
+                            <li>
+                                @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
+                            </li>
+                        }
+                    </ul>
 
-                        <h3>Inactive moderators</h3>
+                    <h3>Inactive moderators</h3>
 
-                        <ul>
-                            @foreach (var moderator in Model.Moderators.Where(m => m.Status.State != ProfileState.ACTIVE))
-                            {
-                                <li>
-                                    @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
-                                </li>
-                            }
-                        </ul>*@
+                    <ul>
+                        @foreach (var moderator in Model.Moderators.Where(m => m.Status.State != ProfileState.ACTIVE))
+                        {
+                            <li>
+                                @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
+                            </li>
+                        }
+                    </ul>*@
                 </div>
 
-                <div class="tab-pane fade" id="v-pills-publications" role="tabpanel">
+                <div class="tab-pane fade" id="@moderatorsTabId" role="tabpanel">
                     @{ await Html.RenderPartialAsync("AdminPanel/_ModeratorsTab", await Model.ModeratorsGroups.ToArrayAsync()); }
                 </div>
 
-                <div class="tab-pane fade" id="v-pills-settings" role="tabpanel">
+                <div class="tab-pane fade" id="@publicationsTabId" role="tabpanel">
+                    @{ await Html.RenderPartialAsync("AdminPanel/_PublicationsTab"); }
                 </div>
 
                 <div class="tab-pane fade" id="@usersTabId" role="tabpanel">
-                    <partial name="AdminPanel/_UsersTab" />
+                    @{ await Html.RenderPartialAsync("AdminPanel/_UsersTab"); }
                 </div>
 
                 <div class="tab-pane fade" id="v-pills-controls" role="tabpanel">
@@ -94,6 +97,7 @@
     @*<script src="~/js/jQRangeSlider/jQDateRangeSlider-min.js"></script>*@
     <script>
         $(document).ready(function () {
+            loadPostsTabPartial();
             loadUsersTabPartial();
 
             Chart.defaults.global.title.fontSize = 22;

@@ -26,9 +26,9 @@
 
 <script>
     function loadUsersTabPartial() {
-        var table = $('@tableId').DataTable({
+        var table = $('#@tableId').DataTable({
             ajax: {
-                url: 'PanelsTable/LoadFullUsersTableAsync',
+                url: '/PanelsTable/LoadFullUsersTableAsync',
                 dataSrc: ''
             },
             columns: [

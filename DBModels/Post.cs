@@ -21,12 +21,13 @@ namespace DBModels
         [Required] public virtual ViewStatistic ViewStatistic { get; set; }
         [InverseProperty(nameof(Report.PostObject))]
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
+        [InverseProperty(nameof(Commentary.Post))]
+        public virtual List<Commentary> Commentaries { get; set; } = new List<Commentary>();
         [InverseProperty(nameof(Violation.PostObject))]
         [Required] public virtual List<Violation> Violations { get; set; } = new List<Violation>();
         public bool IsDeleted { get; set; }
         public string DeleteReason { get; set; }
         [Required] public virtual ModerationInfo ModerationInfo { get; set; }
-
 
         public Post() 
         { 

@@ -6,37 +6,37 @@
     <thead>
         <tr>
             <th class="th">
-                User
+                Post ID
             </th>
             <th class="th">
-                Role
+                Author
             </th>
             <th class="th">
-                All actions
+                Views
             </th>
             <th class="th">
-                Publications
+                Commentaries
             </th>
             <th class="th">
-                Repors per publication
+                Reports per view
             </th>
         </tr>
     </thead>
 </table>
 
 <script>
-    function loadUsersTabPartial() {
-        var table = $('@tableId').DataTable({
+    function loadPostsTabPartial() {
+        var table = $('#@tableId').DataTable({
             ajax: {
-                url: 'PanelsTable/LoadFullUsersTableAsync',
+                url: 'AdminPanelTabs/LoadFullPostsTableAsync',
                 dataSrc: ''
             },
             columns: [
-                { data: 'name' },
-                { data: 'role' },
-                { data: 'actCnt' },
-                { data: 'pubCnt' },
-                { data: 'repPPub' }
+                { data: 'postId' },
+                { data: 'author' },
+                { data: 'viewsCnt' },
+                { data: 'comCnt' },
+                { data: 'repPView' }
             ]
         });
     }
