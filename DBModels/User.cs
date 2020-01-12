@@ -55,11 +55,12 @@ namespace DBModels
         [Required] public virtual UserStatistic Statistic { get; set; } = new UserStatistic();
 
         /// <summary>
-        /// Not null for User in <see cref="Roles.MODERATOR"/>
+        /// Not null for User in <see cref="Roles.MODERATOR"/> role
         /// </summary>
         public virtual ModeratorsGroup ModeratorsGroup { get; set; }
+
         /// <summary>
-        /// Not null for each User
+        /// Not null for any User. Even in <see cref="Roles.MODERATOR"/> role
         /// </summary>
         public virtual ModeratorsGroup ModeratorsInChargeGroup { get; set; }
 

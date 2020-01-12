@@ -7,6 +7,7 @@ using Blog.Misc;
 using Blog.Models;
 using Blog.Services;
 using Microsoft.AspNetCore.Mvc;
+using Utilities.Extensions;
 
 namespace Blog.Controllers
 {
@@ -58,6 +59,72 @@ namespace Blog.Controllers
             };
 
             return Json(result);
+        }
+
+#warning Refactor! Hadn't had time to do better!
+        [CustomResponseCache(3600, 3600 * 24, CacheMode.USER_SCOPED)]
+        public async Task<IActionResult> LoadModeratorsTabAsync()
+        {
+            var startDate = S.Db.ModeratorsGroups
+                .Min(mg => mg.CreationTime).Date;
+            var endDate = DateTime.UtcNow.Date;
+            var xAxis = (endDate - startDate).TotalDays
+                .Round()
+                .Range()
+                .Select(dayOffset => startDate.AddDays(dayOffset))
+                .ToArray();
+
+            var i = 0;
+            var groupsInfos = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo[S.Db.ModeratorsGroups.Count()];
+            foreach (var group in S.Db.ModeratorsGroups.OrderBy(mg => mg.CreationTime))
+            {
+                var moderatorsInfos = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo[group.Moderators.Count()];
+                var statistic = await group.Statistic.DayStatistics
+                    .ToArrayAsync();
+                var resolvedEntities = new int[xAxis.Length];
+                var resolveTime = new double[xAxis.Length];
+                for (int j = 0; j < statistic.Length; j++)
+                {
+                    var dayStatistic = statistic[j];
+                    var k = (dayStatistic.Day - startDate).TotalDays.Round();
+                    resolvedEntities[k] = dayStatistic.ResolvedEntitiesCount;
+                    resolveTime[k] = dayStatistic.SummedResolveTime.HasValue 
+                        ? dayStatistic.SummedResolveTime.Value.TotalSeconds.Round() 
+                        : double.NaN;
+                }
+
+#warning add moderator statistic entity!
+                var m = 0;
+                var moderators = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo[group.Moderators.Count];
+                foreach (var moderator in group.Moderators)
+                {
+                    var resolvedByModeratorEntities = group.EntitiesToCheck
+                        .Where(e => e.IsResolved && e.AssignedModerator == moderator)
+                        .GroupBy(e => e.ResolvingTime.Value.Date)
+                        .ToArray();
+                    var reslovedByModeratorEntitiesCounts = new int[xAxis.Length];
+                    var moderatorResolveTime = new double[xAxis.Length];
+                    moderatorResolveTime.SetAll(double.NaN);
+                    for (int j = 0; j < resolvedByModeratorEntities.Length; j++)
+                    {
+                        var entities = resolvedByModeratorEntities[j];
+                        var l = (entities.Key - startDate).TotalDays.Round();
+                        reslovedByModeratorEntitiesCounts[l] = entities.Count();
+                        moderatorResolveTime[l] = entities.Select(e => (e.ResolvingTime.Value - e.AddTime).TotalSeconds).Sum();
+                    }
+
+                    moderators[m++] = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo(moderator.UserName, resolvedEntities, moderatorResolveTime, null);
+                }
+
+                groupsInfos[i++] = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo(
+                    "Group" + i,
+                    resolvedEntities,
+                    resolveTime,
+                    moderators);
+            }
+
+            var vm = new AdminPanelModeratorsTabModel(new AdminPanelModeratorsTabModel.SummaryModel(xAxis, groupsInfos));
+            return PartialView("AdminPanel/_ModeratorsTab", vm);
         }
     }
 }

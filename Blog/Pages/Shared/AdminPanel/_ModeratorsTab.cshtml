@@ -1,103 +1,392 @@
-﻿@model ModeratorsGroup[]
+﻿@model AdminPanelModeratorsTabModel
 
-    <div class="conatiner">
+@{
+    var entitiesChartId = "entities-resolved-chart";
+    var totalResolveTimeChartId = "avg-time-to-resolve-chart";
+    var entitiesPieChartId = "entities-pie-chart";
+    var totalResolveTimePerContributorBarChartId = "resolve-time-bar-chart";
+}
+
+    <div class="container">
         <div class="row">
             <div class="col">
-                <select class="selectpicker">
-                    <option>Summary</option>
-                    @{
-                        var i = 1;
-                        foreach (var moderatorsGroup in Model)
-                        {
-                            <option>Group @i</option>
-                            i++;
-                        }
+                <select id="view-selector" class="custom-select" style="max-width: 150px">
+                    <option value="Summary">Summary</option>
+                    @foreach (var group in Model.Summary.Groups)
+                    {
+                        <option value="@group.GroupName">@group.GroupName</option>
                     }
                 </select>
             </div>
-
-            <div class="col">
-                <input id="toggle" type="checkbox" unchecked data-toggle="toggle" />
-                <select class="selectpicker">
-                    <option>Last month</option>
-                    <option>Last 3 months</option>
-                    <option>Last year</option>
-                    <option>All time</option>
-                </select>
+        </div>
+        <div class="row mb-3">
+            <div class="col col-lg-9">
+                <div class="chart-container admin-panel-chart">
+                    <canvas id="@entitiesChartId"></canvas>
+                </div>
+            </div>
+            <div class="col col-lg-3">
+                <div class="chart-container admin-panel-chart">
+                    <canvas id="@entitiesPieChartId"></canvas>
+                </div>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col">
-                <canvas id="lineChart"></canvas>
+        <div class="row mb-3">
+            <div class="col col-lg-9">
+                <div class="chart-container admin-panel-chart">
+                    <canvas id="@totalResolveTimeChartId"></canvas>
+                </div>
             </div>
-
-            <div class="col">
-                <canvas id="doughnutChart"></canvas>
+            <div class="col col-lg-3">
+                <div class="chart-container admin-panel-chart">
+                    <canvas id="@totalResolveTimePerContributorBarChartId"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
-
 <script>
-    //$(document).ready(function () {
-    //    $('#toggle').bootstrapToggle({
-    //        on: 'Derrivative',
-    //        off: 'Absolute'
-    //    });
+    var model = @Json.Serialize(Model);
+    var xAxis = model.summary.xAxis.map(x => new Date(Date.parse(x))).map(d => d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear());
+    var c1 = instantiateChart("@entitiesChartId", "Resolved entities", "line");
+    var c2 = instantiateChart("@entitiesPieChartId","Entities by groups", "doughnut");
+    var c3 = instantiateChart("@totalResolveTimeChartId", "Average resolve time", "line");
+    var c4 = instantiateChart("@totalResolveTimePerContributorBarChartId", "Time by groups", "bar");
+    @{
+        var colors = new[] { "#33cc33", "#ffbb33" };
+    }
 
-    //    render2();
+    $('#view-selector').change(function () {
+        var selectorValue = $(this).val();
+        console.log("View selected. Name: " + selectorValue);
+        if (selectorValue == "Summary") {
+            renderSummary();
+        }
+        else {
+            renderGroup(selectorValue);
+        }
+    });
 
-    //    var ctxL = document.getElementById("lineChart").getContext('2d');
-    //    var myLineChart = new Chart(ctxL, {
-    //        type: 'line',
+    function renderModeratorsTabParial() {
+        renderSummary();
+    }
+
+    function renderGroup(groupName) {
+        var groups = model.summary.groups.find(g => g.groupName == groupName).subGroups;
+        renderResolveTime(groups);
+        renderResolvedEntities(groups);
+    }
+
+    function renderSummary() {
+                var groups = model.summary.groups;
+        renderResolveTime(groups);
+        renderResolvedEntities(groups);
+    }
+
+    function renderSummary2() {
+            var datasets = [];
+            var groups = [];
+            var resolvedEntitiesRatioByGroups = [];
+        @{
+            var resolvedEntitiesTotalCount = (double)Model.Summary.Groups.Sum(g => g.ResolvedEntities.Sum());
+            for (int i = 0; i < Model.Summary.Groups.Length; i++)
+            {
+
+                var group = Model.Summary.Groups[i];
+                var groupData = new ChartJSDatasetModel<int>()
+                {
+                    Label = group.GroupName,
+                    Data = group.ResolvedEntities,
+                    BackgroundColor = new[] { colors[i] },
+                    BorderColor = new[] { colors[i] },
+                };
+                var ratio = (100 * group.ResolvedEntities.Sum() / resolvedEntitiesTotalCount).Round(1);
+
+                <text>
+            datasets.push(@Json.Serialize(groupData));
+            groups.push('@groupData.Label');
+            resolvedEntitiesRatioByGroups.push(@ratio);
+                </text>
+            }
+
+            var timeToResolvePerResolvedEntity = new ChartJSDatasetModel<double>()
+            {
+                Label = "Resolve time",
+                Data = new double[Model.Summary.XAxis.Length],
+            };
+
+            for (int i = 0; i < Model.Summary.XAxis.Length; i++)
+            {
+                var time = 0D;
+                var resolvedEntitiesCount = 0;
+                for (int j = 0; j < Model.Summary.Groups.Length; j++)
+                {
+                    var group = Model.Summary.Groups[j];
+                    var providedTime = group.SummedResolveTime[i];
+                    time += providedTime.IsNaN()
+                        ? 0
+                        : providedTime;
+                    resolvedEntitiesCount += group.ResolvedEntities[i];
+                }
+
+                time = time == 0
+                    ? double.NaN // will be rendered as discontinuity
+                    : time;
+                timeToResolvePerResolvedEntity.Data[i] = (time / resolvedEntitiesCount).Round(1);
+            }
+            var avgTimeToResolvePerGroup = new ChartJSDatasetModel<double>()
+            {
+                Label = "Average resolve time",
+                Data = new double[Model.Summary.XAxis.Length],
+                BorderColor = colors,
+                BackgroundColor = colors,
+            };
+            for (int i = 0; i < Model.Summary.Groups.Length; i++)
+            {
+                var group = Model.Summary.Groups[i];
+                var time = group.SummedResolveTime.Where(t => t.IsNotNaN()).EmptyToNull()?.Sum() ?? 0;
+                var resolvedEntitiesCount = group.ResolvedEntities.Sum();
+                avgTimeToResolvePerGroup.Data[i] = (time / resolvedEntitiesCount).Round(1);
+            }
+            }
+
+            @*plot("@entitiesChartId", "Resolved entities", xAxis, datasets);
+            plotPie("@entitiesPieChartId", "Entities by groups", groups, resolvedEntitiesRatioByGroups, @Json.Serialize(colors));
+            plot("@totalResolveTimeChartId", "Average resolve time", xAxis, [@Json.Serialize(timeToResolvePerResolvedEntity)]);
+        plot("@totalResolveTimePerContributorBarChartId", "Time by groups", groups, [@Json.Serialize(avgTimeToResolvePerGroup)], "bar");*@
+
+            plotInto(c1, xAxis, datasets);
+            plotInto(c2, groups, [{ data: resolvedEntitiesRatioByGroups, backgroundColor: @Json.Serialize(colors) }]);
+            plotInto(c3, xAxis, [@Json.Serialize(timeToResolvePerResolvedEntity)]);
+            plotInto(c4, groups, [@Json.Serialize(avgTimeToResolvePerGroup)]);
+    }
+
+    function renderResolvedEntities(groups) {
+        var colors = ["#33cc33", "#ffbb33"];
+
+        var resolvedEntitiesTotalCount = 0;
+        for (var i = 0; i < groups.length; i++) {
+            resolvedEntitiesTotalCount += groups[i].resolvedEntities.sum();
+        }
+
+        var datasets = [];
+        var groupNames = [];
+        var resolvedEntitiesRatioByGroups = [];
+        for (var i = 0; i < groups.length; i++) {
+            var group = groups[i];
+            var dataset = {
+                label: group.groupName,
+                data: group.resolvedEntities,
+                backgroundColor: [colors[i]],
+                borderColor: [colors[i]],
+            };
+            datasets.push(dataset);
+
+            var ratio = (100 * group.resolvedEntities.sum() / resolvedEntitiesTotalCount).toPrecision(2);
+            resolvedEntitiesRatioByGroups.push(ratio);
+
+            groupNames.push(group.groupName);
+        }
+
+        plotInto(c1, xAxis, datasets);
+        plotInto(c2, groupNames, [{ data: resolvedEntitiesRatioByGroups, backgroundColor: @Json.Serialize(colors) }]);
+    }
+
+    function renderResolveTime(groups) {
+        var colors = ["#33cc33", "#ffbb33"];
+
+        var timeToResolvePerResolvedEntity = {
+            label: "Resolve time",
+            data: new Array(xAxis.length),
+            borderColor: colors,
+            backgroundColor: colors,
+        };
+        for (var i = 0; i < xAxis.length; i++) {
+            var time = 0;
+            var resolvedEntitiesCount = 0;
+            for (var j = 0; j < groups.length; j++)
+            {
+                var group = groups[j];
+                var providedTime = group.summedResolveTime[i];
+                time += isNaN(providedTime)
+                    ? 0
+                    : providedTime;
+                resolvedEntitiesCount += group.resolvedEntities[i];
+            }
+
+            time = time == 0
+                ? NaN // will be rendered as discontinuity
+                : time;
+            timeToResolvePerResolvedEntity.data[i] = (time / resolvedEntitiesCount).toPrecision(2);
+        }
+
+        plotInto(c3, xAxis, [timeToResolvePerResolvedEntity]);
+
+        var groupNames = [];
+        var avgTimeToResolvePerGroup =
+        {
+            label: "Average resolve time",
+            data: new Array(groups.length),
+            borderColor: colors,
+            backgroundColor: colors,
+        };
+        for (var i = 0; i < groups.length; i++) {
+            var group = groups[i];
+            groupNames.push(group.groupName);
+            var time = group.summedResolveTime.filter(t => !isNaN(t)).sum();
+            var resolvedEntitiesCount = group.resolvedEntities.sum();
+            avgTimeToResolvePerGroup.data[i] = (time / resolvedEntitiesCount).toPrecision(2);
+        }
+
+        plotInto(c4, groupNames, [avgTimeToResolvePerGroup]);
+    }
+
+    function instantiateChart(containerId, title, type)
+    {
+        var ctx = document.getElementById(containerId).getContext('2d');
+        if (type == "doughnut") {
+            return new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: [{}],
+                    datasets: [{}]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: "bottom",
+                        align: "center"
+                    },
+                    title: {
+                        display: true,
+                        text: title
+                    },
+                    layout: {
+                        padding: {
+                            left: 0,
+                            right: 0,
+                            top: 0,
+                            bottom: 0
+                        }
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: function (tooltipItem, data) {
+                                var dataset = data.datasets[tooltipItem.datasetIndex];
+                                var currentValue = dataset.data[tooltipItem.index];
+                                return data.labels[tooltipItem.index] + ": " + currentValue + "%";
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        else {
+            return new Chart(ctx, {
+                responsive: true,
+                maintainAspectRatio: false,
+                type: type,
+                data: {
+                    labels: [{}],
+                    datasets: [{}]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: false
+                            }
+                        }],
+                        xAxes: [{
+                            gridLines: {
+                                display: false
+                            },
+                            ticks: {
+                                autoSkip: true,
+                                autoSkipPadding: 20,
+                                maxRotation: 0,
+                                minRotation: 0
+                            }
+                        }]
+                    },
+                    legend: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: title
+                    },
+                    elements: {
+                        point: {
+                            radius: 0
+                        }
+                    },
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    }
+
+    
+    function plotInto(chart, xAxis, datasets) {
+        chart.data = {
+            labels: xAxis,
+            datasets: datasets
+        };
+
+        chart.update();
+    }
+
+    //function plot(containerId, title, xAxis, datasets, type) {
+    //    if (!type) {
+    //        type = "line";
+    //    }
+
+    //    var ctx = document.getElementById(containerId).getContext('2d');
+    //    var chart = new Chart(ctx, {
+    //        responsive: true,
+    //        maintainAspectRatio: false,
+    //        type: type,
     //        data: {
-    //            labels: ["January", "February", "March", "April", "May", "June", "July"],
-    //            datasets: [{
-    //                label: "My First dataset",
-    //                data: [65, 59, 80, 81, 56, 55, 40],
-    //                backgroundColor: [
-    //                    'rgba(105, 0, 132, .2)',
-    //                ],
-    //                borderColor: [
-    //                    'rgba(200, 99, 132, .7)',
-    //                ],
-    //                borderWidth: 2
+    //            labels: xAxis,
+    //            datasets: datasets
+    //        },
+    //        options: {
+    //            scales: {
+    //                yAxes: [{
+    //                    ticks: {
+    //                        beginAtZero: false
+    //                    }
+    //                }],
+    //                xAxes: [{
+    //                    gridLines: {
+    //                        display: false
+    //                    },
+    //                    ticks: {
+    //                        autoSkip: true,
+    //                        autoSkipPadding: 20,
+    //                        maxRotation: 0,
+    //                        minRotation: 0
+    //                    }
+    //                }]
     //            },
-    //            {
-    //                label: "My Second dataset",
-    //                data: [28, 48, 40, 19, 86, 27, 90],
-    //                backgroundColor: [
-    //                    'rgba(0, 137, 132, .2)',
-    //                ],
-    //                borderColor: [
-    //                    'rgba(0, 10, 130, .7)',
-    //                ],
-    //                borderWidth: 2
-    //            }
-    //            ]
-    //        },
-    //        options: {
-    //            responsive: true
+    //            legend: {
+    //                display: false,
+    //            },
+    //            title: {
+    //                display: true,
+    //                text: title
+    //            },
+    //            elements: {
+    //                point: {
+    //                    radius: 0
+    //                }
+    //            },
+    //            maintainAspectRatio: false
     //        }
     //    });
-    //}
 
-    //function render2() {
-    //    var ctxD = document.getElementById("doughnutChart").getContext('2d');
-    //    var myLineChart = new Chart(ctxD, {
-    //        type: 'doughnut',
-    //        data: {
-    //            labels: ["Red", "Green", "Yellow", "Grey", "Dark Grey"],
-    //            datasets: [{
-    //                data: [300, 50, 100, 40, 120],
-    //                backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360"],
-    //                hoverBackgroundColor: ["#FF5A5E", "#5AD3D1", "#FFC870", "#A8B3C5", "#616774"]
-    //            }]
-    //        },
-    //        options: {
-    //            responsive: true
-    //        }
-    //    });
+    //    return chart;
     //}
 </script>

@@ -14,7 +14,11 @@ namespace DBModels
         [InverseProperty(nameof(User.ModeratorsInChargeGroup))]
         public virtual List<User> TargetUsers { get; set; } = new List<User>();
         [Required, InverseProperty(nameof(ModeratorsGroupStatistic.Owner))] 
-        public virtual ModeratorsGroupStatistic Statistic { get; set; } = new ModeratorsGroupStatistic();
+        public virtual ModeratorsGroupStatistic Statistic { get; set; }
+        /// <summary>
+        /// When first moderator was assigned
+        /// </summary>
+        public DateTime CreationTime { get; set; }
 
         public virtual List<EntityToCheck<Commentary>> CommentariesToCheck { get; set; } = new List<EntityToCheck<Commentary>>();
         public virtual List<EntityToCheck<PostEdit>> PostEditsToCheck { get; set; } = new List<EntityToCheck<PostEdit>>();
@@ -29,6 +33,12 @@ namespace DBModels
         };
 
         public ModeratorsGroup() { }
+        
+        public ModeratorsGroup(DateTime creationTime) 
+        {
+            CreationTime = creationTime;
+            Statistic = new ModeratorsGroupStatistic();
+        }
 
         public void AddEntityToCheck(IAuthored reportObject, CheckReason reason)
         {

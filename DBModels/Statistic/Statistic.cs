@@ -8,6 +8,11 @@ namespace DBModels
     public class Statistic<TOwner, TDayStatistic> : IDbEntity
         where TDayStatistic : IDayStatistic
     {
+        public Statistic()
+        {
+
+        }
+
         [Key]
         public int Id { get; set; }
         [Required]

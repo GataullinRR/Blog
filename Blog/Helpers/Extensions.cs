@@ -57,6 +57,11 @@ namespace Blog
             return new Lazy<T>(() => (T)serviceProvider.GetService(typeof(T)));
         }
 
+        /// <summary>
+        /// Does not work as @Json.Serialize for objects
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public static string ToJSON(this object obj)
         {
             return JsonConvert.SerializeObject(obj);

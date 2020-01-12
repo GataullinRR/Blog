@@ -142,7 +142,7 @@ namespace Blog
 
             //app.UseResponseCaching();
             app.UseAuthentication();
-            app.UseMiddleware<CustomResponseCachingMiddleware>();
+            //app.UseMiddleware<CustomResponseCachingMiddleware>(); // disable for debugging
             app.UseMiddleware<ErrorsHandlerMiddleware>();
             app.UseStaticFiles(new StaticFileOptions
             {

@@ -7,7 +7,7 @@
 @{
     var overviewTabId = "v-pills-overview";
     var usersTabId = "v-pills-users";
-    var publicationsTabId = "v-pills-publications-tab";
+    var publicationsTabId = "v-pills-publications";
     var moderatorsTabId = "v-pills-moderators";
 }
 
@@ -16,42 +16,45 @@
         <div class="col" style="max-width:200px; width:200px;">
             <div class="nav flex-column nav-pills sticky-top pt-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                 <a class="nav-link active" data-toggle="pill" href="#@overviewTabId" role="tab" aria-selected="true">Overview</a>
-                <a class="nav-link" data-toggle="pill" href="#@moderatorsTabId" role="tab" aria-selected="false">Moderators</a>
+                <a class="nav-link" data-toggle="pill" id="@moderatorsTabId-tab" href="#@moderatorsTabId" role="tab" aria-selected="false">Moderators</a>
                 <a class="nav-link" data-toggle="pill" href="#@publicationsTabId " role="tab" aria-selected="false">Publications</a>
                 <a class="nav-link" data-toggle="pill" href="#@usersTabId" role="tab" aria-selected="false">Users</a>
                 <a class="nav-link" data-toggle="pill" href="#v-pills-controls" role="tab" aria-selected="false">Controls</a>
             </div>
         </div>
+
         <div class="col container-main">
-            <div class="tab-content" id="v-pills-tabContent">
+            <div class="tab-content " id="v-pills-tabContent">
                 <div class="tab-pane fade show active" id="@overviewTabId" role="tabpanel">
                     <div class="fa-3x">
                         <p class="text-center">Loading... <i class="fas fa-cog fa-spin"></i></p>
                     </div>
                     @*<h3>Currently active moderators</h3>
-                    <ul>
-                        @foreach (var moderator in Model.Moderators.Where(m => m.Status.State == ProfileState.ACTIVE))
-                        {
-                            <li>
-                                @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
-                            </li>
-                        }
-                    </ul>
+                        <ul>
+                            @foreach (var moderator in Model.Moderators.Where(m => m.Status.State == ProfileState.ACTIVE))
+                            {
+                                <li>
+                                    @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
+                                </li>
+                            }
+                        </ul>
 
-                    <h3>Inactive moderators</h3>
+                        <h3>Inactive moderators</h3>
 
-                    <ul>
-                        @foreach (var moderator in Model.Moderators.Where(m => m.Status.State != ProfileState.ACTIVE))
-                        {
-                            <li>
-                                @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
-                            </li>
-                        }
-                    </ul>*@
+                        <ul>
+                            @foreach (var moderator in Model.Moderators.Where(m => m.Status.State != ProfileState.ACTIVE))
+                            {
+                                <li>
+                                    @{ await Html.RenderPartialAsync("_ModeratorControl", moderator); }
+                                </li>
+                            }
+                        </ul>*@
                 </div>
 
                 <div class="tab-pane fade" id="@moderatorsTabId" role="tabpanel">
-                    @{ await Html.RenderPartialAsync("AdminPanel/_ModeratorsTab", await Model.ModeratorsGroups.ToArrayAsync()); }
+                    <div class="fa-3x">
+                        <p class="text-center">Loading... <i class="fas fa-cog fa-spin"></i></p>
+                    </div>
                 </div>
 
                 <div class="tab-pane fade" id="@publicationsTabId" role="tabpanel">
@@ -90,21 +93,48 @@
 }
 
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js" integrity="sha256-TQq84xX6vkwR0Qs1qH5ADkP+MvH0W+9E7TdHJsoIQiM=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.js" crossorigin="anonymous"></script>
     <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
     @*<script src="~/js/jQRangeSlider/jQDateRangeSlider-min.js"></script>*@
     <script>
         $(document).ready(function () {
-            loadPostsTabPartial();
-            loadUsersTabPartial();
+            // We need to re-render charts inside tab, otherwise the charts wont be shown
+            @*$('#@moderatorsTabId-tab').on('shown.bs.tab', function (event) {
+                var x = $(event.target).text();         // active tab
+                var y = $(event.relatedTarget).text();  // previous tab
+                console.log("Fired!");
+
+                if (renderModeratorsTabParial) {
+                    renderModeratorsTabParial();
+                }
+            });*@
 
             Chart.defaults.global.title.fontSize = 22;
             Chart.defaults.global.title.display = true;
             Chart.defaults.global.defaultFontColor = "#000000";
             Chart.defaults.global.title.fontStyle = 'normal';
             Chart.defaults.global.defaultFontStyle = 'normal';
+
+            loadPostsTabPartial();
+            loadUsersTabPartial();
+
+                        @*var uri = "/AdminPanelTabs/LoadModeratorsTabAsync"
+            makeRequest(uri, "GET", function (response) {
+                var idSelector = '#@overviewTabId';
+                $(idSelector).html(response);
+                evaluateScripts(idSelector);
+                renderModeratorsTabParial();
+            });*@
+
+            var uri = "/AdminPanelTabs/LoadModeratorsTabAsync"
+            makeRequest(uri, "GET", function (response) {
+                var idSelector = '#@moderatorsTabId';
+                $(idSelector).html(response);
+                evaluateScripts(idSelector);
+                renderModeratorsTabParial();
+            });
 
             var uri = "/AdminPanelTabs/LoadOverviewTabAsync"
             makeRequest(uri, "GET", function (response) {
@@ -178,5 +208,49 @@
                 }
             }
         }
+
+        function plotPie(containerId, title, categories, values, colors) {
+            var ctx = document.getElementById(containerId).getContext('2d');
+            return new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors
+                    }],
+                    labels: categories
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: "bottom",
+                        align: "center"
+                    },
+                    title: {
+                        display: true,
+                        text: title
+                    },
+                    layout: {
+                        padding: {
+                            left: 0,
+                            right: 0,
+                            top: 0,
+                            bottom: 0
+                        }
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: function (tooltipItem, data) {
+                                var dataset = data.datasets[tooltipItem.datasetIndex];
+                                var currentValue = dataset.data[tooltipItem.index];
+                                return data.labels[tooltipItem.index] + ": " + currentValue + "%";
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
     </script>
 }

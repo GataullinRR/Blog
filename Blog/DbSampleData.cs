@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Utilities;
+using Utilities.Extensions;
 
 namespace Blog
 {
@@ -26,8 +27,30 @@ namespace Blog
 
             if (!context.Users.Any())
             {
-                var moderatorGroup1 = new ModeratorsGroup();
-                var moderatorGroup2 = new ModeratorsGroup();
+                var moderatorGroup1 = new ModeratorsGroup(new DateTime(2016, 2, 2));
+                var moderatorGroup2 = new ModeratorsGroup(new DateTime(2016, 2, 2));
+                addTestData(moderatorGroup1);
+                addTestData(moderatorGroup2);
+
+                void addTestData(ModeratorsGroup moderatorsGroup)
+                {
+                    var startDay = Global.Random.Next(100);
+                    var minEntities = Global.Random.Next(5, 15);
+                    var maxEntities = Global.Random.Next((minEntities * 1.5).Round(), minEntities * 2);
+                    var timeFrom = Global.Random.Next(60, 120);
+                    var timeTo = Global.Random.Next(timeFrom * 2, timeFrom * 3);
+                    for (int i = 1; i < 1000; i++)
+                    {
+                        moderatorsGroup.Statistic.DayStatistics.Add(
+                            new ModeratorsGroupDayStatistic()
+                            {
+                                SummedResolveTime = Global.Random.NextTimeSpan(TimeSpan.FromSeconds(timeFrom), TimeSpan.FromSeconds(timeTo)),
+                                Day = moderatorsGroup.CreationTime.AddDays(i + startDay).Date,
+                                ResolvedEntitiesCount = Global.Random.Next(minEntities, maxEntities)
+                            }
+                        );
+                    }
+                }
 
                 var radmir = new User(
                     new Profile(new DateTime(2018, 1, 20)),
