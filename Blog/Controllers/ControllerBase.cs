@@ -37,5 +37,10 @@ namespace Blog.Controllers
 
             base.OnActionExecuting(context);
         }
+
+        public Task<string> RenderPartialToStringAsync<T>(string partialName, T model)
+        {
+            return this.RenderPartialToStringAsync(partialName, model);
+        }
     }
 }

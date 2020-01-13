@@ -21,52 +21,52 @@
             </div>
         </div>
         <div class="col container-main">
-                <div class="tab-content" id="v-pills-tabContent">
-                    <div class="tab-pane fade show active" id="v-pills-profile" role="tabpanel">
-                        <h3>
-                            Profile information @await generateEditButtonAsync(targetUser.Id, canEdit)
-                            <span include-if="await Model.Permissions.CanUnbanUserAsync(targetUser)">| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
-                            <span include-if="await Model.Permissions.CanReportAsync(targetUser.Profile)" class="btn-report">| <a class="no-redirect" href="" onclick="reportProfile(this, @targetUser.Profile.Id)">Report</a></span>
-                            <span include-if="await Model.Permissions.CanReportViolationAsync(targetUser.Profile)">| <a asp-page="/ViolationReport" asp-page-handler="Profile" asp-route-id="@targetUser.Profile.Id">Report violation</a></span>
-                            <span include-if="await Model.Permissions.CanBanUserAsync(targetUser)">| <a class="operation-danger" asp-page="/Account/BanConfirmation" asp-route-id="@targetUser.Id">Ban</a></span>
-                        </h3>
+            <div class="tab-content" id="v-pills-tabContent">
+                <div class="tab-pane fade show active" id="v-pills-profile" role="tabpanel">
+                    <h3>
+                        Profile information @await generateEditButtonAsync(targetUser.Id, canEdit)
+                        <span include-if="await Model.Permissions.CanUnbanUserAsync(targetUser)">| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
+                        <span include-if="await Model.Permissions.CanReportAsync(targetUser.Profile)" class="btn-report">| <a class="no-redirect" href="" onclick="reportProfile(this, @targetUser.Profile.Id)">Report</a></span>
+                        <span include-if="await Model.Permissions.CanReportViolationAsync(targetUser.Profile)">| <a asp-page="/ViolationReport" asp-page-handler="Profile" asp-route-id="@targetUser.Profile.Id">Report violation</a></span>
+                        <span include-if="await Model.Permissions.CanBanUserAsync(targetUser)">| <a class="operation-danger" asp-page="/Account/BanConfirmation" asp-route-id="@targetUser.Id">Ban</a></span>
+                    </h3>
 
-                        <div class="my-4">
-                            <div class="d-flex flex-row">
-                                <div class="d-flex flex-column align-self-center mr-4">
-                                    @await Html.PartialAsync("_ProfileImage", targetUser)
-                                </div>
-                                <div class="d-flex flex-column w-100">
-                                    <h4 class="font-weight-normal">About <a asp-page="/Account/Profile" asp-route-id="@targetUser.Id">@targetUser.UserName</a></h4>
-                                    <span>@(targetUser.Profile.About.EmptyToNull() ?? "No biography provided :(")</span>
-                                </div>
+                    <div class="my-4">
+                        <div class="d-flex flex-row">
+                            <div class="d-flex flex-column align-self-center mr-4">
+                                @await Html.PartialAsync("_ProfileImage", targetUser)
+                            </div>
+                            <div class="d-flex flex-column w-100">
+                                <h4 class="font-weight-normal">About <a asp-page="/Account/Profile" asp-route-id="@targetUser.Id">@targetUser.UserName</a></h4>
+                                <span>@(targetUser.Profile.About.EmptyToNull() ?? "No biography provided :(")</span>
                             </div>
                         </div>
+                    </div>
 
-                        <div include-if="await Model.Permissions.CanSeeProfileGeneralInformationAsync(targetUser)">
-                            <h3 class="font-weight-normal">General information</h3>
-                            @if (canSeePrivateInformation)
-                            {
-                                <div>@("E-Mail: " + targetUser.Email)</div>
-                                <div>@("E-Mail confirmed: " + targetUser.EmailConfirmed.Ternar("Yes", "No"))</div>
-                            }
-                            <div>@("Role: " + Model.Role)</div>
-                            <div>@("State: " + targetUser.Status.State.GetEnumValueDescription())</div>
-                            <div>@("Registration date: " + targetUser.Profile.RegistrationDate.ToString("dd.MM.yyyy"))</div>
-                            <div>The profile seen @Model.UserModel.Profile.ViewStatistic.TotalViews times</div>
-                        </div>
-
-
-                        @{
-                            var postsToShow = targetUser.Posts
-                                .Where(p =>
-                                    (p.ModerationInfo.State == ModerationState.MODERATED && !p.IsDeleted) ||
-                                    (p.ModerationInfo.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION) && canSeePrivateInformation) ||
-                                    (p.IsDeleted && canSeePrivateInformation))
-                                .OrderByDescending(p => p.CreationTime);
+                    <div include-if="await Model.Permissions.CanSeeProfileGeneralInformationAsync(targetUser)">
+                        <h3 class="font-weight-normal">General information</h3>
+                        @if (canSeePrivateInformation)
+                        {
+                            <div>@("E-Mail: " + targetUser.Email)</div>
+                            <div>@("E-Mail confirmed: " + targetUser.EmailConfirmed.Ternar("Yes", "No"))</div>
                         }
+                        <div>@("Role: " + Model.Role)</div>
+                        <div>@("State: " + targetUser.Status.State.GetEnumValueDescription())</div>
+                        <div>@("Registration date: " + targetUser.Profile.RegistrationDate.ToString("dd.MM.yyyy"))</div>
+                        <div>The profile seen @Model.UserModel.Profile.ViewStatistic.TotalViews times</div>
+                    </div>
 
-                        <div class="mt-2">
+
+                    @{
+                        var postsToShow = targetUser.Posts
+                            .Where(p =>
+                                (p.ModerationInfo.State == ModerationState.MODERATED && !p.IsDeleted) ||
+                                (p.ModerationInfo.State.IsOneOf(ModerationState.MODERATION_NOT_PASSED, ModerationState.UNDER_MODERATION) && canSeePrivateInformation) ||
+                                (p.IsDeleted && canSeePrivateInformation))
+                            .OrderByDescending(p => p.CreationTime);
+                    }
+
+                    <div class="mt-2">
                         @if (await Model.Permissions.CanSeeServiceInformationAsync())
                         {
                             <h3 class="font-weight-normal">Violations</h3>
@@ -89,156 +89,218 @@
                                 }
                             </ul>
                         }
-                        </div>
-
-                        <div class="mt-2">
-                            <h3 class="font-weight-normal">Posts</h3>
-
-                            @if (postsToShow.IsEmpty())
-                            {
-                                <div>None at the moment :(</div>
-                            }
-
-                            @foreach (var post in postsToShow)
-                            {
-                                var isPosted = !post.IsDeleted || post.ModerationInfo.State != ModerationState.MODERATED;
-                                var classValue = @isPosted.Ternar("", "text-muted");
-                                <div class="mb-3">
-                                    <div>
-                                        <h4 class="font-weight-normal ">
-                                            <div class="d-flex flex-row justify-content-between">
-                                                <div class="d-flex flex-column">
-                                                    <a class="@classValue" asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
-                                                </div>
-                                                <div class="d-none d-md-flex flex-column">
-                                                    <span class="@classValue">
-                                                            <span include-if="isPosted" style="float:right">@post.CreationTime.ToString("dd.MM.yyyy")</span>
-                                                            <span include-if="post.IsDeleted" style="float:right">DELETED</span>
-                                                            <span include-if="post.ModerationInfo.State != ModerationState.MODERATED" style="float:right">@post.ModerationInfo.State.GetEnumValueDescription()</span>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </h4>
-                                    </div>
-                                    @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(post, true)); }
-                                </div>
-                            }
-                        </div>
                     </div>
 
-                    <div class="tab-pane fade" id="v-pills-settings" role="tabpanel">
-                        <h3 class="mb-3">Profile operations</h3>
+                    <div class="mt-2">
+                        <h3 class="font-weight-normal">Posts</h3>
 
-                        @if (targetUser.EmailConfirmed)
+                        @if (postsToShow.IsEmpty())
                         {
-                            <ul>
-                                @if (await Model.Permissions.CanEditProfileAsync(targetUser))
-                                {
-                                    <li class="mb-2"><a asp-page="/Account/ProfileEdit" asp-route-id="@targetUser.Id">Edit</a> profile image and biography</li>
-                                }
-                                @if (await Model.Permissions.CanChangePasswordAsync(targetUser))
-                                {
-                                    <li class="mb-2"><a asp-page="/Account/PasswordChange" asp-route-id="@targetUser.Id">Change password</a></li>
-                                }
-                                @if (await Model.Permissions.CanChangeEmailAsync(targetUser))
-                                {
-                                    <li class="mb-2"><a asp-page="/Account/EmailChange" asp-route-id="@targetUser.Id">Change e-mail</a></li>
-                                }
-                            </ul>
+                            <div>None at the moment :(</div>
+                        }
+
+                        @foreach (var post in postsToShow)
+                        {
+                            var isPosted = !post.IsDeleted || post.ModerationInfo.State != ModerationState.MODERATED;
+                            var classValue = @isPosted.Ternar("", "text-muted");
+                            <div class="mb-3">
+                                <div>
+                                    <h4 class="font-weight-normal ">
+                                        <div class="d-flex flex-row justify-content-between">
+                                            <div class="d-flex flex-column">
+                                                <a class="@classValue" asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
+                                            </div>
+                                            <div class="d-none d-md-flex flex-column">
+                                                <span class="@classValue">
+                                                    <span include-if="isPosted" style="float:right">@post.CreationTime.ToString("dd.MM.yyyy")</span>
+                                                    <span include-if="post.IsDeleted" style="float:right">DELETED</span>
+                                                    <span include-if="post.ModerationInfo.State != ModerationState.MODERATED" style="float:right">@post.ModerationInfo.State.GetEnumValueDescription()</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </h4>
+                                </div>
+                                @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(post, true)); }
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="v-pills-settings" role="tabpanel">
+                    <h3 class="mb-3">Profile operations</h3>
+
+                    @if (targetUser.EmailConfirmed)
+                    {
+                        <ul>
+                            @if (await Model.Permissions.CanEditProfileAsync(targetUser))
+                            {
+                                <li class="mb-2"><a asp-page="/Account/ProfileEdit" asp-route-id="@targetUser.Id">Edit</a> profile image and biography</li>
+                            }
+                            @if (await Model.Permissions.CanChangePasswordAsync(targetUser))
+                            {
+                                <li class="mb-2"><a asp-page="/Account/PasswordChange" asp-route-id="@targetUser.Id">Change password</a></li>
+                            }
+                            @if (await Model.Permissions.CanChangeEmailAsync(targetUser))
+                            {
+                                <li class="mb-2"><a asp-page="/Account/EmailChange" asp-route-id="@targetUser.Id">Change e-mail</a></li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        if (Model.IsCurrentUser)
+                        {
+                            <div class="text-danger">Your profile e-mail has not been confirmed. Check inbox, or send confirmation again</div>
+                            <div><a asp-page="/Account/ConfirmEMail">Resend</a> confirmation to @targetUser.Email</div>
+                        }
+                    }
+
+                    <p>
+                        If you have any questions we can help! Just mail one of our moderators:
+                        <br />
+                        <ul>
+                            <li><span style="color:#0094ff">@Model.ContactHelpEmail</span></li>
+                        </ul>
+                    </p>
+                </div>
+
+                <div class="tab-pane fade" id="v-pills-actions" role="tabpanel">
+                    <h3 class="my-2">Actions</h3>
+
+                    @if (targetUser.Actions.Count == 0)
+                    {
+                        <span>Nothing at the moment</span>
+                    }
+                    else
+                    {
+                        var MAX_COUNT = 100;
+                        var count = 0;
+                        <div class="table-responsive mt-3">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Time</th>
+                                        <th scope="col">Action name</th>
+                                        <th scope="col">Target</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var action in targetUser.Actions.OrderByDescending(r => r.ActionDate).Take(MAX_COUNT))
+                                    {
+                                        count++;
+
+                                        <tr>
+                                            <td>@action.ActionDate.ToHoursDateString()</td>
+                                            <td>@action.ActionType.GetEnumValueDescription()</td>
+                                            <td>
+                                                @if (action.ActionObject != null)
+                                                {
+                                                    if (action.ActionObject == targetUser || action.ActionObject == targetUser.Profile)
+                                                    {
+                                                        <a asp-page="/Account/Profile" asp-route-id="@targetUser.Id">self</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(action.ActionObject));
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span>unknown</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <span class="text-muted mb-2">@count of @targetUser.Actions.Count actions were shown</span>
+                    }
+
+                    @if (await Model.Permissions.CanSeeServiceInformationAsync())
+                    {
+                        <h3 class="my-2">Violations</h3>
+
+                        if (targetUser.Violations.Count == 0)
+                        {
+                            <span>None we know about :)</span>
                         }
                         else
                         {
-                            if (Model.IsCurrentUser)
-                            {
-                                <div class="text-danger">Your profile e-mail has not been confirmed. Check inbox, or send confirmation again</div>
-                                <div><a asp-page="/Account/ConfirmEMail">Resend</a> confirmation to @targetUser.Email</div>
-                            }
-                        }
-
-                        <p>
-                            If you have any questions we can help! Just mail one of our moderators:
-                            <br />
-                            <ul>
-                                <li><span style="color:#0094ff">@Model.ContactHelpEmail</span></li>
-                            </ul>
-                        </p>
-                    </div>
-
-                    <div class="tab-pane fade" id="v-pills-actions" role="tabpanel">
-                        @if (await Model.Permissions.CanSeeServiceInformationAsync())
-                        {
-                            <h4 class="font-weight-normal">Violations</h4>
-
-                            if (targetUser.Violations.Count == 0)
-                            {
-                                <span>None we know about :)</span>
-                            }
-
-                            <ul>
-                                @foreach (var violation in targetUser.Violations.OrderByDescending(v => v.CreationDate))
-                                {
-                                    <li>
-                                        <span>Got from <a asp-page="/Account/Profile" asp-route-id="@violation.Reporter.Id">@violation.Reporter.UserName</a>, object: </span>
-                                        @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(violation.Object)); }
-                                        <div>
-                                            <span>Description: @violation.Description</span>
-                                        </div>
-                                    </li>
-                                }
-                            </ul>
-
-                            <h4 class="font-weight-normal">Reports</h4>
-
-                            if (targetUser.Reports.Count == 0)
-                            {
-                                <span>None we know about :)</span>
-                            }
-
-                            <ul>
-                                @foreach (var report in targetUser.Reports.OrderByDescending(r => r.CreationDate))
-                                {
-                                    <li>
-                                        <span>Reported by <a asp-page="/Account/Profile" asp-route-id="@report.Reporter.Id">@report.Reporter.UserName</a> at @report.CreationDate.ToHoursDateString(). Report object: </span>
-                                        @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(report.Object)); }
-                                    </li>
-                                }
-                            </ul>
-                        }
-
-                        <h4 class="font-weight-normal">Actions</h4>
-
-                        @if (targetUser.Actions.Count == 0)
-                        {
-                            <span>Nothing at the moment</span>
-                        }
-
-                        <ul>
-                            @foreach (var action in targetUser.Actions.OrderByDescending(r => r.ActionDate))
-                            {
-                                <li>
-                                    <span>@action.ActionType.GetEnumValueDescription() at @action.ActionDate.ToString("hh:mm dd.MM.yyyy"). Object: </span>
-                                    @if (action.ActionObject != null)
-                                    {
-                                        if (action.ActionObject == targetUser || action.ActionObject == targetUser.Profile)
+                            var MAX_COUNT = 100;
+                            var count = 0;
+                            <div class="table-responsive mt-3">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Time</th>
+                                            <th scope="col">Reporter</th>
+                                            <th scope="col">Report object</th>
+                                            <th scope="col">Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var violation in targetUser.Violations.OrderByDescending(v => v.CreationDate).Take(MAX_COUNT))
                                         {
-                                            <a asp-page="/Account/Profile" asp-route-id="@targetUser.Id">self</a>
+                                            count++;
+
+                                            <tr>
+                                                <td>@violation.CreationDate.ToHoursDateString()</td>
+                                                <td><a asp-page="/Account/Profile" asp-route-id="@violation.Reporter.Id">@violation.Reporter.UserName</a></td>
+                                                <td>
+                                                    @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(violation.Object)); }
+                                                </td>
+                                                <td>@violation.Description</td>
+                                            </tr>
                                         }
-                                        else
+                                    </tbody>
+                                </table>
+                            </div>
+                            <span class="text-muted mb-2">@count of @targetUser.Violations.Count violations were shown</span>
+                        }
+
+                        <h3 class="my-2">Reports</h3>
+
+                        if (targetUser.Reports.Count == 0)
+                        {
+                            <span>None we know about :)</span>
+                        }
+                        else
+                        {
+                            var MAX_COUNT = 100;
+                            var count = 0;
+                            <div class="table-responsive mt-3">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Time</th>
+                                            <th scope="col">Reporter</th>
+                                            <th scope="col">Report object</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var report in targetUser.Reports.OrderByDescending(r => r.CreationDate).Take(MAX_COUNT))
                                         {
-                                            await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(action.ActionObject));
+                                            count++;
+
+                                            <tr>
+                                                <td>@report.CreationDate.ToHoursDateString()</td>
+                                                <td><a asp-page="/Account/Profile" asp-route-id="@report.Reporter.Id">@report.Reporter.UserName</a></td>
+                                                <td>
+                                                    @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(report.Object)); }
+                                                </td>
+                                            </tr>
                                         }
-                                    }
-                                    else
-                                    {
-                                        <span>not set</span>
-                                    }
-                                </li>
-                            }
-                        </ul>
-                    </div>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <span class="text-muted">@count of @targetUser.Reports.Count reports were shown</span>
+                        }
+                    }
                 </div>
             </div>
         </div>
+    </div>
 </div>
 
 @functions
