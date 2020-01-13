@@ -22,6 +22,7 @@ namespace Blog.Pages.Account
         /// Page is shown to the current logged in user
         /// </summary>
         public bool IsCurrentUser { get; private set; }
+        public string ContactHelpEmail { get; private set; }
 
         public ProfileModel(ServicesLocator serviceProvider) : base(serviceProvider)
         {
@@ -49,6 +50,7 @@ namespace Blog.Pages.Account
 
             IsCurrentUser = currentUser?.Id == UserModel.Id;
             Role = (await S.UserManager.GetRolesAsync(UserModel)).Single();
+            ContactHelpEmail = await S.ContactEmailProvider.GetHelpContactEmailAsync();
             await S.DbUpdator.UpdateViewStatisticAsync(currentUser, UserModel.Profile.ViewStatistic);
 
             await S.Db.SaveChangesAsync();

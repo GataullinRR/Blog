@@ -16,7 +16,6 @@
         <div include-if="await Model.Permissions.CanSeeProfileTabsAsync(targetUser)" class="col" style="max-width:200px; width:200px;">
             <div class="nav flex-column nav-pills sticky-top pt-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                 <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-selected="true">Overview</a>
-                <a include-if="await Model.Permissions.CanSeeProfileAnalyticsTabAsync(targetUser)" class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-publications" role="tab" aria-selected="false">Analytics</a>
                 <a include-if="await Model.Permissions.CanSeeProfileSettingsTabAsync(targetUser)" class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-selected="false">Settings</a>
                 <a include-if="await Model.Permissions.CanSeeProfileActionsTabAsync(targetUser)" class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-actions" role="tab" aria-selected="false">Actions</a>
             </div>
@@ -24,7 +23,7 @@
         <div class="col container-main">
                 <div class="tab-content" id="v-pills-tabContent">
                     <div class="tab-pane fade show active" id="v-pills-profile" role="tabpanel">
-                        <h3 class="font-weight-normal">
+                        <h3>
                             Profile information @await generateEditButtonAsync(targetUser.Id, canEdit)
                             <span include-if="await Model.Permissions.CanUnbanUserAsync(targetUser)">| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
                             <span include-if="await Model.Permissions.CanReportAsync(targetUser.Profile)" class="btn-report">| <a class="no-redirect" href="" onclick="reportProfile(this, @targetUser.Profile.Id)">Report</a></span>
@@ -127,34 +126,42 @@
                         </div>
                     </div>
 
-                    <div class="tab-pane fade" id="v-pills-publications" role="tabpanel">
-                        There will be information about number of views, popularity, etc
-                    </div>
-
                     <div class="tab-pane fade" id="v-pills-settings" role="tabpanel">
+                        <h3 class="mb-3">Profile operations</h3>
+
                         @if (targetUser.EmailConfirmed)
                         {
-                            if (await Model.Permissions.CanEditProfileAsync(targetUser))
-                            {
-                                <div class="mb-2"><a asp-page="/Account/ProfileEdit" asp-route-id="@targetUser.Id">Edit profile</a></div>
-                            }
-                            if (await Model.Permissions.CanChangePasswordAsync(targetUser))
-                            {
-                                <div class="mb-2"><a asp-page="/Account/PasswordChange" asp-route-id="@targetUser.Id">Change password</a></div>
-                            }
-                            if (await Model.Permissions.CanChangeEmailAsync(targetUser))
-                            {
-                                <div class="mb-2"><a asp-page="/Account/EmailChange" asp-route-id="@targetUser.Id">Change e-mail</a></div>
-                            }
+                            <ul>
+                                @if (await Model.Permissions.CanEditProfileAsync(targetUser))
+                                {
+                                    <li class="mb-2"><a asp-page="/Account/ProfileEdit" asp-route-id="@targetUser.Id">Edit</a> profile image and biography</li>
+                                }
+                                @if (await Model.Permissions.CanChangePasswordAsync(targetUser))
+                                {
+                                    <li class="mb-2"><a asp-page="/Account/PasswordChange" asp-route-id="@targetUser.Id">Change password</a></li>
+                                }
+                                @if (await Model.Permissions.CanChangeEmailAsync(targetUser))
+                                {
+                                    <li class="mb-2"><a asp-page="/Account/EmailChange" asp-route-id="@targetUser.Id">Change e-mail</a></li>
+                                }
+                            </ul>
                         }
                         else
                         {
                             if (Model.IsCurrentUser)
                             {
-                                <div class="text-danger">Your profile e-mail has not been confirmed. Check inbox, or send the confirmation again</div>
+                                <div class="text-danger">Your profile e-mail has not been confirmed. Check inbox, or send confirmation again</div>
                                 <div><a asp-page="/Account/ConfirmEMail">Resend</a> confirmation to @targetUser.Email</div>
                             }
                         }
+
+                        <p>
+                            If you have any questions we can help! Just mail one of our moderators:
+                            <br />
+                            <ul>
+                                <li><span style="color:#0094ff">@Model.ContactHelpEmail</span></li>
+                            </ul>
+                        </p>
                     </div>
 
                     <div class="tab-pane fade" id="v-pills-actions" role="tabpanel">

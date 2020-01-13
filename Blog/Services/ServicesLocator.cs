@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace Blog.Services
 {
+    /// <summary>
+    /// I know that it's wrong, but it makes development easier
+    /// </summary>
     public class ServicesLocator
     {
         readonly Lazy<BlogContext> _db;
@@ -39,6 +42,7 @@ namespace Blog.Services
         readonly Lazy<RepositoryService> _repository;
         readonly Lazy<URIProviderService> _uriProvider;
         readonly Lazy<IMemoryCache> _memoryCache;
+        readonly Lazy<ContactEmailProviderService> _contactEmailProvider;
 
         public IServiceProvider ServiceProvider { get; }
         public BlogContext Db => _db.Value;
@@ -66,6 +70,7 @@ namespace Blog.Services
         public RepositoryService Repository => _repository.Value;
         public URIProviderService URIProvider => _uriProvider.Value;
         public IMemoryCache MemoryCache => _memoryCache.Value;
+        public ContactEmailProviderService ContactEmailProvider => _contactEmailProvider.Value;
 
         public ServicesLocator(IServiceProvider serviceProvider)
         {
@@ -96,6 +101,7 @@ namespace Blog.Services
             _repository = ServiceProvider.GetLazyService<RepositoryService>();
             _uriProvider = ServiceProvider.GetLazyService<URIProviderService>();
             _memoryCache = ServiceProvider.GetLazyService<IMemoryCache>();
+            _contactEmailProvider = ServiceProvider.GetLazyService<ContactEmailProviderService>();
         }
     }
 }
