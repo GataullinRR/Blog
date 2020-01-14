@@ -9,20 +9,24 @@
     var targetUser = Model.UserModel;
     var canSeePrivateInformation = await Model.Permissions.CanSeePrivateInformationAsync(targetUser);
     var canEdit = await Model.Permissions.CanEditProfileAsync(targetUser);
+
+    var overviewTabId = "v-pills-profile";
+    var settingsTabId = "v-pills-settings";
+    var actionsTabId = "v-pills-actions";
 }
 
 <div class="container">
     <div class="row justify-content-center">
         <div include-if="await Model.Permissions.CanSeeProfileTabsAsync(targetUser)" class="col" style="max-width:200px; width:200px;">
             <div class="nav flex-column nav-pills sticky-top pt-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-selected="true">Overview</a>
-                <a include-if="await Model.Permissions.CanSeeProfileSettingsTabAsync(targetUser)" class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-selected="false">Settings</a>
-                <a include-if="await Model.Permissions.CanSeeProfileActionsTabAsync(targetUser)" class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-actions" role="tab" aria-selected="false">Actions</a>
+                <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#@overviewTabId" role="tab" aria-selected="true">Overview</a>
+                <a include-if="await Model.Permissions.CanSeeProfileSettingsTabAsync(targetUser)" class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#@settingsTabId" role="tab" aria-selected="false">Settings</a>
+                <a include-if="await Model.Permissions.CanSeeProfileActionsTabAsync(targetUser)" class="nav-link" id="@actionsTabId-tab" data-toggle="pill" href="#@actionsTabId" role="tab" aria-selected="false">Actions</a>
             </div>
         </div>
         <div class="col container-main">
             <div class="tab-content" id="v-pills-tabContent">
-                <div class="tab-pane fade show active" id="v-pills-profile" role="tabpanel">
+                <div class="tab-pane fade show active" id="@overviewTabId" role="tabpanel">
                     <h3>
                         Profile information @await generateEditButtonAsync(targetUser.Id, canEdit)
                         <span include-if="await Model.Permissions.CanUnbanUserAsync(targetUser)">| <a asp-controller="@nameof(AccountController).GetController()" asp-action="@nameof(AccountController.UnbanAsync)" asp-route-userId="@targetUser.Id">Unban</a></span>
@@ -53,9 +57,14 @@
                         <div>@("Role: " + Model.Role)</div>
                         <div>@("State: " + targetUser.Status.State.GetEnumValueDescription())</div>
                         <div>@("Registration date: " + targetUser.Profile.RegistrationDate.ToString("dd.MM.yyyy"))</div>
+                        <div include-if="await Model.Permissions.CanSeeServiceInformationAsync()">
+                            <div class="mt-2"><a href="" class="no-redirect" onclick="goToActionsTab()">Actions:</a> @targetUser.Actions.Count</div>
+                            <div><a href="" class="no-redirect" onclick="goToActionsTab()">Reported reports:</a> @targetUser.ReportedReports.Count</div>
+                            <div><a href="" class="no-redirect" onclick="goToActionsTab()">Reports:</a> @targetUser.Reports.Count</div>
+                            <div><a href="" class="no-redirect" onclick="goToActionsTab()">Violations:</a> @targetUser.Violations.Count</div>
+                        </div>
                         <div>The profile seen @Model.UserModel.Profile.ViewStatistic.TotalViews times</div>
                     </div>
-
 
                     @{
                         var postsToShow = targetUser.Posts
@@ -67,31 +76,6 @@
                     }
 
                     <div class="mt-2">
-                        @if (await Model.Permissions.CanSeeServiceInformationAsync())
-                        {
-                            <h3 class="font-weight-normal">Violations</h3>
-
-                            if (targetUser.Violations.Count == 0)
-                            {
-                                <span>None we know about :)</span>
-                            }
-
-                            <ul>
-                                @foreach (var violation in targetUser.Violations.OrderByDescending(v => v.CreationDate))
-                                {
-                                    <li>
-                                        <span>Got from <a asp-page="/Account/Profile" asp-route-id="@violation.Reporter.Id">@violation.Reporter.UserName</a>, object: </span>
-                                        @{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(violation.Object)); }
-                                        <div>
-                                            <span>Description: @violation.Description</span>
-                                        </div>
-                                    </li>
-                                }
-                            </ul>
-                        }
-                    </div>
-
-                    <div class="mt-2">
                         <h3 class="font-weight-normal">Posts</h3>
 
                         @if (postsToShow.IsEmpty())
@@ -101,8 +85,8 @@
 
                         @foreach (var post in postsToShow)
                         {
-                            var isPosted = !post.IsDeleted || post.ModerationInfo.State != ModerationState.MODERATED;
-                            var classValue = @isPosted.Ternar("", "text-muted");
+                            var isPosted = !post.IsDeleted && post.ModerationInfo.State == ModerationState.MODERATED;
+                            var classValue = isPosted.Ternar("", "text-muted");
                             <div class="mb-3">
                                 <div>
                                     <h4 class="font-weight-normal ">
@@ -111,7 +95,7 @@
                                                 <a class="@classValue" asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
                                             </div>
                                             <div class="d-none d-md-flex flex-column">
-                                                <span class="@classValue">
+                                                <span class="@classValue text-nowrap">
                                                     <span include-if="isPosted" style="float:right">@post.CreationTime.ToString("dd.MM.yyyy")</span>
                                                     <span include-if="post.IsDeleted" style="float:right">DELETED</span>
                                                     <span include-if="post.ModerationInfo.State != ModerationState.MODERATED" style="float:right">@post.ModerationInfo.State.GetEnumValueDescription()</span>
@@ -126,7 +110,7 @@
                     </div>
                 </div>
 
-                <div class="tab-pane fade" id="v-pills-settings" role="tabpanel">
+                <div class="tab-pane fade" id="@settingsTabId" role="tabpanel">
                     <h3 class="mb-3">Profile operations</h3>
 
                     @if (targetUser.EmailConfirmed)
@@ -164,7 +148,7 @@
                     </p>
                 </div>
 
-                <div class="tab-pane fade" id="v-pills-actions" role="tabpanel">
+                <div class="tab-pane fade" id="@actionsTabId" role="tabpanel">
                     <h3 class="my-2">Actions</h3>
 
                     @if (targetUser.Actions.Count == 0)
@@ -314,6 +298,10 @@
 @section Scripts
 {
     <script>
+        function goToActionsTab() {
+           $('#@actionsTabId-tab').trigger('click');
+        }
+
         $(window).resize(function () {
             if ($(this).width() < 981) {
                 //do something
