@@ -1,5 +1,1 @@
-﻿@{ 
-    var tableId = "users-table";
-}
-
-<partial name="@Partials.USERS_TABLE" model="/PanelsTable/LoadFullUsersTableAsync" />
+﻿<partial name="@Partials.USERS_TABLE" model="@PanelsTableController.ALL_USERS_URI"/>

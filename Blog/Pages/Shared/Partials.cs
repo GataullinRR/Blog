@@ -12,5 +12,10 @@ namespace Blog
     {
         public static string LINK_TO_USER = "_LinkToUser";
         public static string USERS_TABLE = "_UsersTable";
+
+        public static class AdminPanel
+        {
+            public static string USERS_TAB = "AdminPanel/_UsersTable";
+        }
     }
 }

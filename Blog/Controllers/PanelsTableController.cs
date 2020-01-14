@@ -16,6 +16,7 @@ namespace Blog.Controllers
     public class PanelsTableController : ControllerBase
     {
         public static readonly string MODERATORS_PANEL_USERS_URI = getURIToAction(nameof(PanelsTableController), nameof(LoadModeratorsUsersTableAsync));
+        public static readonly string ALL_USERS_URI = getURIToAction(nameof(PanelsTableController), nameof(LoadFullUsersTableAsync));
 
         public PanelsTableController(ServicesLocator serviceProvider) : base(serviceProvider)
         {
