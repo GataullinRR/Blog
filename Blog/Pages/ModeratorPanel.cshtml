@@ -11,6 +11,8 @@
     var resolvedEntities = Model.Entities.Where(e => e.AssignedModerator == Model.Owner && e.IsResolved);
 }
 
+
+
 <div class="container">
     <div class="row">
         <div class="col" style="max-width:200px; width:200px;">
@@ -212,59 +214,7 @@
                 <div class="tab-pane fade" id="v-pills-settings" role="tabpanel">
                     <h3 class="mb-3">Users you are in charge of</h3>
 
-                    <table id="users-table" class="table-test table table-striped table-bordered data-table" cellspacing="0" width="100%">
-                        <thead>
-                            <tr>
-                                <th class="th">
-                                    User
-                                </th>
-                                <th class="th">
-                                    Role
-                                </th>
-                                <th class="th">
-                                    All actions
-                                </th>
-                                <th class="th">
-                                    Publications
-                                </th>
-                                <th class="th">
-                                    Repors per publication
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var user in Model.TargetUsers)
-                            {
-                                var referenceDate = DateTime.UtcNow.AddMonths(-1);
-                                var lastMonthActions = user.Actions.Where(a => a.ActionDate > referenceDate).ToArray();
-                                var lastMonthPublications = new Enumerable<IReportable>()
-                                            {
-                            user.Posts.Where(p => p.CreationTime > referenceDate),
-                            user.Commentaries.Where(p => p.CreationTime > referenceDate),
-                            };
-                                var numOfPublications = lastMonthPublications.Count();
-                                var numOfReports = user.Reports
-                                    .Where(r => r.CreationDate > referenceDate)
-                                    .Count();
-                                double? reportsPerPublications = (numOfReports / (double)numOfPublications).Round(2);
-                                reportsPerPublications = double.IsNormal(reportsPerPublications.Value)
-                                    ? reportsPerPublications
-                                    : null;
-                                <tr>
-                                    @{ 
-                                        var role = (await UserManager.GetRolesAsync(user)).FirstElement(); 
-                                    }
-
-                                    <td><a asp-page="/Account/Profile" asp-route-id="@user.Id">@user.UserName</a></td>
-                                    <td>@role</td>
-                                    @*<td>@{ await UserManager.GetRolesAsync(user).ThenDo(r => r.FirstElement()); }</td>*@
-                                    <td>@lastMonthActions.Length</td>
-                                    <td>@numOfPublications</td>
-                                    <td>@(reportsPerPublications.HasValue.Ternar(reportsPerPublications.ToString(), "-"))</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                    <partial name="@Partials.USERS_TABLE" model="@PanelsTableController.MODERATORS_PANEL_USERS_URI" />
                 </div>
             </div>
         </div>
@@ -286,7 +236,6 @@
             $('#current-entities-table').DataTable();
             $('#unassigned-entities-table').DataTable();
             $('#resolved-entities-table').DataTable();
-            $('#users-table').DataTable();
 
             //var tables = $("table"); // Does not work :(
             //for (var i = 0; i < tables.length; i++) {

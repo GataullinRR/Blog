@@ -1,0 +1,53 @@
+﻿@model string
+
+@{
+    var tableId = "users-table";
+}
+
+<div class="widget" widget-loader="@Partials.USERS_TABLE">
+    <table id="@tableId" class="table table-striped table-bordered mt-3" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th class="th">
+                    User
+                </th>
+                <th class="th">
+                    Role
+                </th>
+                <th class="th">
+                    All actions
+                </th>
+                <th class="th">
+                    Publications
+                </th>
+                <th class="th">
+                    Repors per publication
+                </th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<script>
+    function @Partials.USERS_TABLE () {
+        var table = $('#@tableId').DataTable({
+            ajax: {
+                url: '@Model',
+                dataSrc: ''
+            },
+            columns: [
+                {
+                    data: 'name',
+                    "render": function (data, type, row, meta) {
+                        var idAndName = data.split("|");
+                        return '<a href="/Account/Profile?id=' + idAndName[0] + '">' + idAndName[1] + '</a>';
+                    }
+                },
+                { data: 'role' },
+                { data: 'actCnt' },
+                { data: 'pubCnt' },
+                { data: 'repPPub' }
+            ],
+        });
+    }
+</script>

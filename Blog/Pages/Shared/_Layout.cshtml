@@ -231,6 +231,21 @@
         </script>
 
         @RenderSection("Scripts", required: false)
+
+        <script>
+            $(document).ready(function () {
+                var widgets = $("div.widget");
+                for (var i = 0; i < widgets.length; i++) {
+                    var loader = $(widgets[i]).attr("widget-loader");
+                    try {
+                        eval(loader.toString() + "();");
+                    }
+                    catch (ex) {
+                        console.error("Error while executing widget loader with name: " + loader + " ex: " + ex);
+                    }
+                }
+            });
+        </script>
     </div>
 </body>
 </html>
