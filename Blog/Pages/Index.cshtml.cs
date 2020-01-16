@@ -10,9 +10,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Utilities.Extensions;
 
 namespace Blog.Pages
 {
+#warning low performance
     public class IndexModel : PageModelBase
     {
         const int NUM_OF_POSTS_ON_PAGE = 3;
@@ -20,17 +22,27 @@ namespace Blog.Pages
         public Post[] Posts { get; private set; }
         public int NumOfPages { get; private set; }
         public int CurrentPage { get; private set; }
+        public string SearchQuery { get; private set; }
+        public int NumOfSearchResults { get; private set; }
 
         public IndexModel(ServicesLocator serviceProvider) : base(serviceProvider)
         {
 
         }
 
-        public async Task<IActionResult> OnGet(int? pageIndex)
+        public async Task<IActionResult> OnGet(int? pageIndex, string filter)
         {
             CurrentPage = pageIndex ?? 0;
+
             var viewablePosts = S.Db.Posts
                 .Where(p => p.ModerationInfo.State == ModerationState.MODERATED && !p.IsDeleted);
+            if (filter != null)
+            {
+                var keyword = filter.Split(" ").FirstElementOrDefault("");
+                viewablePosts = viewablePosts.Where(p => p.Title.Contains(keyword));
+                SearchQuery = filter;
+                NumOfSearchResults = viewablePosts.Count();
+            }
             Posts = await viewablePosts
                 .OrderByDescending(p => p.CreationTime)
                 .Skip(CurrentPage * NUM_OF_POSTS_ON_PAGE)

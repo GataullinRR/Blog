@@ -5,7 +5,7 @@
     ViewData["Title"] = "Home";
 }
 
-<div class="jumbotron jumbotron-fluid">
+<div class="jumbotron jumbotron-fluid mb-0">
     <div class="container text-center">
         <h1 class="display-4">The Blog</h1>
         <p class="lead">Or simply the first ASP .NET Core 2.2 web project :)</p>
@@ -15,75 +15,83 @@
 <div class="container container-main">
     <div class="row">
         <div class="col">
-            @foreach (var post in Model.Posts)
+            @if (Model.SearchQuery != null)
             {
-                <div class="post-preview">
-                    <h4 class="font-weight-normal">
-                        <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
-                    </h4>
-                    @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(post, true)); }
-                    <h6 class="font-weight-normal text-secondary">
-                        Written by <a asp-page="/Account/Profile" asp-route-id="@post.Author.Id">@post.Author.UserName</a>
-
-                        <span style="float:right">@post.CreationTime.ToString("dd.MM.yyyy")</span>
-                    </h6>
+                <div class="mt-3">
+                    <h3 class="mb-0">Search results for "@Model.SearchQuery"</h3>
+                    <span class="text-muted">@Model.NumOfSearchResults entries found</span>
                 </div>
             }
+
+                @foreach (var post in Model.Posts)
+                {
+                    <div class="post-preview mt-4">
+                        <h4 class="font-weight-normal">
+                            <a asp-page="/Post" asp-route-id="@post.Id">@post.Title</a>
+                        </h4>
+                        @{ await Html.RenderPartialAsync("_PostBodyView", new PostViewModel(post, true)); }
+                        <h6 class="font-weight-normal text-secondary">
+                            Written by <a asp-page="/Account/Profile" asp-route-id="@post.Author.Id">@post.Author.UserName</a>
+
+                            <span style="float:right">@post.CreationTime.ToString("dd.MM.yyyy")</span>
+                        </h6>
+                    </div>
+                }
+            </div>
         </div>
     </div>
-</div>
 
-<nav aria-label="Page navigation example">
-    <ul class="pagination justify-content-center">
-        @{
-            const int MAX = 3;
-            const int SIDE_LENGTH = (MAX - 1) / 2;
-            var addStartElipsis = Model.CurrentPage - SIDE_LENGTH - 1 > 0;
-            var addEndElipsis = Model.NumOfPages - 1 - (Model.CurrentPage + SIDE_LENGTH) > 1;
-        }
-
-        <li class="page-item@((Model.CurrentPage > 0).Ternar("", " disabled"))">
-            <a class="page-link" aria-label="Previous" asp-page="/Index" asp-route-pageIndex="@(Model.CurrentPage - 1)">
-                <span aria-hidden="true">&laquo;</span>
-                <span class="sr-only">Previous</span>
-            </a>
-        </li>
-        <li class="page-item @GetPageNavClass(0)"><a class="page-link" asp-page="/Index" asp-route-pageIndex="0">1</a></li>
-        @if (addStartElipsis)
-        {
-            <li class="page-item">
-                <span>...</span>
-            </li>
-        }
-        @foreach (var i in MAX.Range().Select(i => i + Model.CurrentPage - SIDE_LENGTH).Where(i => i < Model.NumOfPages - 1).SkipNegative())
-        {
-            <li class="page-item @GetPageNavClass(i)"><a class="page-link" asp-page="/Index" asp-route-pageIndex="@i">@(i + 1)</a></li>
-        }
-        @if (addEndElipsis)
-        {
-            <li class="page-item">
-                <span>...</span>
-            </li>
-        }
-        @if (Model.NumOfPages > 1)
-        {
-            <li class="page-item @GetPageNavClass(Model.NumOfPages.Add(-1))"><a class="page-link" asp-page="/Index" asp-route-pageIndex="@Model.NumOfPages.Add(-1)">@Model.NumOfPages</a></li>
-        }
-        <li class="page-item@((Model.CurrentPage < Model.NumOfPages - 1).Ternar("", " disabled"))">
-            <a class="page-link" aria-label="Next" asp-page="/Index" asp-route-pageIndex="@(Model.CurrentPage + 1)">
-                <span aria-hidden="true">&raquo;</span>
-                <span class="sr-only">Next</span>
-            </a>
-        </li>
-
-        @functions {
-            public string GetPageNavClass(int pageIndex)
-            {
-                var cssClass = pageIndex == Model.CurrentPage
-                    ? "active"
-                    : "";
-                return cssClass;
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            @{
+                const int MAX = 3;
+                const int SIDE_LENGTH = (MAX - 1) / 2;
+                var addStartElipsis = Model.CurrentPage - SIDE_LENGTH - 1 > 0;
+                var addEndElipsis = Model.NumOfPages - 1 - (Model.CurrentPage + SIDE_LENGTH) > 1;
             }
-        }
-    </ul>
-</nav>
+
+            <li class="page-item@((Model.CurrentPage > 0).Ternar("", " disabled"))">
+                <a class="page-link" aria-label="Previous" asp-page="/Index" asp-route-pageIndex="@(Model.CurrentPage - 1)">
+                    <span aria-hidden="true">&laquo;</span>
+                    <span class="sr-only">Previous</span>
+                </a>
+            </li>
+            <li class="page-item @GetPageNavClass(0)"><a class="page-link" asp-page="/Index" asp-route-pageIndex="0">1</a></li>
+            @if (addStartElipsis)
+            {
+                <li class="page-item">
+                    <span>...</span>
+                </li>
+            }
+            @foreach (var i in MAX.Range().Select(i => i + Model.CurrentPage - SIDE_LENGTH).Where(i => i < Model.NumOfPages - 1).SkipNegative())
+            {
+                <li class="page-item @GetPageNavClass(i)"><a class="page-link" asp-page="/Index" asp-route-pageIndex="@i">@(i + 1)</a></li>
+            }
+            @if (addEndElipsis)
+            {
+                <li class="page-item">
+                    <span>...</span>
+                </li>
+            }
+            @if (Model.NumOfPages > 1)
+            {
+                <li class="page-item @GetPageNavClass(Model.NumOfPages.Add(-1))"><a class="page-link" asp-page="/Index" asp-route-pageIndex="@Model.NumOfPages.Add(-1)">@Model.NumOfPages</a></li>
+            }
+            <li class="page-item@((Model.CurrentPage < Model.NumOfPages - 1).Ternar("", " disabled"))">
+                <a class="page-link" aria-label="Next" asp-page="/Index" asp-route-pageIndex="@(Model.CurrentPage + 1)">
+                    <span aria-hidden="true">&raquo;</span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </li>
+
+            @functions {
+                public string GetPageNavClass(int pageIndex)
+                {
+                    var cssClass = pageIndex == Model.CurrentPage
+                        ? "active"
+                        : "";
+                    return cssClass;
+                }
+            }
+        </ul>
+    </nav>
