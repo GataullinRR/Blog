@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Utilities.Extensions;
 
 namespace Blog.Pages.Account
 {
@@ -31,7 +32,8 @@ namespace Blog.Pages.Account
         // Compare does not seem to work with BindPropertyAttr
         [DataType(DataType.Password), BindProperty]
         public string ConfirmPassword { get; set; }
-        public string RegistrationRole { get; private set; }
+        [BindProperty]
+        public string RegistrationRole { get; set; }
 
         public RegisterModel(ServicesLocator services) : base(services)
         {
@@ -66,7 +68,8 @@ namespace Blog.Pages.Account
                     var newUser = new User(new Profile(DateTime.UtcNow), new ProfileStatus(default))
                     {
                         UserName = Username,
-                        Email = EMail
+                        Email = EMail,
+                        ModeratorsInChargeGroup = getModeratorGroup()
                     };
                     var result = await S.UserManager.CreateAsync(newUser, Password);
                     if (result.Succeeded)
@@ -90,6 +93,14 @@ namespace Blog.Pages.Account
             }
 
             return Page();
+        }
+
+        ModeratorsGroup getModeratorGroup()
+        {
+            return S.Db.ModeratorsGroups
+                .OrderByDescending(mg => mg.Moderators.Count) // Because empty group should be taken in the last place
+                .ThenBy(mg => mg.TargetUsers.Count / (double)mg.Moderators.Count.Exchange(0, 1)) // Take lest "busy" first
+                .First();
         }
     }
 }

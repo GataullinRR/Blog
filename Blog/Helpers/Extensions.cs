@@ -105,7 +105,7 @@ namespace Blog
             return new DisposingAction(() => db.SaveChanges());
         }
 
-        public static string GetStringOrDefault(this ISession session, string key, string defaultValue = null)
+        public static string GetUTF8StringOrDefault(this ISession session, string key, string defaultValue = null)
         {
             var has = session.TryGetValue(key, out byte[] ddd);
          

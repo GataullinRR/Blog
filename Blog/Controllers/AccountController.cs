@@ -185,12 +185,12 @@ namespace Blog.Controllers
             }
             else if (await S.Utilities.GetCurrentUserModelOrThrowAsync() != user)
             {
-                return reportError("You should log in in order this link to work");
+                return reportError("You should be signed in in order this link to work");
             }
             else
             {
                 user.EmailConfirmed = true;
-                await S.UserManager.AddToRoleAsync(user, Roles.USER);
+                user.Status.State = ProfileState.ACTIVE;
                 await S.Repository.AddUserActionAsync(user, new UserAction(ActionType.EMAIL_CONFIRMED, user));
                 await S.Db.SaveChangesAsync();
 

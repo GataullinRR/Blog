@@ -9,6 +9,8 @@
     <form method="post">
         <h2>Registration</h2>
 
+        <input type="hidden" asp-for="@Model.RegistrationRole" value="@Model.RegistrationRole"/>
+
         @if (Model.RegistrationRole != Roles.USER)
         {
             <span>You will be registered as @Model.RegistrationRole</span>

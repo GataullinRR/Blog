@@ -111,11 +111,11 @@
                 </div>
 
                 <div class="tab-pane fade" id="@settingsTabId" role="tabpanel">
-                    <h3 class="mb-3">Profile operations</h3>
+                    <h3>Profile operations</h3>
 
                     @if (targetUser.EmailConfirmed)
                     {
-                        <ul>
+                        <ul class="mt-3">
                             @if (await Model.Permissions.CanEditProfileAsync(targetUser))
                             {
                                 <li class="mb-2"><a asp-page="/Account/ProfileEdit" asp-route-id="@targetUser.Id">Edit</a> profile image and biography</li>
@@ -134,8 +134,8 @@
                     {
                         if (Model.IsCurrentUser)
                         {
-                            <div class="text-danger">Your profile e-mail has not been confirmed. Check inbox, or send confirmation again</div>
-                            <div><a asp-page="/Account/ConfirmEMail">Resend</a> confirmation to @targetUser.Email</div>
+                            <div class="text-danger">Your profile e-mail has not been confirmed. Check inbox, or send the confirmation again</div>
+                            <div class="my-3"><a asp-page="/Account/ConfirmEMail">Resend</a> the confirmation to @targetUser.Email</div>
                         }
                     }
 

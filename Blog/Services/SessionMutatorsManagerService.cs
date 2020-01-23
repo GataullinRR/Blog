@@ -17,7 +17,7 @@ namespace Blog.Services
 
         public string RegistrationRole
         {
-            get => S.HttpContext.Session.GetStringOrDefault(nameof(RegistrationRole), Roles.USER);
+            get => S.HttpContext.Session.GetUTF8StringOrDefault(nameof(RegistrationRole), Roles.USER);
             set
             {
                 S.HttpContext.Session.Set(nameof(RegistrationRole), value.ToByteArray(Encoding.UTF8));
