@@ -18,7 +18,7 @@ namespace DBModels
         [Required] public string BodyPreview { get; set; }
         [Required] public virtual List<PostEdit> Edits { get; set; } = new List<PostEdit>();
         public PostEdit LastEdit => Edits.OrderByDescending(e => e.EditTime).FirstOrDefault();
-        [Required] public virtual ViewStatistic ViewStatistic { get; set; }
+        [Required] public virtual ViewStatistic<Post> ViewStatistic { get; set; }
         [InverseProperty(nameof(Report.PostObject))]
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
         [InverseProperty(nameof(Commentary.Post))]
@@ -28,6 +28,7 @@ namespace DBModels
         public bool IsDeleted { get; set; }
         public string DeleteReason { get; set; }
         [Required] public virtual ModerationInfo ModerationInfo { get; set; }
+        IViewStatistic IViewable.ViewStatistic => ViewStatistic;
 
         public Post() 
         { 
@@ -41,7 +42,7 @@ namespace DBModels
             Title = title ?? throw new ArgumentNullException(nameof(title));
             Body = body ?? throw new ArgumentNullException(nameof(body));
             BodyPreview = bodyPreview ?? throw new ArgumentNullException(nameof(bodyPreview));
-            ViewStatistic = new ViewStatistic();
+            ViewStatistic = new ViewStatistic<Post>();
             ModerationInfo = new ModerationInfo();
         }
     }

@@ -81,8 +81,8 @@ namespace DBModels
         public virtual Commentary CommentaryObject { get; set; }
         public virtual Post PostObject { get; set; }
         public virtual Profile ProfileObject { get; set; }
-        public virtual User UserObject { get; set; }
-        public object ActionObject => new object[] { CommentaryObject, PostObject, ProfileObject, UserObject }.SkipNulls().SingleOrDefault();
+        public virtual User Owner { get; set; }
+        public object ActionObject => new object[] { CommentaryObject, PostObject, ProfileObject, Owner }.SkipNulls().SingleOrDefault();
 
         public UserAction() { }
 
@@ -93,7 +93,7 @@ namespace DBModels
             CommentaryObject = @object as Commentary;
             PostObject = @object as Post;
             ProfileObject = @object as Profile;
-            UserObject = @object as User;
+            Owner = @object as User;
         }
     }
 }

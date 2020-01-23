@@ -1,4 +1,5 @@
-﻿using DBModels;
+﻿using Blog.Services.Models;
+using DBModels;
 using Ganss.XSS;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;

@@ -32,7 +32,7 @@ namespace Blog.Controllers
         {
             await S.Permissions.ValidateAccessBlogControlPanelAsync();
 
-            var daysStatistic = await S.Db.Blog.Single().Statistic.DayStatistics
+            var daysStatistic = await S.Db.Blog.Statistic.DayStatistics
                 .AsQueryable()
                 .OrderBy(ds => ds.Day)
                 .ToAsyncEnumerable()
@@ -88,8 +88,8 @@ namespace Blog.Controllers
                     var dayStatistic = statistic[j];
                     var k = (dayStatistic.Day - startDate).TotalDays.Round();
                     resolvedEntities[k] = dayStatistic.ResolvedEntitiesCount;
-                    resolveTime[k] = dayStatistic.SummedResolveTime.HasValue 
-                        ? dayStatistic.SummedResolveTime.Value.TotalSeconds.Round() 
+                    resolveTime[k] = dayStatistic.SummedResolveTime != default
+                        ? dayStatistic.SummedResolveTime.TotalSeconds.Round() 
                         : double.NaN;
                 }
 

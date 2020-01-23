@@ -2,6 +2,6 @@
 {
     public interface IViewable
     { 
-        ViewStatistic ViewStatistic { get; }
+        IViewStatistic ViewStatistic { get; }
     }
 }

@@ -8,10 +8,23 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DBModels
 {
-    public class ViewStatistic : IDbEntity
+    public interface IViewStatistic : IDbEntity
+    {
+        int RegistredUserViews { get; set; }
+        int TotalViews { get; set; }
+    }
+
+    public interface IViewStatistic<T> : IViewStatistic
+    {
+        T Owner { get; set; }
+    }
+
+    public class ViewStatistic<T> : IViewStatistic<T>
     {
         [Key]
         public int Id { get; set; }
+        public int? OwnerId { get; set; }
+        public T Owner { get; set; }
         public int RegistredUserViews { get; set; }
         public int TotalViews { get; set; }
     }

@@ -60,12 +60,15 @@ namespace Blog
                     UserName = "QTU100",
                     EmailConfirmed = true,
                     ModeratorsInChargeGroup = moderatorGroup1,
-                };
+                }; 
                 userManager.CreateAsync(radmir, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(radmir, Roles.OWNER).Wait();
 
                 var alex = new User(
-                    new Profile(new DateTime(2010, 12, 9)),
+                    new Profile(new DateTime(2010, 12, 9))
+                    {
+                        ViewStatistic = new ViewStatistic<Profile>()
+                    },
                     new ProfileStatus(ProfileState.ACTIVE))
                 {
                     Email = "Sasha@yandex.ru",
@@ -77,7 +80,10 @@ namespace Blog
                 userManager.AddToRoleAsync(alex, Roles.USER).Wait();
 
                 var ksenya = new User(
-                    new Profile(new DateTime(2019, 3, 11)),
+                    new Profile(new DateTime(2019, 3, 11))
+                    {
+                        ViewStatistic = new ViewStatistic<Profile>()
+                    },
                     new ProfileStatus(ProfileState.ACTIVE))
                 {
                     Email = "Ksy_chemist@mail.ru",
@@ -89,7 +95,10 @@ namespace Blog
                 userManager.AddToRoleAsync(ksenya, Roles.USER).Wait();
 
                 var oleg = new User(
-                    new Profile(new DateTime(2012, 1, 5)),
+                    new Profile(new DateTime(2012, 1, 5))
+                    {
+                        ViewStatistic = new ViewStatistic<Profile>()
+                    },
                     new ProfileStatus(ProfileState.ACTIVE))
                 {
                     Email = "Oleg@yota.ru",
@@ -102,7 +111,10 @@ namespace Blog
                 userManager.AddToRoleAsync(oleg, Roles.MODERATOR).Wait();
 
                 var muddy = new User(
-                    new Profile(new DateTime(1990, 1, 1)),
+                    new Profile(new DateTime(1990, 1, 1))
+                    {
+                        ViewStatistic = new ViewStatistic<Profile>()
+                    },
                     new ProfileStatus(ProfileState.RESTRICTED))
                 {
                     Email = "Muddy@google.com",
@@ -113,7 +125,10 @@ namespace Blog
                 userManager.AddToRoleAsync(muddy, Roles.USER).Wait();
 
                 var arslan = new User(
-                    new Profile(new DateTime(1996, 10, 2)),
+                    new Profile(new DateTime(1996, 10, 2))
+                    {
+                        ViewStatistic = new ViewStatistic<Profile>()
+                    },
                     new ProfileStatus(ProfileState.ACTIVE))
                 {
                     Email = "Arslan@google.com",
@@ -126,7 +141,10 @@ namespace Blog
                 userManager.AddToRoleAsync(arslan, Roles.MODERATOR).Wait();
 
                 var anthon = new User(
-                    new Profile(new DateTime(1997, 06, 20)),
+                    new Profile(new DateTime(1997, 06, 20))
+                    {
+                        ViewStatistic = new ViewStatistic<Profile>()
+                    },
                     new ProfileStatus(ProfileState.ACTIVE))
                 {
                     Email = "Anthon@google.com",
@@ -292,11 +310,11 @@ Ozone,
                 var count = 500;
                 var startDate = DateTime.UtcNow.AddDays(-count);
                 var blogInfo = new BlogInfo(new BlogStatistic());
-                context.Blog.Add(blogInfo);
+                context.Blogs.Add(blogInfo);
                 blogInfo.Statistic.DayStatistics.Add(new BlogDayStatistic()
                 {
-                    PostsViewStatistic = new ViewStatistic(),
-                    CommentariesViewStatistic = new ViewStatistic()
+                    PostsViewStatistic = new ViewStatistic<Post>(),
+                    CommentariesViewStatistic = new ViewStatistic<Commentary>()
                 });
                 for (int i = 1; i < count; i++)
                 {
@@ -306,18 +324,16 @@ Ozone,
                         ActiveUsersCount = previous.ActiveUsersCount + Global.Random.Next(-1, 10),
                         BannedUsersCount = previous.BannedUsersCount + Global.Random.Next(-1, 3),
                         UnconfirmedUsersCount = previous.UnconfirmedUsersCount + Global.Random.Next(-5, 10),
-                        CommentariesViewStatistic = new ViewStatistic()
+                        CommentariesViewStatistic = new ViewStatistic<Commentary>()
                         {
                             TotalViews = previous.CommentariesViewStatistic.TotalViews + Global.Random.Next(0, 3000),
                             RegistredUserViews = previous.CommentariesViewStatistic.RegistredUserViews + Global.Random.Next(0, 1000),
                         },
-                        PostsViewStatistic = new ViewStatistic()
+                        PostsViewStatistic = new ViewStatistic<Post>()
                         {
                             TotalViews = previous.PostsViewStatistic.TotalViews + Global.Random.Next(0, 1000),
                             RegistredUserViews = previous.PostsViewStatistic.RegistredUserViews + Global.Random.Next(0, 100),
                         },
-                        CommentariesCount = previous.CommentariesCount + Global.Random.Next(-1, 50),
-                        PostsCount = previous.PostsCount + Global.Random.Next(-1, 10),
                         Day = startDate.AddDays(i)
                     }); 
                 }

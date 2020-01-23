@@ -7,11 +7,16 @@ using System.Text;
 using Utilities;
 using Utilities.Types;
 using Utilities.Extensions;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace DBModels
 {
     public class BlogContext : IdentityDbContext<User>
     {
+        public event Action SavingChanges;
+
         public DbSet<Post> Posts { get; set; }
         public DbSet<Commentary> Commentaries { get; set; }
         public DbSet<PostEdit> PostsEdits { get; set; }
@@ -20,7 +25,6 @@ namespace DBModels
         public DbSet<ProfileStatus> ProfilesStatuses { get; set; }
         public DbSet<Profile> ProfilesInfos { get; set; }
         public DbSet<Report> Reports { get; set; }
-        public DbSet<ViewStatistic> ViewStatistics { get; set; }
         public DbSet<UserAction> UsersActions { get; set; }
         public DbSet<ModeratorsGroup> ModeratorsGroups { get; set; }
         public DbSet<TokenMetadata> TokenMetadatas { get; set; }
@@ -41,8 +45,9 @@ namespace DBModels
         /// <summary>
         /// Contains single entity
         /// </summary>
-        public DbSet<BlogInfo> Blog { get; set; }
-        
+        public DbSet<BlogInfo> Blogs { get; set; }
+        public BlogInfo Blog => Blogs.Single();
+
         public BlogContext(DbContextOptions<BlogContext> options)
             : base(options)
         {
@@ -64,15 +69,15 @@ namespace DBModels
                 .HasOne(c => c.Author)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<Profile>()
+            //    .HasOne(p => p.ViewStatistic)
+            //    .WithOne()
+            //    .HasForeignKey<ViewStatistic<Profile>>(b => b.OwnerId);
             modelBuilder.Entity<Post>()
                 .HasOne(p => p.ViewStatistic)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Commentary>()
-                .HasOne(p => p.ViewStatistic)
-                .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Profile>()
                 .HasOne(p => p.ViewStatistic)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
@@ -140,6 +145,34 @@ namespace DBModels
             //    .HasOne(a => a.Statistic)
             //    .WithOne(b => b.Owner)
             //    .HasForeignKey<ModeratorsGroupStatistic>(b => b.Owner);
+        }
+
+        public override int SaveChanges()
+        {
+            SavingChanges?.Invoke();
+
+            return base.SaveChanges();
+        }
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            SavingChanges?.Invoke();
+
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        {
+            SavingChanges?.Invoke();
+
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            SavingChanges?.Invoke();
+
+            return base.SaveChangesAsync(cancellationToken);
         }
     }
 }

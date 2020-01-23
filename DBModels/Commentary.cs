@@ -17,10 +17,11 @@ namespace DBModels
         [Required] public virtual List<Report> Reports { get; set; } = new List<Report>();
         [InverseProperty(nameof(Violation.CommentaryObject))]
         [Required] public virtual List<Violation> Violations { get; set; } = new List<Violation>();
-        [Required] public virtual ViewStatistic ViewStatistic { get; set; }
+        [Required] public virtual ViewStatistic<Commentary> ViewStatistic { get; set; }
         public bool IsHidden { get; set; }
         public bool IsDeleted { get; set; }
         public string DeleteReason { get; set; }
+        IViewStatistic IViewable.ViewStatistic => ViewStatistic;
 
         public Commentary() { }
 
@@ -30,7 +31,7 @@ namespace DBModels
             CreationTime = creationTime;
             Post = post ?? throw new ArgumentNullException(nameof(post));
             Body = body ?? throw new ArgumentNullException(nameof(body));
-            ViewStatistic = new ViewStatistic();
+            ViewStatistic = new ViewStatistic<Commentary>();
         }
     }
 }

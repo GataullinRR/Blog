@@ -14,7 +14,7 @@ namespace Blog.Services
 
         }
 
-        public async Task UpdateViewStatisticAsync(User currentUser, ViewStatistic viewStatistic)
+        public async Task UpdateViewStatisticAsync(User currentUser, IViewStatistic viewStatistic)
         {
             if (currentUser != null)
             {
