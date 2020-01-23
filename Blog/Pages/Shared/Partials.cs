@@ -5,9 +5,6 @@ using System.Threading.Tasks;
 
 namespace Blog
 {
-    /// <summary>
-    /// Some kind of DRY
-    /// </summary>
     public class Partials
     {
         public static string LINK_TO_USER = "_LinkToUser";
@@ -15,7 +12,7 @@ namespace Blog
 
         public static class AdminPanel
         {
-            public static string USERS_TAB = "AdminPanel/_UsersTable";
+            public static string USERS_TAB = "AdminPanel/_UsersTab";
         }
     }
 }
