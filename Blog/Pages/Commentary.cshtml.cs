@@ -14,7 +14,6 @@ namespace Blog.Pages
     public class CommentaryModel : PageModelBase
     {
         public Commentary Commentary { get; private set; }   
-        public User CurrentUserModel { get; private set; }
 
         public CommentaryModel(ServicesLocator services) : base(services)
         {
@@ -25,7 +24,6 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                CurrentUserModel = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 Commentary = await S.Db.Commentaries.FirstOrDefaultByIdAsync(id);
 
                 return Page();
