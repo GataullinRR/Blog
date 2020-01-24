@@ -20,14 +20,16 @@ namespace Blog.Models
             /// </summary>
             public class GroupInfo
             {
-                public GroupInfo(string groupName, int[] resolvedEntities, double[] summedResolveTime, GroupInfo[] subGroupsInfo)
+                public GroupInfo(string groupName, int? groupId, int[] resolvedEntities, double[] summedResolveTime, GroupInfo[] subGroupsInfo)
                 {
                     GroupName = groupName ?? throw new ArgumentNullException(nameof(groupName));
+                    GroupId = groupId;
                     ResolvedEntities = resolvedEntities ?? throw new ArgumentNullException(nameof(resolvedEntities));
                     SummedResolveTime = summedResolveTime ?? throw new ArgumentNullException(nameof(summedResolveTime));
                     SubGroups = subGroupsInfo;
                 }
 
+                public int? GroupId { get; }
                 public string GroupName { get; }
                 public int[] ResolvedEntities { get; }
                 /// <summary>

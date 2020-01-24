@@ -313,6 +313,7 @@ Ozone,
                 context.Blogs.Add(blogInfo);
                 blogInfo.Statistic.DayStatistics.Add(new BlogDayStatistic()
                 {
+                    Day = startDate,
                     PostsViewStatistic = new ViewStatistic<Post>(),
                     CommentariesViewStatistic = new ViewStatistic<Commentary>()
                 });
@@ -324,6 +325,10 @@ Ozone,
                         ActiveUsersCount = previous.ActiveUsersCount + Global.Random.Next(-1, 10),
                         BannedUsersCount = previous.BannedUsersCount + Global.Random.Next(-1, 3),
                         UnconfirmedUsersCount = previous.UnconfirmedUsersCount + Global.Random.Next(-5, 10),
+
+                        CommentariesCount = previous.CommentariesCount + Global.Random.Next(-1, 10),
+                        PostsCount = previous.PostsCount + Global.Random.Next(-1, 3),
+
                         CommentariesViewStatistic = new ViewStatistic<Commentary>()
                         {
                             TotalViews = previous.CommentariesViewStatistic.TotalViews + Global.Random.Next(0, 3000),

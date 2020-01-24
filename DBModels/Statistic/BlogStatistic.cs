@@ -18,6 +18,10 @@ namespace DBModels
         public int ActiveUsersCount { get; set; }
         public int BannedUsersCount { get; set; }
         public int UnconfirmedUsersCount { get; set; }
+
+        public int CommentariesCount { get; set; }
+        public int PostsCount { get; set; }
+
         public virtual ViewStatistic<Commentary> CommentariesViewStatistic { get; set; }
         public virtual ViewStatistic<Post> PostsViewStatistic { get; set; }
     }

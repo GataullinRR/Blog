@@ -69,13 +69,24 @@ namespace Blog.Controllers
                 commentary.Edits.Add(new CommentaryEdit(user, editReason, DateTime.UtcNow));
                 await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.COMMENTARY_EDIT, commentary));
                 await S.Db.SaveChangesAsync();
-
-                return Redirect(S.History.GetLastURL());
             }
             else
             {
-                throw new Exception();
+                if (editReason == null)
+                {
+                    LayoutModel.AddMessage("Edit reason is required");
+                }
+                else if (body == null)
+                {
+                    LayoutModel.AddMessage("Commentary body is required");
+                }
+                else
+                {
+                    throw new Exception();
+                }
             }
+
+            return Redirect(S.History.GetLastURL());
         }
 
         [HttpGet()]

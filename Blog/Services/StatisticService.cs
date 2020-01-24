@@ -39,7 +39,15 @@ namespace Blog.Services
                             updateUsersWithStateCount(stateProperty.OriginalValue.To<ProfileState>(), stateProperty.CurrentValue.To<ProfileState>());
                         }
                     }
-                    else if(entry.Entity is IViewStatistic viewStatistic) // Update blog statistic
+                    if (entity is Post post) // Update blog statistic
+                    {
+                        updatePostsCount(post, entry.State == EntityState.Added);
+                    }
+                    if (entity is Commentary commentary) // Update blog statistic
+                    {
+                        updateCommentariesCount(commentary, entry.State == EntityState.Added);
+                    }
+                    else if (entry.Entity is IViewStatistic viewStatistic && entry.State == EntityState.Modified) // Update blog statistic
                     {
                         var totalViewsProperty = entry.Property(nameof(IViewStatistic.TotalViews));
                         var registredUserViewsProperty = entry.Property(nameof(IViewStatistic.RegistredUserViews));
@@ -54,17 +62,14 @@ namespace Blog.Services
                             updatePostsViewStatistic(totalViewsDelta, registredUserViewsDelta);
                         }
                     }
-                    else if (entity is UserAction userAction) // Update user stat
+                    else if (entity is UserAction userAction && entry.State == EntityState.Added) // Update user stat
                     {
-                        if (entry.State == EntityState.Added)
-                        {
-                            updateUserActionsStatistic(userAction);
-                        }
+                        updateUserActionsStatistic(userAction);
                     }
-                    else if (entity is IEntityToCheck entityToCheck) // Update mod panel stat
+                    else if (entity is IEntityToCheck entityToCheck && entry.State == EntityState.Modified) // Update mod panel stat
                     {
-                        var isResolvedProperty = entry.Property(nameof(IEntityToCheck.IsResolved));
-                        if (isResolvedProperty.CurrentValue.To<bool>() == true)
+                        var isResolvedProperty = entry.Property(nameof(IEntityToCheck.ResolvingTime));
+                        if (isResolvedProperty.IsModified && isResolvedProperty.CurrentValue.To<DateTime?>() != null && entityToCheck.AssignedModerator != null)
                         {
                             var moderatorPanel = entityToCheck.AssignedModerator.ModeratorsGroup;
                             updateResolvedEntitiesStatistic(moderatorPanel, entityToCheck);
@@ -75,6 +80,21 @@ namespace Blog.Services
         }
 
         #region ### Blog-wide statistic ###
+
+        void updatePostsCount(Post post, bool isCreated)
+        {
+            var currentDayStatistic = ensureHasThisDayBlogStatistic();
+            currentDayStatistic.PostsCount += isCreated
+                ? 1
+                : (post.IsDeleted ? -1 : 0);
+        }
+        void updateCommentariesCount(Commentary commentary, bool isCreated)
+        {
+            var currentDayStatistic = ensureHasThisDayBlogStatistic();
+            currentDayStatistic.CommentariesCount += isCreated
+                ? 1
+                : (commentary.IsDeleted ? -1 : 0);
+        }
 
         void updateUsersWithStateCount(ProfileState newState)
         {
@@ -123,16 +143,19 @@ namespace Blog.Services
 
         BlogDayStatistic ensureHasThisDayBlogStatistic()
         {
-            var today = DateTime.UtcNow;
+            var today = DateTime.UtcNow.Date;
             BlogDayStatistic dayStatistic;
             if (today != S.Db.Blog.Statistic.LastDayStatistic?.Day)
             {
                 var lastStatistic = S.Db.Blog.Statistic.LastDayStatistic ?? new BlogDayStatistic();
                 dayStatistic = new BlogDayStatistic()
                 {
+                    Day = today,
                     ActiveUsersCount = lastStatistic.ActiveUsersCount,
                     BannedUsersCount = lastStatistic.BannedUsersCount,
                     UnconfirmedUsersCount = lastStatistic.UnconfirmedUsersCount,
+                    PostsCount = lastStatistic.PostsCount,
+                    CommentariesCount = lastStatistic.CommentariesCount,
                     CommentariesViewStatistic = new ViewStatistic<Commentary>()
                     {
                         RegistredUserViews = lastStatistic.CommentariesViewStatistic.RegistredUserViews,
@@ -172,7 +195,7 @@ namespace Blog.Services
 
         ModeratorsGroupDayStatistic ensureHasThisDayModeratorsGroupStatistic(ModeratorsGroup moderatorsGroup)
         {
-            var today = DateTime.UtcNow;
+            var today = DateTime.UtcNow.Date;
             ModeratorsGroupDayStatistic dayStatistic;
             if (today != moderatorsGroup.Statistic.LastDayStatistic?.Day)
             {
@@ -201,7 +224,7 @@ namespace Blog.Services
 
         void updateUserActionsStatistic(UserAction addedAction)
         {
-            var statistic = ensureHasThisDayUserStatistic(addedAction.Owner);
+            var statistic = ensureHasThisDayUserStatistic(addedAction.Author);
             ensureHasAppropriateCounter().Count++;
 
             IActionStatistic ensureHasAppropriateCounter()
@@ -226,7 +249,7 @@ namespace Blog.Services
 
         UserDayStatistic ensureHasThisDayUserStatistic(User user)
         {
-            var today = DateTime.UtcNow;
+            var today = DateTime.UtcNow.Date;
             UserDayStatistic dayStatistic;
             if (today != user.Statistic.LastDayStatistic?.Day)
             {

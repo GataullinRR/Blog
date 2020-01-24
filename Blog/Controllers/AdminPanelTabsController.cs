@@ -6,6 +6,7 @@ using Blog.Middlewares;
 using Blog.Misc;
 using Blog.Models;
 using Blog.Services;
+using DBModels;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Extensions;
 
@@ -15,12 +16,15 @@ namespace Blog.Controllers
     {
         class PostsTableRowModel
         {
-            public string PostId { get; set; }
+            public string Post { get; set; }
             public string Author { get; set; }
+            public long CreatTime { get; set; }
             public int ViewsCnt { get; set; }
             public int ComCnt { get; set; }
             public double RepPView { get; set; }
         }
+
+        public static readonly string FULL_POSTS_TABLE_URI = getURIToAction(nameof(AdminPanelTabsController), nameof(LoadFullPostsTableAsync));
 
         public AdminPanelTabsController(ServicesLocator serviceProvider) : base(serviceProvider)
         {
@@ -50,11 +54,12 @@ namespace Blog.Controllers
             {
                 result[i++] = new PostsTableRowModel()
                 {
-                    Author = post.Author.UserName,
+                    Author = $"{post.Author.Id}|{post.Author.UserName}",
                     ComCnt = post.Commentaries.Count(),
-                    PostId = post.Id.ToString(),
+                    Post = $"{post.Id}|{post.Title.Take(30).Aggregate()}...",
+                    CreatTime =  new DateTimeOffset(post.CreationTime).ToUnixTimeSeconds(),
                     ViewsCnt = post.ViewStatistic.TotalViews,
-                    RepPView = post.Reports.Count / (double)post.ViewStatistic.TotalViews
+                    RepPView = (post.Reports.Count / (double)post.ViewStatistic.TotalViews).Exchange(double.NaN, 0)
                 };
             };
 
@@ -68,7 +73,7 @@ namespace Blog.Controllers
             var startDate = S.Db.ModeratorsGroups
                 .Min(mg => mg.CreationTime).Date;
             var endDate = DateTime.UtcNow.Date;
-            var xAxis = (endDate - startDate).TotalDays
+            var xAxis = ((endDate - startDate).TotalDays + 1)
                 .Round()
                 .Range()
                 .Select(dayOffset => startDate.AddDays(dayOffset))
@@ -83,12 +88,12 @@ namespace Blog.Controllers
                     .ToArrayAsync();
                 var resolvedEntities = new int[xAxis.Length];
                 var resolveTime = new double[xAxis.Length];
-                for (int j = 0; j < statistic.Length; j++)
+                for (int j = 0; j < xAxis.Length; j++)
                 {
-                    var dayStatistic = statistic[j];
-                    var k = (dayStatistic.Day - startDate).TotalDays.Round();
-                    resolvedEntities[k] = dayStatistic.ResolvedEntitiesCount;
-                    resolveTime[k] = dayStatistic.SummedResolveTime != default
+                    var day = xAxis[j];
+                    var dayStatistic = statistic.FirstOrDefault(s => s.Day == day) ?? new ModeratorsGroupDayStatistic();
+                    resolvedEntities[j] = dayStatistic.ResolvedEntitiesCount;
+                    resolveTime[j] = dayStatistic.SummedResolveTime != default
                         ? dayStatistic.SummedResolveTime.TotalSeconds.Round() 
                         : double.NaN;
                 }
@@ -113,11 +118,12 @@ namespace Blog.Controllers
                         moderatorResolveTime[l] = entities.Select(e => (e.ResolvingTime.Value - e.AddTime).TotalSeconds).Sum();
                     }
 
-                    moderators[m++] = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo(moderator.UserName, resolvedEntities, moderatorResolveTime, null);
+                    moderators[m++] = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo(moderator.UserName, null, resolvedEntities, moderatorResolveTime, null);
                 }
 
                 groupsInfos[i++] = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo(
                     "Group" + i,
+                    group.Id,
                     resolvedEntities,
                     resolveTime,
                     moderators);

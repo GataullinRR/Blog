@@ -12,16 +12,22 @@
                     User
                 </th>
                 <th class="th">
+                    Reg date
+                </th>
+                <th class="th">
                     Role
                 </th>
                 <th class="th">
-                    All actions
+                    State
+                </th>
+                <th class="th">
+                    Actions
                 </th>
                 <th class="th">
                     Publications
                 </th>
                 <th class="th">
-                    Repors per publication
+                    Repors
                 </th>
             </tr>
         </thead>
@@ -43,10 +49,22 @@
                         return '<a href="/Account/Profile?id=' + idAndName[0] + '">' + idAndName[1] + '</a>';
                     }
                 },
+                {
+                    data: 'regTime',
+                    "render": function (data, type, row, meta) {
+                        return getDateFromTimestamp(data);
+                    }
+                },
                 { data: 'role' },
+                { data: 'state' },
                 { data: 'actCnt' },
                 { data: 'pubCnt' },
-                { data: 'repPPub' }
+                {
+                    data: 'repPPub',
+                    "render": function (data, type, row, meta) {
+                        return round(data, 3);
+                    }
+                },
             ],
         });
     }

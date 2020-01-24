@@ -6,6 +6,12 @@
     ViewData["Title"] = Model.Post.Title;
 }
 
+@section Styles
+{
+    @*<link rel="stylesheet" type="text/css" id="u0" href="http://localhost:14971/js/tinymce/skins/ui/oxide/content.min.css"/>*@
+    <link rel="stylesheet" type="text/css" href="~/css/prism.css" />
+}
+
 <div class="container container-main">
     <div class="row">
         <div class="col">
@@ -63,10 +69,10 @@
 
                 @{ var count = 0; }
                 @foreach (var commentary in Model.Commentaries
-                   .OrderByDescending(c => c.CreationTime)
-                   .Take(100)
-                   .Select(c => Html.PartialAsync("_CommentaryContainer", c))
-                   .ToArray())
+                 .OrderByDescending(c => c.CreationTime)
+                 .Take(100)
+                 .Select(c => Html.PartialAsync("_CommentaryContainer", c))
+                 .ToArray())
                 {
                     @await commentary;
 
@@ -102,7 +108,7 @@
 
 @section Scripts {
     <partial name="_CommentartyScripts" />
-
+    <script src="~/js/prism.js"></script>
     <script>
         @{
             var target = new ControllerAction(nameof(ReportingController), nameof(ReportingController.ReportPostAsync));

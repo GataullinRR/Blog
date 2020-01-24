@@ -196,8 +196,8 @@
                                 @foreach (var entity in resolvedEntities)
                                 {
                                     <tr>
-                                        <td>@entity.AddTime</td>
-                                        <td>@entity.ResolvingTime</td>
+                                        <td>@entity.AddTime.ToHoursDateString()</td>
+                                        <td>@entity.ResolvingTime.Value.ToHoursDateString()</td>
                                         <td>@entity.CheckReason.GetEnumValueDescription()</td>
                                         <td>@{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(entity.Entity)); }</td>
                                     </tr>
@@ -214,7 +214,7 @@
                 <div class="tab-pane fade" id="v-pills-settings" role="tabpanel">
                     <h3 class="mb-3">Users you are in charge of</h3>
 
-                    <partial name="@Partials.USERS_TABLE" model="@PanelsTableController.MODERATORS_PANEL_USERS_URI" />
+                    <partial name="@Partials.USERS_TABLE" model="@(PanelsTableController.MODERATORS_PANEL_USERS_URI + "?id=" + Model.Owner.Id)"/>
                 </div>
             </div>
         </div>

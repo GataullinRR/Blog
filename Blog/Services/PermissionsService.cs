@@ -548,8 +548,8 @@ namespace Blog.Services
             else
             {
                 return await isNotDeletedAsync(entity)
-                    //&& currentUser != entity.Author
-                    && await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.MODERATOR)
+                    && (await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.MODERATOR) 
+                        || (await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.OWNER) && currentUser == entity.Author))
                     && entity.ModerationInfo.State.IsOneOf(ModerationState.UNDER_MODERATION);
             }
         }

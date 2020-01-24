@@ -1,4 +1,5 @@
 ﻿@model AdminPanelModeratorsTabModel
+@inject BlogContext Db
 
 @{
     var entitiesChartId = "entities-resolved-chart";
@@ -7,53 +8,92 @@
     var totalResolveTimePerContributorBarChartId = "resolve-time-bar-chart";
 }
 
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                <select id="view-selector" class="custom-select" style="max-width: 150px">
-                    <option value="Summary">Summary</option>
-                    @foreach (var group in Model.Summary.Groups)
-                    {
-                        <option value="@group.GroupName">@group.GroupName</option>
-                    }
-                </select>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <select id="view-selector" class="custom-select" style="max-width: 150px">
+                <option value="Summary">Summary</option>
+                @foreach (var group in Model.Summary.Groups)
+                {
+                    <option value="@group.GroupName">@group.GroupName</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col col-lg-9">
+            <div class="chart-container admin-panel-chart">
+                <canvas id="@entitiesChartId"></canvas>
             </div>
         </div>
-        <div class="row mb-3">
-            <div class="col col-lg-9">
-                <div class="chart-container admin-panel-chart">
-                    <canvas id="@entitiesChartId"></canvas>
-                </div>
-            </div>
-            <div class="col col-lg-3">
-                <div class="chart-container admin-panel-chart">
-                    <canvas id="@entitiesPieChartId"></canvas>
-                </div>
+        <div class="col col-lg-3">
+            <div class="chart-container admin-panel-chart">
+                <canvas id="@entitiesPieChartId"></canvas>
             </div>
         </div>
-        <div class="row mb-3">
-            <div class="col col-lg-9">
-                <div class="chart-container admin-panel-chart">
-                    <canvas id="@totalResolveTimeChartId"></canvas>
-                </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col col-lg-9">
+            <div class="chart-container admin-panel-chart">
+                <canvas id="@totalResolveTimeChartId"></canvas>
             </div>
-            <div class="col col-lg-3">
-                <div class="chart-container admin-panel-chart">
-                    <canvas id="@totalResolveTimePerContributorBarChartId"></canvas>
-                </div>
+        </div>
+        <div class="col col-lg-3">
+            <div class="chart-container admin-panel-chart">
+                <canvas id="@totalResolveTimePerContributorBarChartId"></canvas>
             </div>
         </div>
     </div>
 
+    <div class="row">
+        <div class="col">
+            <div class="table-responsive mt-3">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Moderator</th>
+                            <th scope="col">Registration date</th>
+                            <th scope="col">State</th>
+                            <th scope="col">Panel</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var moderator in Db.ModeratorsGroups.Select(mg => mg.Moderators).Flatten())
+                        {
+                            <tr>
+                                <td><a asp-page="/Account/Profile" asp-route-id="@moderator.Id">@moderator.UserName</a></td>
+                                <td>@moderator.Profile.RegistrationDate.ToDateString()</td>
+                                <td>@moderator.Status.State.GetEnumValueDescription()</td>
+                                <td><a asp-page="/ModeratorPanel" asp-route-id="@moderator.Id">@Model.Summary.Groups.Find(g => g.GroupId.Value == moderator.ModeratorsGroup.Id).Value.GroupName</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     var model = @Json.Serialize(Model);
     var xAxis = model.summary.xAxis.map(x => new Date(Date.parse(x))).map(d => d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear());
-    var c1 = instantiateChart("@entitiesChartId", "Resolved entities", "line");
-    var c2 = instantiateChart("@entitiesPieChartId","Entities by groups", "doughnut");
-    var c3 = instantiateChart("@totalResolveTimeChartId", "Average resolve time", "line");
-    var c4 = instantiateChart("@totalResolveTimePerContributorBarChartId", "Time by groups", "bar");
-    @{
-        var colors = new[] { "#33cc33", "#ffbb33" };
+    var c1 = null;
+    var c2 = null;
+    var c3 = null;
+    var c4 = null;
+    var borderColors = ["rgba(51,204,51,0.8)", "rgba(255,187,51,0.8)"];
+    var backgroundColors = ["rgba(51,204,51,0.2)", "rgba(255,187,51,0.2)"];
+    function reInstantiateCharts() {
+        if (c1) {
+            c1.destroy();
+            c2.destroy();
+            c3.destroy();
+            c4.destroy();
+        }
+        c1 = instantiateChart("@entitiesChartId", "Resolved entities", "line");
+        c2 = instantiateChart("@entitiesPieChartId", "Entities by groups", "doughnut");
+        c3 = instantiateChart("@totalResolveTimeChartId", "Average resolve time", "line");
+        c4 = instantiateChart("@totalResolveTimePerContributorBarChartId", "Time by groups", "bar");
     }
 
     $('#view-selector').change(function () {
@@ -68,101 +108,28 @@
     });
 
     function renderModeratorsTabParial() {
+
         renderSummary();
     }
 
     function renderGroup(groupName) {
-        var groups = model.summary.groups.find(g => g.groupName == groupName).subGroups;
+        var rootGroup = model.summary.groups.find(g => g.groupName == groupName);
+
+        var groups = rootGroup.subGroups;
+        reInstantiateCharts(); // Just update() does not work :(
         renderResolveTime(groups);
         renderResolvedEntities(groups);
     }
 
     function renderSummary() {
-                var groups = model.summary.groups;
+        reInstantiateCharts();
+        var groups = model.summary.groups;
         renderResolveTime(groups);
         renderResolvedEntities(groups);
     }
 
-    function renderSummary2() {
-            var datasets = [];
-            var groups = [];
-            var resolvedEntitiesRatioByGroups = [];
-        @{
-            var resolvedEntitiesTotalCount = (double)Model.Summary.Groups.Sum(g => g.ResolvedEntities.Sum());
-            for (int i = 0; i < Model.Summary.Groups.Length; i++)
-            {
-
-                var group = Model.Summary.Groups[i];
-                var groupData = new ChartJSDatasetModel<int>()
-                {
-                    Label = group.GroupName,
-                    Data = group.ResolvedEntities,
-                    BackgroundColor = new[] { colors[i] },
-                    BorderColor = new[] { colors[i] },
-                };
-                var ratio = (100 * group.ResolvedEntities.Sum() / resolvedEntitiesTotalCount).Round(1);
-
-                <text>
-            datasets.push(@Json.Serialize(groupData));
-            groups.push('@groupData.Label');
-            resolvedEntitiesRatioByGroups.push(@ratio);
-                </text>
-            }
-
-            var timeToResolvePerResolvedEntity = new ChartJSDatasetModel<double>()
-            {
-                Label = "Resolve time",
-                Data = new double[Model.Summary.XAxis.Length],
-            };
-
-            for (int i = 0; i < Model.Summary.XAxis.Length; i++)
-            {
-                var time = 0D;
-                var resolvedEntitiesCount = 0;
-                for (int j = 0; j < Model.Summary.Groups.Length; j++)
-                {
-                    var group = Model.Summary.Groups[j];
-                    var providedTime = group.SummedResolveTime[i];
-                    time += providedTime.IsNaN()
-                        ? 0
-                        : providedTime;
-                    resolvedEntitiesCount += group.ResolvedEntities[i];
-                }
-
-                time = time == 0
-                    ? double.NaN // will be rendered as discontinuity
-                    : time;
-                timeToResolvePerResolvedEntity.Data[i] = (time / resolvedEntitiesCount).Round(1);
-            }
-            var avgTimeToResolvePerGroup = new ChartJSDatasetModel<double>()
-            {
-                Label = "Average resolve time",
-                Data = new double[Model.Summary.XAxis.Length],
-                BorderColor = colors,
-                BackgroundColor = colors,
-            };
-            for (int i = 0; i < Model.Summary.Groups.Length; i++)
-            {
-                var group = Model.Summary.Groups[i];
-                var time = group.SummedResolveTime.Where(t => t.IsNotNaN()).EmptyToNull()?.Sum() ?? 0;
-                var resolvedEntitiesCount = group.ResolvedEntities.Sum();
-                avgTimeToResolvePerGroup.Data[i] = (time / resolvedEntitiesCount).Round(1);
-            }
-            }
-
-            @*plot("@entitiesChartId", "Resolved entities", xAxis, datasets);
-            plotPie("@entitiesPieChartId", "Entities by groups", groups, resolvedEntitiesRatioByGroups, @Json.Serialize(colors));
-            plot("@totalResolveTimeChartId", "Average resolve time", xAxis, [@Json.Serialize(timeToResolvePerResolvedEntity)]);
-        plot("@totalResolveTimePerContributorBarChartId", "Time by groups", groups, [@Json.Serialize(avgTimeToResolvePerGroup)], "bar");*@
-
-            plotInto(c1, xAxis, datasets);
-            plotInto(c2, groups, [{ data: resolvedEntitiesRatioByGroups, backgroundColor: @Json.Serialize(colors) }]);
-            plotInto(c3, xAxis, [@Json.Serialize(timeToResolvePerResolvedEntity)]);
-            plotInto(c4, groups, [@Json.Serialize(avgTimeToResolvePerGroup)]);
-    }
-
     function renderResolvedEntities(groups) {
-        var colors = ["#33cc33", "#ffbb33"];
+
 
         var resolvedEntitiesTotalCount = 0;
         for (var i = 0; i < groups.length; i++) {
@@ -177,8 +144,9 @@
             var dataset = {
                 label: group.groupName,
                 data: group.resolvedEntities,
-                backgroundColor: [colors[i]],
-                borderColor: [colors[i]],
+                backgroundColor: [backgroundColors[i]],
+                borderColor: [borderColors[i]],
+                borderWidth: 2,
             };
             datasets.push(dataset);
 
@@ -189,17 +157,19 @@
         }
 
         plotInto(c1, xAxis, datasets);
-        plotInto(c2, groupNames, [{ data: resolvedEntitiesRatioByGroups, backgroundColor: @Json.Serialize(colors) }]);
+        plotInto(c2, groupNames, [{ data: resolvedEntitiesRatioByGroups, backgroundColor: borderColors  }]);
     }
 
     function renderResolveTime(groups) {
-        var colors = ["#33cc33", "#ffbb33"];
+        //var colors = ["#33cc33", "#ffbb33"];
+        //var colors = ["rgba(51,204,51,0.2)", "rgba(255,187,51,0.2)"];
 
         var timeToResolvePerResolvedEntity = {
             label: "Resolve time",
             data: new Array(xAxis.length),
-            borderColor: colors,
-            backgroundColor: colors,
+            borderColor: [borderColors[0]],
+            backgroundColor: [backgroundColors[0]],
+            borderWidth: 2,
         };
         for (var i = 0; i < xAxis.length; i++) {
             var time = 0;
@@ -227,8 +197,8 @@
         {
             label: "Average resolve time",
             data: new Array(groups.length),
-            borderColor: colors,
-            backgroundColor: colors,
+            borderColor: borderColors,
+            backgroundColor: borderColors,
         };
         for (var i = 0; i < groups.length; i++) {
             var group = groups[i];
@@ -295,7 +265,7 @@
                     scales: {
                         yAxes: [{
                             ticks: {
-                                beginAtZero: false
+                                beginAtZero: type === "bar"
                             }
                         }],
                         xAxes: [{
@@ -328,7 +298,7 @@
         }
     }
 
-    
+
     function plotInto(chart, xAxis, datasets) {
         chart.data = {
             labels: xAxis,

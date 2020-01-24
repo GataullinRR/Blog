@@ -99,6 +99,10 @@ namespace Blog
         {
             return dateTime.ToString("hh:mm dd.MM.yyyy");
         }
+        public static string ToDateString(this DateTime dateTime)
+        {
+            return dateTime.ToString("dd.MM.yyyy");
+        }
 
         public static IDisposable SaveChangesMode(this BlogContext db)
         {

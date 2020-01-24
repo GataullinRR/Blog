@@ -1,6 +1,6 @@
 ﻿@model PostViewModel
 
-<div class="mce-content-body text-justify">
+<div class="mce-content-body text-justify" id="tinymce" data-id="Body">
     @if (Model.PreviewVersion)
     {
         @Html.Raw(Model.Post.BodyPreview);

@@ -24,12 +24,12 @@ namespace Blog.Services
         public PostSanitizerService(ServicesLocator services) : base(services)
         {
             _allowAllButNotExecutable = new HtmlSanitizer(
-                allowedTags: "code i b s img li ul ol link p em strong tr td table tbody a br span code pre sup sub blockquote caption".Split(" "),
+                allowedTags: "h1 h2 h3 h4 h5 h6 code i b s img li ul ol link p em strong tr td table tbody a br span code pre sup sub blockquote caption".Split(" "),
                 allowedSchemes: "http https data".Split(" "),
                 allowedAttributes: "href src style class".Split(" "),
                 uriAttributes: "href src".Split(" "),
                 allowedCssProperties: "list-style-type padding-left text-decoration height width border border-collapse cellspacing cellpadding data-mce-style".Split(" "),
-                allowedCssClasses: "language-csharp language-markup language-javascript language-css language-php language-ruby language-python language-java language-c language-cpp".Split(" "));
+                allowedCssClasses: "language-csharp language-markup language-javascript language-css language-php language-ruby language-python language-java language-c language-cpp token operator punctuation keyword string number".Split(" "));
         }
 
         public async Task<string> SanitizePostBodyAsync(string body)
@@ -118,7 +118,10 @@ namespace Blog.Services
 
         public string IgnoreNonTextNodes(string richHtml)
         {
-            if (string.IsNullOrEmpty(richHtml)) return string.Empty;
+            if (string.IsNullOrEmpty(richHtml))
+            {
+                return string.Empty;
+            }
 
             var document = new HtmlDocument();
             document.LoadHtml(richHtml);

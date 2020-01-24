@@ -11,6 +11,23 @@
         };
     };
 
+    function round(number, numOfDigits) {
+        var coef = Math.pow(10, numOfDigits);
+        return (Math.round(number * coef)/coef).toFixed(numOfDigits);
+    }
+
+    function getDateFromTimestamp(unix_timestamp) {
+        // Create a new JavaScript Date object based on the timestamp
+        // multiplied by 1000 so that the argument is in milliseconds, not seconds.
+        var date = new Date(unix_timestamp * 1000);
+        var day = "0" + date.getDay();
+        var month = "0" + (date.getMonth() + 1);
+        var year = "0" + date.getFullYear();
+
+        // Will display time in 10:30:23 format
+        return day.substr(-2) + '.' + month.substr(-2) + '.' + year.substr(-4);
+    }
+
     function makePost(route, dataObject, isAsync, onSuccess, onError) {
         $.ajax({
             type: "POST",

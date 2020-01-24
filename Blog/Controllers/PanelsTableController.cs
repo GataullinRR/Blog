@@ -10,6 +10,7 @@ using Utilities.Types;
 using Utilities.Extensions;
 using Blog.Middlewares;
 using DBModels;
+using System.ComponentModel.DataAnnotations;
 
 namespace Blog.Controllers
 {
@@ -27,6 +28,8 @@ namespace Blog.Controllers
         {
             public string Name { get; set; }
             public string Role { get; set; }
+            public long RegTime { get; set; }
+            public string State { get; set; }
             public int ActCnt { get; set; }
             public int PubCnt { get; set; }
             public double RepPPub { get; set; }
@@ -41,19 +44,23 @@ namespace Blog.Controllers
         }
 
         [CustomResponseCache(3600, 3600 * 24, CacheMode.USER_SCOPED)]
-        public async Task<IActionResult> LoadModeratorsUsersTableAsync()
+        public async Task<IActionResult> LoadModeratorsUsersTableAsync([Required]string id)
         {
-            var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-            await S.Permissions.ValidateAccessModeratorsPanelAsync(currentUser);
+            if (ModelState.IsValid)
+            {
+                var targetModerator = await S.UserManager.FindByIdAsync(id);
+                await S.Permissions.ValidateAccessModeratorsPanelAsync(targetModerator);
 
-            return await generateTableData(currentUser.ModeratorsGroup.TargetUsers.AsQueryable());
+                return await generateTableData(targetModerator.ModeratorsGroup.TargetUsers.AsQueryable());
+            }
+            else
+            {
+                throw new Exception();
+            }
         }
 
         async Task<JsonResult> generateTableData(IQueryable<User> users)
         {
-            var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-            await S.Permissions.ValidateAccessModeratorsPanelAsync(currentUser);
-
             var i = 0;
             var result = new UsersTableRowModel[users.Count()];
             foreach (var user in users)
@@ -64,8 +71,10 @@ namespace Blog.Controllers
                     Name = $"{user.Id}|{user.UserName}",
                     Role = await S.UserManager.GetRolesAsync(user).ThenDo(r => r.FirstElement()),
                     ActCnt = user.Actions.Count(),
+                    State = user.Status.State.GetEnumValueDescription(),
+                    RegTime = new DateTimeOffset(user.Profile.RegistrationDate).ToUnixTimeSeconds(),
                     PubCnt = user.Commentaries.Count() + user.Posts.Count(),
-                    RepPPub = user.Reports.Where(r => r.PostObject != null || r.CommentaryObject != null).Count() / (double)pubCnt
+                    RepPPub = (user.Reports.Where(r => r.PostObject != null || r.CommentaryObject != null).Count() / (double)pubCnt).Exchange(double.NaN, 0)
                 };
             }
 
