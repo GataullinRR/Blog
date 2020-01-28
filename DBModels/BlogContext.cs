@@ -10,12 +10,17 @@ using Utilities.Extensions;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Diagnostics;
 
 namespace DBModels
 {
     public class BlogContext : IdentityDbContext<User>
     {
         public event Action SavingChanges;
+
+        readonly ModeManager _modeManager = new ModeManager();
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public IDisposable LazyLoadingSuppressingMode => _modeManager.Holder;
 
         public DbSet<Post> Posts { get; set; }
         public DbSet<Commentary> Commentaries { get; set; }
@@ -52,6 +57,18 @@ namespace DBModels
             : base(options)
         {
             Database.EnsureCreated();
+
+            _modeManager.Activated += _modeManager_Activated;
+            _modeManager.Deactivated += _modeManager_Deactivated;
+
+            void _modeManager_Activated()
+            {
+                ChangeTracker.LazyLoadingEnabled = false;
+            }
+            void _modeManager_Deactivated()
+            {
+                ChangeTracker.LazyLoadingEnabled = true;
+            }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

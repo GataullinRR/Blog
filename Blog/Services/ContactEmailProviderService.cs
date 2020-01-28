@@ -21,25 +21,34 @@ namespace Blog.Services
         public async Task<string> GetHelpContactEmailAsync()
         {
             var currentUser = await S.Utilities.GetCurrentUserModelAsync();
-            string email = null;
-            if (currentUser != null)
+            using (S.Db.LazyLoadingSuppressingMode)
             {
-                var moderators = currentUser.ModeratorsInChargeGroup.Moderators
-                    .Where(m => m.EmailConfirmed)
-                    .ToArray();
-                var moderator = _rnd.NextElementFrom(moderators);
-                email = moderator.Email;
-            }
-            else
-            {
-                var moderators = await S.Db.GetUsersInRoleAsync(Roles.MODERATOR).ThenDo(r => r
-                    .Where(m => m.EmailConfirmed)
-                    .ToArray());
-                var moderator = _rnd.NextElementFrom(moderators);
-                email = moderator.Email;
-            }
+                string email = null;
+                if (currentUser != null)
+                {
+#warning quick fix
+                    if (currentUser.ModeratorsInChargeGroup == null)
+                    {
+                        return null;
+                    }
 
-            return email;
+                    var moderators = currentUser.ModeratorsInChargeGroup.Moderators
+                        .Where(m => m.EmailConfirmed)
+                        .ToArray();
+                    var moderator = _rnd.NextElementFrom(moderators);
+                    email = moderator.Email;
+                }
+                else
+                {
+                    var moderators = await S.Db.GetUsersInRoleAsync(Roles.MODERATOR).ThenDo(r => r
+                        .Where(m => m.EmailConfirmed)
+                        .ToArray());
+                    var moderator = _rnd.NextElementFrom(moderators);
+                    email = moderator.Email;
+                }
+
+                return email;
+            }
         }
     }
 }

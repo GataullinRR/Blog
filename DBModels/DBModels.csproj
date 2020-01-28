@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyVersion>2020.1.23.2704</AssemblyVersion>
-    <FileVersion>2020.1.23.2704</FileVersion>
+    <AssemblyVersion>2020.1.28.2722</AssemblyVersion>
+    <FileVersion>2020.1.28.2722</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +11,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.2.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.6" />
+    <PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.1.0" />
   </ItemGroup>
 
   <ItemGroup>

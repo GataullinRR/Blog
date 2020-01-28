@@ -9,6 +9,7 @@ using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Controllers
 {
@@ -36,10 +37,17 @@ namespace Blog.Controllers
         {
             await S.Permissions.ValidateAccessBlogControlPanelAsync();
 
-            var daysStatistic = await S.Db.Blog.Statistic.DayStatistics
-                .AsQueryable()
+            S.Db.ChangeTracker.LazyLoadingEnabled = false;
+            var daysStatistic = S.Db.Blogs
+                .AsNoTracking()
+                .Include(b => b.Statistic)
+                .ThenInclude(s => s.DayStatistics)
+                .ThenInclude(s => s.PostsViewStatistic)
+                .Include(b => b.Statistic)
+                .ThenInclude(s => s.DayStatistics)
+                .ThenInclude(s => s.CommentariesViewStatistic)
+                .Single().Statistic.DayStatistics
                 .OrderBy(ds => ds.Day)
-                .ToAsyncEnumerable()
                 .ToArray();
 
             return PartialView("AdminPanel/_OverviewTab", daysStatistic);
@@ -48,20 +56,24 @@ namespace Blog.Controllers
         [CustomResponseCache(3600, 3600 * 24, CacheMode.USER_SCOPED)]
         public async Task<IActionResult> LoadFullPostsTableAsync()
         {
-            var i = 0;
-            var result = new PostsTableRowModel[S.Db.Posts.Count()];
-            foreach (var post in S.Db.Posts)
-            {
-                result[i++] = new PostsTableRowModel()
-                {
-                    Author = $"{post.Author.Id}|{post.Author.UserName}",
-                    ComCnt = post.Commentaries.Count(),
-                    Post = $"{post.Id}|{post.Title.Take(30).Aggregate()}...",
-                    CreatTime =  new DateTimeOffset(post.CreationTime).ToUnixTimeSeconds(),
-                    ViewsCnt = post.ViewStatistic.TotalViews,
-                    RepPView = (post.Reports.Count / (double)post.ViewStatistic.TotalViews).Exchange(double.NaN, 0)
-                };
-            };
+            S.Db.ChangeTracker.LazyLoadingEnabled = false;
+            var result = S.Db.Posts
+                .AsNoTracking()
+                .Select(post =>
+                    new PostsTableRowModel()
+                    {
+                        Author = $"{post.Author.Id}|{post.Author.UserName}",
+                        ComCnt = post.Commentaries.Count(),
+                        Post = $"{post.Id}|{post.Title.Take(30).Aggregate()}...",
+                        CreatTime = new DateTimeOffset(post.CreationTime).ToUnixTimeSeconds(),
+                        ViewsCnt = post.ViewStatistic.TotalViews,
+                        RepPView = post.ViewStatistic.TotalViews == 0 
+                        ? 0
+                        : (double)post.Reports.Count / post.ViewStatistic.TotalViews 
+                        // This line is same, but causes runtime exception
+                        //((double)post.Reports.Count / (double)post.ViewStatistic.TotalViews).Exchange(double.NaN, 0D)
+                    })
+                .ToArray();
 
             return Json(result);
         }
@@ -70,8 +82,19 @@ namespace Blog.Controllers
         [CustomResponseCache(3600, 3600 * 24, CacheMode.USER_SCOPED)]
         public async Task<IActionResult> LoadModeratorsTabAsync()
         {
-            var startDate = S.Db.ModeratorsGroups
-                .Min(mg => mg.CreationTime).Date;
+            S.Db.ChangeTracker.LazyLoadingEnabled = false;
+            var groups = S.Db.ModeratorsGroups
+                .AsNoTracking()
+                .OrderBy(mg => mg.CreationTime)
+                .Include(mg => mg.Statistic)
+                .ThenInclude(s => s.DayStatistics)
+                .Include(mg => mg.PostEditsToCheck)
+                .Include(mg => mg.CommentariesToCheck)
+                .Include(mg => mg.ProfilesToCheck)
+                .Include(mg => mg.PostsToCheck)
+                .Include(mg => mg.Moderators)
+                .ToArray();
+            var startDate = groups[0].CreationTime.Date;
             var endDate = DateTime.UtcNow.Date;
             var xAxis = ((endDate - startDate).TotalDays + 1)
                 .Round()
@@ -80,8 +103,8 @@ namespace Blog.Controllers
                 .ToArray();
 
             var i = 0;
-            var groupsInfos = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo[S.Db.ModeratorsGroups.Count()];
-            foreach (var group in S.Db.ModeratorsGroups.OrderBy(mg => mg.CreationTime))
+            var groupsInfos = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo[groups.Length];
+            foreach (var group in groups)
             {
                 var moderatorsInfos = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo[group.Moderators.Count()];
                 var statistic = await group.Statistic.DayStatistics

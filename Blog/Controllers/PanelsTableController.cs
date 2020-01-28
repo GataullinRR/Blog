@@ -61,22 +61,32 @@ namespace Blog.Controllers
 
         async Task<JsonResult> generateTableData(IQueryable<User> users)
         {
-            var i = 0;
-            var result = new UsersTableRowModel[users.Count()];
-            foreach (var user in users)
-            {
-                var pubCnt = user.Commentaries.Count() + user.Posts.Count();
-                result[i++] = new UsersTableRowModel()
+            S.Db.ChangeTracker.LazyLoadingEnabled = false;
+            var query = users
+                .Select(user => new
                 {
                     Name = $"{user.Id}|{user.UserName}",
-                    Role = await S.UserManager.GetRolesAsync(user).ThenDo(r => r.FirstElement()),
+                    RoleId = S.Db.UserRoles.First(r => r.UserId == user.Id).RoleId,
                     ActCnt = user.Actions.Count(),
-                    State = user.Status.State.GetEnumValueDescription(),
-                    RegTime = new DateTimeOffset(user.Profile.RegistrationDate).ToUnixTimeSeconds(),
+                    State = user.Status.State,
+                    RegTime = user.Profile.RegistrationDate,
                     PubCnt = user.Commentaries.Count() + user.Posts.Count(),
-                    RepPPub = (user.Reports.Where(r => r.PostObject != null || r.CommentaryObject != null).Count() / (double)pubCnt).Exchange(double.NaN, 0)
-                };
-            }
+                    RepCnt = user.Reports.Where(r => r.PostObject != null || r.CommentaryObject != null).Count()
+                })
+                .ToArray();
+            var roles = S.Db.Roles.ToDictionary(r => r.Id, r => r.Name);
+            var result = query
+                .Select(user => new UsersTableRowModel()
+                {
+                    Name = user.Name,
+                    Role = roles[user.RoleId],
+                    ActCnt = user.ActCnt,
+                    State = user.State.GetEnumValueDescription(),
+                    RegTime = new DateTimeOffset(user.RegTime).ToUnixTimeSeconds(),
+                    PubCnt = user.PubCnt,
+                    RepPPub = (user.RepCnt / (double)user.PubCnt).Exchange(double.NaN, 0)
+                })
+                .ToArray();
 
             return Json(result);
         }

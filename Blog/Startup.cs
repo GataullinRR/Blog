@@ -40,7 +40,8 @@ namespace Blog
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<BlogContext>(options => options
                     .UseLazyLoadingProxies()
-                    .UseSqlServer(connection));
+                    .UseSqlServer(connection, 
+                        sqlOpt => sqlOpt.CommandTimeout(60)));
             //services.AddResponseCaching();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     .AddCookie(options => {

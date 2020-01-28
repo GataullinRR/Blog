@@ -42,7 +42,7 @@
                             </div>
                             <div class="d-flex flex-column w-100">
                                 <h4 class="font-weight-normal">About <a asp-page="/Account/Profile" asp-route-id="@targetUser.Id">@targetUser.UserName</a></h4>
-                                <span>@(targetUser.Profile.About.EmptyToNull() ?? "No biography provided :(")</span>
+                                <span>@(targetUser.Profile.About?.EmptyToNull() ?? "No biography provided :(")</span>
                             </div>
                         </div>
                     </div>
