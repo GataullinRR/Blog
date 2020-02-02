@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <AssemblyVersion>2020.2.2.30</AssemblyVersion>
+    <FileVersion>2020.2.2.30</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Console" Version="4.3.1" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\GeneralPurposeLibs\DSPLib\DSPLib\DSPUtilities.csproj" />
+    <ProjectReference Include="..\..\GeneralPurposeLibs\Utilities\UtilitiesStandard\UtilitiesStandard.csproj" />
+  </ItemGroup>
+
+</Project>
