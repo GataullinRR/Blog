@@ -81,6 +81,7 @@ namespace Blog
                 //});
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+
             services.AddSession();
             services.AddMemoryCache();
             services.AddUrlHelper();
@@ -90,7 +91,7 @@ namespace Blog
             services.AddScoped<HistoryService>();
             services.AddSingleton<AutounbanService>();
             services.AddScoped<DecisionsService>();
-            services.AddScoped<DbEntitiesUpdateService>();
+            //services.AddScoped<DbEntitiesUpdateService>();
             services.AddScoped<LinkBuilderService>();
             services.AddScoped<ServicesLocator>();
             services.AddScoped<ActivationLinkGeneratorService>();
@@ -103,8 +104,10 @@ namespace Blog
 
             void registerServices()
             {
-                var assembly = Assembly.GetExecutingAssembly();
-                foreach (var type in assembly.DefinedTypes)
+                var allTypes = Assembly.GetExecutingAssembly().DefinedTypes
+                    .Select(t => t.AsType())
+                    .ToArray();
+                foreach (var type in allTypes)
                 {
                     var serviceType = type.GetCustomAttribute<ServiceAttribute>()?.ServiceType;
                     if (serviceType.HasValue)
@@ -116,6 +119,9 @@ namespace Blog
                                 break;
                             case ServiceType.SINGLETON:
                                 services.AddSingleton(type);
+                                break;
+                            case ServiceType.TRANSIENT:
+                                services.AddTransient(type);
                                 break;
 
                             default:

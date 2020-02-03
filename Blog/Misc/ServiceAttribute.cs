@@ -8,7 +8,8 @@ namespace Blog.Misc
     public enum ServiceType
     {
         SCOPED,
-        SINGLETON
+        SINGLETON,
+        TRANSIENT
     }
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]

@@ -12,8 +12,8 @@ namespace Blog
     public class DbSampleData
     {
         public static void Initialize(
-            BlogContext context, 
-            RoleManager<IdentityRole> roleManager, 
+            BlogContext context,
+            RoleManager<IdentityRole> roleManager,
             UserManager<User> userManager,
             SignInManager<User> signInManager)
         {
@@ -60,7 +60,7 @@ namespace Blog
                     UserName = "QTU100",
                     EmailConfirmed = true,
                     ModeratorsInChargeGroup = moderatorGroup1,
-                }; 
+                };
                 userManager.CreateAsync(radmir, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(radmir, Roles.OWNER).Wait();
 
@@ -332,15 +332,15 @@ Ozone,
                         CommentariesViewStatistic = new ViewStatistic<Commentary>()
                         {
                             TotalViews = previous.CommentariesViewStatistic.TotalViews + Global.Random.Next(0, 3000),
-                            RegistredUserViews = previous.CommentariesViewStatistic.RegistredUserViews + Global.Random.Next(0, 1000),
+                            RegisteredUserViews = previous.CommentariesViewStatistic.RegisteredUserViews + Global.Random.Next(0, 1000),
                         },
                         PostsViewStatistic = new ViewStatistic<Post>()
                         {
                             TotalViews = previous.PostsViewStatistic.TotalViews + Global.Random.Next(0, 1000),
-                            RegistredUserViews = previous.PostsViewStatistic.RegistredUserViews + Global.Random.Next(0, 100),
+                            RegisteredUserViews = previous.PostsViewStatistic.RegisteredUserViews + Global.Random.Next(0, 100),
                         },
                         Day = startDate.AddDays(i)
-                    }); 
+                    });
                 }
 
                 context.SaveChanges();

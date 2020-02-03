@@ -48,7 +48,6 @@ namespace Blog.Pages
                     }
                     await S.DbUpdator.UpdateViewStatisticAsync(currentUser, Post.ViewStatistic);
 
-                    var x = await S.Db.SaveChangesAsync();
                     NewCommentary.PostId = id;
 
                     return Page();

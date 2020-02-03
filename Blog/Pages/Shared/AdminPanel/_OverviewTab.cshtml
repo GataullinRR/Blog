@@ -49,7 +49,7 @@
 </div>
 
 @{
-    var registredUserViewsPercent = Model.LastElement().PostsViewStatistic.RegistredUserViews / (double)Model.LastElement().PostsViewStatistic.TotalViews;
+    var registredUserViewsPercent = Model.LastElement().PostsViewStatistic.RegisteredUserViews / (double)Model.LastElement().PostsViewStatistic.TotalViews;
     var otherViewsPercent = 1 - registredUserViewsPercent;
 }
 

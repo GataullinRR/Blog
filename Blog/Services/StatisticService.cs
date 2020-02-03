@@ -50,7 +50,7 @@ namespace Blog.Services
                     else if (entry.Entity is IViewStatistic viewStatistic && entry.State == EntityState.Modified) // Update blog statistic
                     {
                         var totalViewsProperty = entry.Property(nameof(IViewStatistic.TotalViews));
-                        var registredUserViewsProperty = entry.Property(nameof(IViewStatistic.RegistredUserViews));
+                        var registredUserViewsProperty = entry.Property(nameof(IViewStatistic.RegisteredUserViews));
                         var totalViewsDelta = totalViewsProperty.CurrentValue.To<int>() - totalViewsProperty.OriginalValue.To<int>();
                         var registredUserViewsDelta = registredUserViewsProperty.CurrentValue.To<int>() - registredUserViewsProperty.OriginalValue.To<int>();
                         if (viewStatistic is IViewStatistic<Commentary>)
@@ -76,7 +76,7 @@ namespace Blog.Services
                         }
                     }
                 }
-            } 
+            }
         }
 
         #region ### Blog-wide statistic ###
@@ -132,13 +132,13 @@ namespace Blog.Services
         {
             var statistic = ensureHasThisDayBlogStatistic();
             statistic.CommentariesViewStatistic.TotalViews += totalViewsDelta;
-            statistic.CommentariesViewStatistic.RegistredUserViews += registredUserViewsDelta;
+            statistic.CommentariesViewStatistic.RegisteredUserViews += registredUserViewsDelta;
         }
         void updatePostsViewStatistic(int totalViewsDelta, int registredUserViewsDelta)
         {
             var statistic = ensureHasThisDayBlogStatistic();
             statistic.PostsViewStatistic.TotalViews += totalViewsDelta;
-            statistic.PostsViewStatistic.RegistredUserViews += registredUserViewsDelta;
+            statistic.PostsViewStatistic.RegisteredUserViews += registredUserViewsDelta;
         }
 
         BlogDayStatistic ensureHasThisDayBlogStatistic()
@@ -158,12 +158,12 @@ namespace Blog.Services
                     CommentariesCount = lastStatistic.CommentariesCount,
                     CommentariesViewStatistic = new ViewStatistic<Commentary>()
                     {
-                        RegistredUserViews = lastStatistic.CommentariesViewStatistic.RegistredUserViews,
+                        RegisteredUserViews = lastStatistic.CommentariesViewStatistic.RegisteredUserViews,
                         TotalViews = lastStatistic.CommentariesViewStatistic.TotalViews,
                     },
                     PostsViewStatistic = new ViewStatistic<Post>()
                     {
-                        RegistredUserViews = lastStatistic.PostsViewStatistic.RegistredUserViews,
+                        RegisteredUserViews = lastStatistic.PostsViewStatistic.RegisteredUserViews,
                         TotalViews = lastStatistic.PostsViewStatistic.TotalViews,
                     }
                 };

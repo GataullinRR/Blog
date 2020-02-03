@@ -46,6 +46,9 @@ namespace DBModels
                 CommentariesToCheck
             };
         public DbSet<ModerationInfo> ModerationInfos { get; set; }
+        public DbSet<ViewStatistic<Commentary>> CommentaryViews { get; set; }
+        public DbSet<ViewStatistic<Post>> PostViews { get; set; }
+        public DbSet<ViewStatistic<Profile>> ProfileViews { get; set; }
         public DbSet<ModeratorsGroupStatistic> ModeratorsGroupStatistics { get; set; }
         /// <summary>
         /// Contains single entity

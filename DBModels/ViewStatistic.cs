@@ -10,7 +10,7 @@ namespace DBModels
 {
     public interface IViewStatistic : IDbEntity
     {
-        int RegistredUserViews { get; set; }
+        int RegisteredUserViews { get; set; }
         int TotalViews { get; set; }
     }
 
@@ -25,7 +25,7 @@ namespace DBModels
         public int Id { get; set; }
         public int? OwnerId { get; set; }
         public T Owner { get; set; }
-        public int RegistredUserViews { get; set; }
+        public int RegisteredUserViews { get; set; }
         public int TotalViews { get; set; }
     }
 }
