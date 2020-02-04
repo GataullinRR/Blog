@@ -122,10 +122,12 @@ namespace PerformanceTest
                         .ToArray();
                     if (parameters.Length == info.Parameters.Length)
                     {
+                        var parsedSuccessfully = true;
                         var parsedParameters = new object[info.Parameters.Length];
                         for (int i = 0; i < info.Parameters.Length; i++)
                         {
-                            if (parameters[i][0].Skip(1).Aggregate() == info.Parameters[i].Info.ParameterName)
+                            var parameterName = parameters[i][0].Skip(1).Aggregate();
+                            if (parameterName == info.Parameters[i].Info.ParameterName)
                             {
                                 if (info.Parameters[i].Type == typeof(int))
                                 {
@@ -138,12 +140,24 @@ namespace PerformanceTest
                             }
                             else
                             {
-                                throw new Exception();
+                                Console.WriteLine($"ERR: Paramater \"{parameterName}\" is not recognized");
+                                
+                                parsedSuccessfully = false;
+                                break;
                             }
                         }
 
-
-                        await (Task)info.Handler.Invoke(null, parsedParameters);
+                        if (parsedSuccessfully)
+                        {
+                            try
+                            {
+                                await (Task)info.Handler.Invoke(null, parsedParameters);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Eception while executing command. Ex: {ex}");
+                            }
+                        }
                     }
                     else
                     {

@@ -59,7 +59,10 @@ namespace DBModels
         public BlogContext(DbContextOptions<BlogContext> options)
             : base(options)
         {
-            Database.EnsureCreated();
+            // Dont want to spend 4ms each time on
+            // IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE') SELECT 1 ELSE SELECT 0
+            // query
+            //Database.EnsureCreated();
 
             _modeManager.Activated += _modeManager_Activated;
             _modeManager.Deactivated += _modeManager_Deactivated;
@@ -77,7 +80,7 @@ namespace DBModels
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseLazyLoadingProxies();
-
+            
             base.OnConfiguring(optionsBuilder);
         }
 

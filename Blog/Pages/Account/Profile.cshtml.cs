@@ -51,7 +51,7 @@ namespace Blog.Pages.Account
             IsCurrentUser = currentUser?.Id == UserModel.Id;
             Role = (await S.UserManager.GetRolesAsync(UserModel)).Single();
             ContactHelpEmail = await S.ContactEmailProvider.GetHelpContactEmailAsync();
-            await S.DbUpdator.UpdateViewStatisticAsync(currentUser, UserModel.Profile.ViewStatistic);
+            await S.DbUpdator.UpdateViewStatisticAsync(currentUser != null, UserModel.Profile.ViewStatistic);
             await S.Db.SaveChangesAsync();
 
             return Page();

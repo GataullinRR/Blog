@@ -39,28 +39,28 @@ namespace Blog.Services
             loopAsync();
         }
 
-        public async Task UpdateViewStatisticAsync(User currentUser, IViewStatistic viewStatistic)
+        public async Task UpdateViewStatisticAsync(bool isUserRegisteredUser, IViewStatistic viewStatistic)
         {
-            updateViewStatistic(currentUser, (dynamic)viewStatistic);
+            updateViewStatistic(isUserRegisteredUser, (dynamic)viewStatistic);
         }
-        void updateViewStatistic(User currentUser, IViewStatistic<Post> viewStatistic)
+        void updateViewStatistic(bool isUserRegisteredUser, IViewStatistic<Post> viewStatistic)
         {
             var statistic = _postsDeltas.GetOrAdd(viewStatistic.Id, new ViewStatisticDelta());
-            increment(currentUser, statistic);
+            increment(isUserRegisteredUser, statistic);
         }
-        void updateViewStatistic(User currentUser, IViewStatistic<Commentary> viewStatistic)
+        void updateViewStatistic(bool isUserRegisteredUser, IViewStatistic<Commentary> viewStatistic)
         {
             var statistic = _commentariesDeltas.GetOrAdd(viewStatistic.Id, new ViewStatisticDelta());
-            increment(currentUser, statistic);
+            increment(isUserRegisteredUser, statistic);
         }
-        void updateViewStatistic(User currentUser, IViewStatistic<Profile> viewStatistic)
+        void updateViewStatistic(bool isUserRegisteredUser, IViewStatistic<Profile> viewStatistic)
         {
             var statistic = _profilesDeltas.GetOrAdd(viewStatistic.Id, new ViewStatisticDelta());
-            increment(currentUser, statistic);
+            increment(isUserRegisteredUser, statistic);
         }
-        void increment(User currentUser, ViewStatisticDelta statistic)
+        void increment(bool isUserRegisteredUser, ViewStatisticDelta statistic)
         {
-            if (currentUser != null)
+            if (isUserRegisteredUser)
             {
                 Interlocked.Increment(ref statistic.RegisteredUserViews);
             }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Middlewares;
 using Blog.Models;
 using Blog.Services;
 using DBModels;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Utilities.Extensions;
+using Utilities.Types;
 
 namespace Blog.Pages
 {
@@ -27,6 +29,17 @@ namespace Blog.Pages
             NewCommentary = new CommentaryCreateModel();
         }
 
+        [CustomResponseCacheHandler(CacheManagerService.POST_GET_CACHE_KEY)]
+        public static async Task HandelCachedOnGetAsync(CacheScope scope)
+        {
+            var services = scope.ServiceProvider.GetService<ServicesLocator>();
+            var isUserRegistered = services.HttpContext.User?.Identity?.IsAuthenticated ?? false;
+            var viewStatistics = scope.RequestData.To<IViewStatistic[]>();
+
+            await updateViewStatisticAsync(services.DbUpdator, isUserRegistered, viewStatistics);
+        }
+
+        [CustomResponseCache(20, 3 * 60, CacheMode.PUBLIC, CacheManagerService.POST_GET_CACHE_KEY)]
         public async Task<IActionResult> OnGetAsync([Required]int id)
         {
             if (ModelState.IsValid)
@@ -42,11 +55,14 @@ namespace Blog.Pages
                     var currentUser = await S.UserManager.GetUserAsync(User);
 
                     Commentaries = S.Db.Commentaries.Where(c => c.Post == Post);
-                    foreach (var commentary in Commentaries)
+                    var viewStatistics = new Enumerable<IViewStatistic>
                     {
-                        await S.DbUpdator.UpdateViewStatisticAsync(currentUser, commentary.ViewStatistic);
-                    }
-                    await S.DbUpdator.UpdateViewStatisticAsync(currentUser, Post.ViewStatistic);
+                        Post.ViewStatistic,
+                        Commentaries.Select(c => c.ViewStatistic),
+                    }.ToArray();
+                    
+                    await S.CacheManager.CacheManager.SetRequestDataAsync(CacheManagerService.POST_GET_CACHE_KEY, viewStatistics);
+                    await updateViewStatisticAsync(S.DbUpdator, currentUser != null, viewStatistics);
 
                     NewCommentary.PostId = id;
 
@@ -56,6 +72,14 @@ namespace Blog.Pages
             else
             {
                 throw new Exception();
+            }
+        }
+
+        static async Task updateViewStatisticAsync(DbEntitiesUpdateService updateService, bool isUserRegistered, IViewStatistic[] viewStatistics)
+        {
+            foreach (var vs in viewStatistics)
+            {
+                await updateService.UpdateViewStatisticAsync(isUserRegistered, vs);
             }
         }
 

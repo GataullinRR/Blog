@@ -75,12 +75,12 @@ namespace Blog
             });
             services.AddMvc(options =>
             {
+                options.Filters.Add(new AttributesProviderAsyncPageFilter());
                 //options.CacheProfiles.Add(ResponseCaching.DAILY, new CacheProfile()
                 //{
                 //    Duration = 60 * 60 * 24
                 //});
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
 
             services.AddSession();
             services.AddMemoryCache();
@@ -149,9 +149,9 @@ namespace Blog
 
             //app.UseResponseCaching();
             app.UseAuthentication();
-            //app.UseMiddleware<CustomResponseCachingMiddleware>(); // disable for debugging
-            app.UseMiddleware<ScopedServiceInstantiatorMiddleware<StatisticService>>(); // to execute before all other services
             app.UseMiddleware<ErrorsHandlerMiddleware>();
+            app.UseMiddleware<CustomResponseCachingMiddleware>(); // disable for debugging
+            app.UseMiddleware<ScopedServiceInstantiatorMiddleware<StatisticService>>(); // to execute before all other services
             app.UseStaticFiles(new StaticFileOptions
             {
                 OnPrepareResponse = (context) =>

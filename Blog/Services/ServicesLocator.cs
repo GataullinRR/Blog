@@ -44,6 +44,7 @@ namespace Blog.Services
         readonly Lazy<URIProviderService> _uriProvider;
         readonly Lazy<IMemoryCache> _memoryCache;
         readonly Lazy<ContactEmailProviderService> _contactEmailProvider;
+        readonly Lazy<CacheManagerService> _cacheManager;
 
         public IServiceProvider ServiceProvider { get; }
         public BlogContext Db => _db.Value;
@@ -72,6 +73,7 @@ namespace Blog.Services
         public URIProviderService URIProvider => _uriProvider.Value;
         public IMemoryCache MemoryCache => _memoryCache.Value;
         public ContactEmailProviderService ContactEmailProvider => _contactEmailProvider.Value;
+        public CacheManagerService CacheManager => _cacheManager.Value;
 
         public ServicesLocator(IServiceProvider serviceProvider)
         {
@@ -103,6 +105,7 @@ namespace Blog.Services
             _uriProvider = ServiceProvider.GetLazyService<URIProviderService>();
             _memoryCache = ServiceProvider.GetLazyService<IMemoryCache>();
             _contactEmailProvider = ServiceProvider.GetLazyService<ContactEmailProviderService>();
+            _cacheManager = ServiceProvider.GetLazyService<CacheManagerService>();
         }
     }
 }
