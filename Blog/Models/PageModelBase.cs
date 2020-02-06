@@ -15,7 +15,7 @@ namespace Blog.Models
 {
     public interface ILayoutModelProvider
     {
-        LayoutModel LayoutModel { get; }
+        ServerLayoutModel LayoutModel { get; }
     }
 
     public abstract class PageModelBase : PageModel, ILayoutModelProvider
@@ -23,7 +23,7 @@ namespace Blog.Models
         public ServicesLocator S { get; set; }
 
         public PermissionsService Permissions => S.Permissions;
-        public LayoutModel LayoutModel { get; private set; }
+        public ServerLayoutModel LayoutModel { get; private set; }
         protected bool autoSaveDbChanges = false;
 
         public PageModelBase(ServicesLocator services)
@@ -31,24 +31,44 @@ namespace Blog.Models
             S = services;
         }
 
-        public override void OnPageHandlerSelected(PageHandlerSelectedContext context)
-        {
-            LayoutModel = LayoutModel.LoadOrNew(HttpContext.Session);
+        //public override void OnPageHandlerSelected(PageHandlerSelectedContext context)
+        //{
+        //    LayoutModel = ServerLayoutModel.LoadOrNewAsync(HttpContext.Session);
 
-            base.OnPageHandlerSelected(context);
-        }
+        //    base.OnPageHandlerSelected(context);
+        //}
 
-        public override void OnPageHandlerExecuted(PageHandlerExecutedContext context)
+        public override async Task OnPageHandlerExecutionAsync(PageHandlerExecutingContext context, PageHandlerExecutionDelegate next)
         {
-            LayoutModel.UpdateMessages();
-            LayoutModel.Save(HttpContext.Session);
-            S.History.SaveCurrentURL();
-            if (autoSaveDbChanges)
+            LayoutModel = await ServerLayoutModel.LoadOrNewAsync(S);
+
+            try
             {
-                S.Db.SaveChanges();
+                await base.OnPageHandlerExecutionAsync(context, next);
             }
-
-            base.OnPageHandlerExecuted(context);
+            finally
+            {
+                LayoutModel.UpdateMessages();
+                LayoutModel.Save(HttpContext.Session);
+                S.History.SaveCurrentURL();
+                if (autoSaveDbChanges)
+                {
+                    S.Db.SaveChanges();
+                }
+            }
         }
+
+        //public override void OnPageHandlerExecuted(PageHandlerExecutedContext context)
+        //{
+        //    LayoutModel.UpdateMessages();
+        //    LayoutModel.Save(HttpContext.Session);
+        //    S.History.SaveCurrentURL();
+        //    if (autoSaveDbChanges)
+        //    {
+        //        S.Db.SaveChanges();
+        //    }
+
+        //    base.OnPageHandlerExecuted(context);
+        //}
     }
 }

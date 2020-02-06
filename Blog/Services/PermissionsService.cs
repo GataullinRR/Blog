@@ -579,12 +579,12 @@ namespace Blog.Services
 
         public async Task ValidateAccessBlogControlPanelAsync()
         {
-            if (!await CanAccessBlogControlPanelAsync())
+            if (!await CanAccessAdminPanelAsync())
             {
                 throw buildException();
             }
         }
-        public async Task<bool> CanAccessBlogControlPanelAsync()
+        public async Task<bool> CanAccessAdminPanelAsync()
         {
             var currentUser = await getCurrentUserOrNullAsync();
             if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
@@ -606,7 +606,7 @@ namespace Blog.Services
         }
         public async Task<bool> CanGenerateActivationLinkAsync(ActivationLinkAction activationLinkAction)
         {
-            return await CanAccessBlogControlPanelAsync();
+            return await CanAccessAdminPanelAsync();
         }
 
         public async Task ValidateMarkAsNotPassedModerationAsync(IModeratable entity)

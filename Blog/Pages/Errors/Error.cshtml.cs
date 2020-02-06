@@ -11,11 +11,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Blog.Pages.Errors
 {
-    public class ErrorModel : PageModel
+    public class ErrorModel : PageModelBase
     {
         public int HttpStatus { get; private set; }
 
-        public ErrorModel(ServicesLocator services)
+        public ErrorModel(ServicesLocator services) : base(services)
         {
 
         }
@@ -41,7 +41,6 @@ namespace Blog.Pages.Errors
             //{
             //    ExceptionMessage += " from home page";
             //}
-
         }
     }
 }

@@ -53,13 +53,13 @@ namespace Blog.Models
     }
 
     [Serializable]
-    public class MessageModel
+    public class MessageServerModel
     {
         public string Text { get; }
         public List<JSHandledAction> JSActions { get; } = new List<JSHandledAction>();
         internal CreationStage Stage { get; set; } = CreationStage.JUST_CREATED;
 
-        public MessageModel(string text)
+        public MessageServerModel(string text)
         {
             Text = text ?? throw new ArgumentNullException(nameof(text));
         }

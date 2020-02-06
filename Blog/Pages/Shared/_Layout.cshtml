@@ -1,10 +1,15 @@
-﻿@{
-    var model = (Model as ILayoutModelProvider)?.LayoutModel ?? new LayoutModel();
-    var currentUser = await UserManager.GetUserAsync(User);
+﻿@model ILayoutModelProvider
+
+@{
+    const string AUTH_USER_CONTROL = nameof(AUTH_USER_CONTROL);
+    const string NOT_AUTH_USER_CONTROLS = nameof(NOT_AUTH_USER_CONTROLS);
+    const string USER_NAME_HOLDER_ID = nameof(USER_NAME_HOLDER_ID);
+    const string CREATE_POST_CONTROLS = nameof(CREATE_POST_CONTROLS);
+    const string MOD_PANEL_CONTROLS = nameof(MOD_PANEL_CONTROLS);
+    const string ADMIN_PANEL_CONTROLS = nameof(ADMIN_PANEL_CONTROLS);
+
+    var serverModel = Model.LayoutModel.LayoutModel;
 }
-@inject Blog.Services.PermissionsService Permissions
-@inject Microsoft.AspNetCore.Identity.UserManager<User> UserManager
-@inject Blog.Services.StatisticService T
 
     <!DOCTYPE html>
 
@@ -25,6 +30,7 @@
 
         <script>
             var partialLoaders = [];
+            var model = @Json.Serialize(serverModel);
         </script>
     </head>
 
@@ -43,42 +49,31 @@
                 </button>
                 <div class="collapse navbar-collapse" id="collapsibleNavbar">
                     <ul class="navbar-nav mr-auto">
-                        @if (User.Identity.IsAuthenticated)
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link" asp-page="/Account/Profile">@User.Identity.Name</a>
+                        <li class="nav-item @AUTH_USER_CONTROL d-none">
+                            <a id="@USER_NAME_HOLDER_ID" class="nav-link" asp-page="/Account/Profile"></a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item @AUTH_USER_CONTROL d-none">
                             <a class="nav-link" asp-controller="Account" asp-action="Logout">Logout</a>
                         </li>
-                    }
-                    else
-                    {
-                        <li class="nav-item">
+
+                        <li class="nav-item @NOT_AUTH_USER_CONTROLS d-none">
                             <a class="nav-link" asp-page="/Account/Login">Login</a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item @NOT_AUTH_USER_CONTROLS d-none">
                             <a class="nav-link" asp-page="/Account/Register">Register</a>
                         </li>
-                    }
-                        @if (await Permissions.CanCreatePostAsync())
-                    {
-                        <li class="nav-item">
+
+                        <li class="nav-item @CREATE_POST_CONTROLS d-none">
                             <a class="nav-link" asp-page="/PostCreate">New post</a>
                         </li>
-                    }
-                        @if (await Permissions.CanAccessModeratorsPanelAsync(currentUser))
-                    {
-                        <li class="nav-item">
+
+                        <li class="nav-item @MOD_PANEL_CONTROLS d-none">
                             <a class="nav-link" asp-page="/ModeratorPanel">Moderator panel</a>
                         </li>
-                    }
-                        @if (await Permissions.CanAccessBlogControlPanelAsync())
-                    {
-                        <li class="nav-item">
+
+                        <li class="nav-item @ADMIN_PANEL_CONTROLS d-none">
                             <a class="nav-link" asp-page="/AdminPanel">Admin panel</a>
                         </li>
-                    }
                     </ul>
 
                     <form class="form-inline my-2" method="get" action="@SearchController.SEARCH_URI">
@@ -90,12 +85,32 @@
                 </div>
             </nav>
 
-            <div id="messages">
-                @foreach (var message in model.Messages)
-            {
-                await Html.RenderPartialAsync("_MessageTemplate", message);
-            }
+            <div class="d-none">
+                <div id="message-template">
+                    <div class="message container-fluid">
+                        <div class="row justify-content-center py-3">
+                            <div class="col container-main">
+                                <div class="d-flex flex-sm-row d-flex">
+                                    <div class="message-text d-flex flex-sm-column flex-grow-1">
+
+                                    </div>
+
+                                    <div class="d-flex flex-sm-column align-self-center ml-2">
+                                        <a href="" class="no-redirect" onclick="removeParent(this)">Dismiss</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="message-button-template">
+                    <div class="d-flex flex-sm-column align-self-center ml-2">
+                        <span><a href="" class="no-redirect message-button"></a> |</span>
+                    </div>
+                </div>
             </div>
+            <div id="messages"></div>
+
             @RenderBody()
 
             <footer>
@@ -115,7 +130,6 @@
             <partial name="_HelperFunctions" />
 
             <script>
-
                 // See https://www.tiny.cloud/docs/demo/full-featured/
                 // and https://www.tiny.cloud/docs/configure/editor-appearance/#menu
                 tinymce.init({
@@ -152,6 +166,28 @@
                 });
 
                 $(document).ready(function () {
+                    function render() {
+                        //var model = getCacheModel();
+                        setVisibility("@CREATE_POST_CONTROLS", model.@nameof(serverModel.canCreatePost));
+                        setVisibility("@MOD_PANEL_CONTROLS", model.@nameof(serverModel.canAccessModsPanel));
+                        setVisibility("@ADMIN_PANEL_CONTROLS", model.@nameof(serverModel.canAccessAdminsPanel));
+                        setVisibility("@AUTH_USER_CONTROL", model.@nameof(serverModel.userName) !== null);
+                        setVisibility("@NOT_AUTH_USER_CONTROLS", model.@nameof(serverModel.userName) === null);
+                        setVisibility("@CREATE_POST_CONTROLS", model.@nameof(serverModel.canCreatePost));
+                        $("#@USER_NAME_HOLDER_ID").html(model.@nameof(serverModel.userName));
+
+                        for (var i = 0; i < model.@(nameof(serverModel.messages)).length; i++) {
+                            var message = model.@(nameof(serverModel.messages))[i];
+                            renderMessage(message.@nameof(MessageModel.text), message.@nameof(MessageModel.jsActions)); 
+                        }
+
+                        function setVisibility(elementsClass, visibility) {
+                            if (visibility === true) {
+                                $("." + elementsClass).removeClass("d-none");
+                            }
+                        }
+                    }
+
                     function applyClasses() {
                         $('a').click(function (e) {
                             if ($(this).hasClass("no-redirect")) {
@@ -178,6 +214,7 @@
                         subtree: true, // Important
                     };
 
+                    render();
                     observer.observe(document.body, config);
                     applyClasses();
 
@@ -198,15 +235,20 @@
                 }
 
                 function renderMessage(messageText, jsActions) {
-                    var route = "/Messages/GetMessageView?body=" + messageText;
-                    if (jsActions != undefined) {
-                        route += "&jsActions=" + jsActions;
+                    var template = $($("#message-template").html());
+                    $(".message-text", template).html(messageText);
+                    if (jsActions !== undefined) {
+                        jsActions = jsActions.split(',');
+                        for (var i = 0; i < jsActions.length; i++) {
+                            var jsAction = jsActions[i];
+                            var nameAndFunc = jsAction.split('=>');
+
+                            var buttonTemplate = $($("#message-button-template").html());
+                            $("a", buttonTemplate).html(nameAndFunc[0]).attr("onclick", nameAndFunc[1]);
+                            $(buttonTemplate).insertAfter($(".message-text", template));
+                        }
                     }
-                    makeRequest(route, "get", function (response) {
-                        var container = document.createElement("div");
-                        container.innerHTML = response;
-                        document.getElementById("messages").appendChild(container);
-                    });
+                    $("#messages").append(template);
                 }
 
                 function removeParent(element) {

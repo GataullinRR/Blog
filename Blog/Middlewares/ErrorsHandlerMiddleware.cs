@@ -23,6 +23,7 @@ namespace Blog.Middlewares
         public async Task Invoke(HttpContext httpContext)
         {
             var shouldRedirectToErrorPage = true;
+            var statusCode = HttpStatusCode.OK;
             try
             {
                 await _next(httpContext);
@@ -30,19 +31,19 @@ namespace Blog.Middlewares
             }
             catch (UnauthorizedAccessException)
             {
-                httpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                statusCode = HttpStatusCode.Unauthorized;
             }
             catch (AuthenticationException)
             {
-                httpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                statusCode = HttpStatusCode.Unauthorized;
             }
             catch (NotFoundException)
             {
-                httpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                statusCode = HttpStatusCode.NotFound;
             }
             catch (Exception ex)
             {
-                httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                statusCode = HttpStatusCode.InternalServerError;
             }
             
             if (shouldRedirectToErrorPage)
@@ -53,9 +54,9 @@ namespace Blog.Middlewares
                     var isAjaxEndpoint = endpoint.Metadata.GetMetadata<AJAXAttribute>() != null;
                     if (!isAjaxEndpoint) // For AJAX error page wont be rendered
                     {
-                        var statusCode = httpContext.Response.StatusCode;
                         httpContext.Response.Clear();
-                        httpContext.Response.Redirect($"/Errors/Error?code={statusCode}", false);
+                        httpContext.Response.StatusCode = (int)statusCode;
+                        httpContext.Response.Redirect($"/Errors/Error?code={httpContext.Response.StatusCode}", false);
                     }
                 }
             }

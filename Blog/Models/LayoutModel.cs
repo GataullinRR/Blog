@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Blog.Services;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,13 +9,15 @@ using Utilities.Extensions;
 namespace Blog.Models
 {
     [Serializable()]
-    public class LayoutModel
+    public class ServerLayoutModel
     {
-        public List<MessageModel> Messages { get; } = new List<MessageModel>();
+        public List<MessageServerModel> Messages { get; } = new List<MessageServerModel>();
+
+        public LayoutModel LayoutModel { get; } = new LayoutModel();
 
         public void AddMessage(string message)
         {
-            Messages.Add(new MessageModel(message));
+            Messages.Add(new MessageServerModel(message));
         }
 
         public void UpdateMessages()
@@ -26,16 +29,29 @@ namespace Blog.Models
             }
         }
 
-        public static LayoutModel LoadOrNew(ISession session)
+        public static async Task<ServerLayoutModel> LoadOrNewAsync(ServicesLocator services)
         {
-            return session.Keys.Contains(nameof(LayoutModel))
-                ? session.GetString(nameof(LayoutModel)).FromBase64().Deserialize<LayoutModel>()
-                : new LayoutModel();
+            var model = services.HttpContext.Session.Keys.Contains(nameof(ServerLayoutModel))
+                ? services.HttpContext.Session.GetString(nameof(ServerLayoutModel)).FromBase64().Deserialize<ServerLayoutModel>()
+                : new ServerLayoutModel();
+            var currentUser = await services.Utilities.GetCurrentUserModelAsync();
+            model.LayoutModel.canAccessAdminsPanel = await services.Permissions.CanAccessAdminPanelAsync();
+            model.LayoutModel.canAccessModsPanel = await services.Permissions.CanAccessModeratorsPanelAsync(currentUser);
+            model.LayoutModel.canCreatePost = await services.Permissions.CanCreatePostAsync();
+            model.LayoutModel.messages = model.Messages.Select(m => new MessageModel()
+            {
+                text = m.Text,
+                jsActions = m.JSActions.Select(a => $"{a.Name}=>{a.FunctionName}").Aggregate(",")
+            }).ToArray();
+            model.LayoutModel.userName = currentUser?.UserName;
+            model.LayoutModel.userId = currentUser?.Id;
+
+            return model;
         }
 
         public void Save(ISession session)
         {
-            session.SetString(nameof(LayoutModel), this.Serialize().ToBase64());
+            session.SetString(nameof(ServerLayoutModel), this.Serialize().ToBase64());
         }
     }
 }

@@ -58,4 +58,11 @@
         xhr.open(requestType, route);
         xhr.send();
     }
+
+    function getCacheModel() {
+        // In JSON
+        var rawModel = $('@(CustomCache.CACHE_MODEL_TAG)[@CustomCache.CACHE_MODEL_TAG_ATTRIBUTE]').html();
+
+        return eval(rawModel);
+    }
 </script>

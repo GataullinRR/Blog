@@ -18,26 +18,35 @@ namespace Blog.Controllers
     public abstract class ControllerBase : Controller, ILayoutModelProvider
     {
         internal ServicesLocator S { get; }
-        public LayoutModel LayoutModel { get; private set; }
+        public ServerLayoutModel LayoutModel { get; private set; }
 
         public ControllerBase(ServicesLocator serviceProvider)
         {
             S = serviceProvider;
         }
 
-        public override void OnActionExecuted(ActionExecutedContext context)
+        //public override void OnActionExecuted(ActionExecutedContext context)
+        //{
+        //    LayoutModel.UpdateMessages();
+        //    LayoutModel.Save(HttpContext.Session);
+
+        //    base.OnActionExecuted(context);
+        //}
+
+
+        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            LayoutModel.UpdateMessages();
-            LayoutModel.Save(HttpContext.Session);
+            LayoutModel = await ServerLayoutModel.LoadOrNewAsync(S);
 
-            base.OnActionExecuted(context);
-        }
-
-        public override void OnActionExecuting(ActionExecutingContext context)
-        {
-            LayoutModel = LayoutModel.LoadOrNew(HttpContext.Session);
-
-            base.OnActionExecuting(context);
+            try
+            {
+                await base.OnActionExecutionAsync(context, next);
+            }
+            finally
+            {
+                LayoutModel.UpdateMessages();
+                LayoutModel.Save(HttpContext.Session);
+            }
         }
 
         protected static string getURIToAction(string controllerNameOf, string actionName)

@@ -16,6 +16,33 @@ using Utilities.Types;
 
 namespace Blog.Pages
 {
+
+    public class CacheModelScope
+    {
+        public IServiceProvider ServiceProvider { get; }
+    }
+
+    /// <summary>
+    /// The marked method should be static, taking <see cref="CacheModelScope"/> and returning <see cref="Task{string}"/>, where <see cref="string"/>
+    /// is JSON value of a <see cref="CustomCache.CACHE_MODEL_VAR"/>
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+    public class CacheModelProviderAttribute : Attribute
+    {
+        public CacheModelProviderAttribute(int invalidationInterval, string cacheKey)
+        {
+            InvalidationInterval = invalidationInterval;
+            CacheKey = cacheKey ?? throw new ArgumentNullException(nameof(cacheKey));
+        }
+
+        /// <summary>
+        /// In secounds
+        /// </summary>
+        public int InvalidationInterval { get; }
+        public Key CacheKey { get; }
+    }
+
+
     public class PostModel : PageModelBase
     {
         public Post Post { get; private set; }
@@ -27,6 +54,26 @@ namespace Blog.Pages
         public PostModel(ServicesLocator serviceProvider) : base(serviceProvider)
         {
             NewCommentary = new CommentaryCreateModel();
+        }
+
+
+
+        public class PostCacheModelDTO : ServerLayoutModel
+        {
+            
+            public bool canEdit { get; set; }
+            public bool canReport { get; set; }
+            public bool canReportViolation { get; set; }
+            public bool canMarkAsModerated { get; set; }
+            public bool canMarkAsNotPassedModeration { get; set; }
+            public bool canDelete { get; set; }
+            public bool canRestore { get; set; }
+        }
+
+        [CacheModelProvider(1 * 60 * 60, CacheManagerService.POST_GET_CACHE_KEY)]
+        public static async Task<string> ProvideModelAsync(CacheModelScope scope)
+        {
+            return "";
         }
 
         [CustomResponseCacheHandler(CacheManagerService.POST_GET_CACHE_KEY)]
