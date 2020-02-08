@@ -10,7 +10,7 @@ namespace Blog.Controllers
 #if DEBUG
     public class TestingController : ControllerBase
     {
-        public TestingController(ServicesLocator serviceProvider) : base(serviceProvider)
+        public TestingController(ServiceLocator serviceProvider) : base(serviceProvider)
         {
         }
 

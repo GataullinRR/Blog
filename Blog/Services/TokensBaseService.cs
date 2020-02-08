@@ -37,7 +37,7 @@ namespace Blog.Services
         protected abstract TimeSpan _tokenLifespan { get; }
         protected abstract ControllerAction _targetAction { get; }
 
-        public TokensBaseService(ServicesLocator services, IDataProtector protector) : base(services)
+        public TokensBaseService(ServiceLocator services, IDataProtector protector) : base(services)
         {
             _protector = protector;
         }

@@ -17,7 +17,7 @@ namespace Blog.Pages
         public string EditReason { get; set; }
         public Post Post { get; private set; }
 
-        public PostEditModel(ServicesLocator serviceProvider) : base(serviceProvider)
+        public PostEditModel(ServiceLocator serviceProvider) : base(serviceProvider)
         {
 
         }

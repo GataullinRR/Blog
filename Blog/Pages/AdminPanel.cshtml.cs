@@ -16,7 +16,7 @@ namespace Blog.Pages
         public IEnumerable<User> Moderators { get; private set; }
         public IQueryable<ModeratorsGroup> ModeratorsGroups { get; private set; }
 
-        public AdminPanelModel(ServicesLocator services) : base(services)
+        public AdminPanelModel(ServiceLocator services) : base(services)
         {
 
         }

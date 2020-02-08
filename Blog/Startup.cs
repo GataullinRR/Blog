@@ -93,7 +93,7 @@ namespace Blog
             services.AddScoped<DecisionsService>();
             //services.AddScoped<DbEntitiesUpdateService>();
             services.AddScoped<LinkBuilderService>();
-            services.AddScoped<ServicesLocator>();
+            services.AddScoped<ServiceLocator>();
             services.AddScoped<ActivationLinkGeneratorService>();
             services.AddScoped<SessionMutatorsManagerService>();
             services.AddScoped<BanningService>();

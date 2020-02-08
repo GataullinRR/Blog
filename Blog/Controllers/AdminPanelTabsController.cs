@@ -27,7 +27,7 @@ namespace Blog.Controllers
 
         public static readonly string FULL_POSTS_TABLE_URI = getURIToAction(nameof(AdminPanelTabsController), nameof(LoadFullPostsTableAsync));
 
-        public AdminPanelTabsController(ServicesLocator serviceProvider) : base(serviceProvider)
+        public AdminPanelTabsController(ServiceLocator serviceProvider) : base(serviceProvider)
         {
 
         }

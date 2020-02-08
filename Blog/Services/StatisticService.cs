@@ -13,7 +13,7 @@ namespace Blog.Services
     [Service(ServiceType.SCOPED)]
     public class StatisticService : ServiceBase
     {
-        public StatisticService(ServicesLocator services) : base(services)
+        public StatisticService(ServiceLocator services) : base(services)
         {
             S.Db.SavingChanges += Db_SavingChanges;
         }

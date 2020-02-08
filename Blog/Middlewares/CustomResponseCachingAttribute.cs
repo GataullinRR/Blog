@@ -8,7 +8,7 @@ namespace Blog.Middlewares
     public enum CacheMode
     {
         USER_SCOPED = 0,
-        PUBLIC,
+        FOR_ANONYMOUS,
     }
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]

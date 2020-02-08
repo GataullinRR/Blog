@@ -9,7 +9,7 @@ namespace Blog.Services
     [Service(ServiceType.SCOPED)]
     public class URIProviderService : ServiceBase
     {
-        public URIProviderService(ServicesLocator services) : base(services)
+        public URIProviderService(ServiceLocator services) : base(services)
         {
 
         }

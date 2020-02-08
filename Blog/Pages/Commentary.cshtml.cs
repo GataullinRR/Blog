@@ -15,7 +15,7 @@ namespace Blog.Pages
     {
         public Commentary Commentary { get; private set; }   
 
-        public CommentaryModel(ServicesLocator services) : base(services)
+        public CommentaryModel(ServiceLocator services) : base(services)
         {
 
         }

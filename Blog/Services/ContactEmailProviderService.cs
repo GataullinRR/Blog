@@ -13,7 +13,7 @@ namespace Blog.Services
     {
         readonly Random _rnd = new Random();
 
-        public ContactEmailProviderService(ServicesLocator services) : base(services)
+        public ContactEmailProviderService(ServiceLocator services) : base(services)
         {
 
         }

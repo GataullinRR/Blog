@@ -18,7 +18,14 @@ namespace Blog.Controllers
     [Authorize(Roles = Roles.NOT_RESTRICTED)]
     public class CommentaryController : ControllerBase
     {
-        public CommentaryController(ServicesLocator serviceProvider) : base(serviceProvider)
+        public const int MAX_COMMENTARY_LENGTH = 500;
+        public const int MIN_COMMENTARY_LENGTH = 10;
+        public const int MIN_EDIT_REASON_LENGTH = 10;
+        public const int MAX_EDIT_REASON_LENGTH = 100;
+
+        public static readonly string GET_COMMENTARIES_SECTION_URI = getURIToAction(nameof(CommentaryController), nameof(GetCommentariesSectionAsync));
+
+        public CommentaryController(ServiceLocator serviceProvider) : base(serviceProvider)
         {
 
         }
@@ -40,14 +47,45 @@ namespace Blog.Controllers
         }
 
         [HttpGet(), AllowAnonymous()]
-        public async Task<IActionResult> GetCommentaryAsync([Required]int id)
+        public async Task<IActionResult> GetCommentariesSectionAsync([Required]int id)
         {
             if (ModelState.IsValid)
             {
-                var commentary = await S.Db.Commentaries.FirstAsync(c => c.Id == id);
-                var user = await S.UserManager.GetUserAsync(User);
+                using (S.Db.LazyLoadingSuppressingMode)
+                {
+                    var commentaries = S.Db.Commentaries
+                        .AsNoTracking()
+                        .Where(c => c.Post.Id == id)
+                        .Select(c => new CommentaryModel()
+                        {
+                            Author = c.Author.UserName,
+                            AuthorId = c.Author.Id,
+                            AuthorProfileImage = new ProfileImageModel()
+                            {
+                                RelativeUri = c.Author.Profile.Image
+                            },
+                            Body = c.Body,
+                            CommentaryId = c.Id,
+                            CreationTime = c.CreationTime,
+                            Edits = c.Edits.Select(e => new CommentaryEditModel()
+                            {
+                                Author = e.Author.UserName,
+                                AuthorId = e.Author.Id,
+                                Reason = e.Reason,
+                                Time = e.EditTime
+                            }).ToArray(),
+                            IsDeleted = c.IsDeleted,
+                            IsHidden = c.IsHidden
+                        })
+                        .ToArray();
 
-                return PartialView("_Commentary", new CommentaryModel(user, commentary, S.Permissions));
+                    var model = new CommentarySectionModel()
+                    {
+                        Commentaries = commentaries
+                    };
+
+                    return PartialView(Partials.COMMENTARIES_SECTION, model);
+                }
             }
             else
             {
@@ -56,7 +94,9 @@ namespace Blog.Controllers
         }
 
         [HttpPost()]
-        public async Task<IActionResult> UpdateCommentaryAsync([Required]int id, [Required]string body, [Required]string editReason)
+        public async Task<IActionResult> UpdateCommentaryAsync([Required]int id, 
+            [Required, MaxLength(MAX_COMMENTARY_LENGTH), MinLength(MIN_COMMENTARY_LENGTH)]string body, 
+            [Required, MaxLength(MAX_EDIT_REASON_LENGTH), MinLength(MIN_EDIT_REASON_LENGTH)]string editReason)
         {
             if (ModelState.IsValid)
             {

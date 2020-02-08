@@ -227,8 +227,13 @@ namespace Blog.Middlewares
                             return;
                         }
                         break;
-                    case CacheMode.PUBLIC:
+                    case CacheMode.FOR_ANONYMOUS:
+                        if (httpContext.User?.Identity?.Name != null)
+                        {
+                            await nextAndPopulateAsync();
 
+                            return;
+                        }
                         break;
 
                     default:
@@ -321,18 +326,20 @@ namespace Blog.Middlewares
                             switch (cachingInfo.Mode)
                             {
                                 case CacheMode.USER_SCOPED:
-                                    var user = await userManager.GetUserAsync(httpContext.User);
-                                    if (user == null)
+                                    if (httpContext.User?.Identity?.Name == null)
                                     {
                                         throw new ArgumentOutOfRangeException("User must be signed in for using scoped caching!");
                                     }
                                     else
                                     {
-                                        userName = user.UserName;
+                                        userName = httpContext.User?.Identity?.Name;
                                     }
                                     break;
-                                case CacheMode.PUBLIC:
-
+                                case CacheMode.FOR_ANONYMOUS:
+                                    if (httpContext.User?.Identity?.Name != null)
+                                    {
+                                        return;
+                                    }
                                     break;
 
                                 default:

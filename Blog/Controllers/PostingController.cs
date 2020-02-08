@@ -11,7 +11,7 @@ namespace Blog.Controllers
 {
     public class PostingController : ControllerBase
     {
-        public PostingController(ServicesLocator serviceProvider) : base(serviceProvider)
+        public PostingController(ServiceLocator serviceProvider) : base(serviceProvider)
         {
 
         }

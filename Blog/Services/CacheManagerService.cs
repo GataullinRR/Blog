@@ -17,7 +17,7 @@ namespace Blog.Services
         
         public ICacheManagerFeature CacheManager => _cacheManager;
 
-        public CacheManagerService(ServicesLocator services) : base(services)
+        public CacheManagerService(ServiceLocator services) : base(services)
         {
             _cacheManager = services.HttpContext.Features.Get<ICacheManagerFeature>();
         }

@@ -10,7 +10,6 @@ namespace Blog.Controllers
 {
     public class TestController : Controller
     {
-        [CustomResponseCache(-1, 10, CacheMode.PUBLIC)]
         public async Task<IActionResult> CachedTime()
         {
             await Task.Delay(3000);

@@ -15,18 +15,18 @@ namespace Blog.Models
 {
     public interface ILayoutModelProvider
     {
-        ServerLayoutModel LayoutModel { get; }
+        LayoutModel LayoutModel { get; }
     }
 
     public abstract class PageModelBase : PageModel, ILayoutModelProvider
     {
-        public ServicesLocator S { get; set; }
+        public ServiceLocator S { get; set; }
 
         public PermissionsService Permissions => S.Permissions;
-        public ServerLayoutModel LayoutModel { get; private set; }
+        public LayoutModel LayoutModel { get; private set; }
         protected bool autoSaveDbChanges = false;
 
-        public PageModelBase(ServicesLocator services)
+        public PageModelBase(ServiceLocator services)
         {
             S = services;
         }
@@ -40,7 +40,7 @@ namespace Blog.Models
 
         public override async Task OnPageHandlerExecutionAsync(PageHandlerExecutingContext context, PageHandlerExecutionDelegate next)
         {
-            LayoutModel = await ServerLayoutModel.LoadOrNewAsync(S);
+            LayoutModel = await LayoutModel.LoadOrNewAsync(S);
 
             try
             {

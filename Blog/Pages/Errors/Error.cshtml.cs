@@ -15,7 +15,7 @@ namespace Blog.Pages.Errors
     {
         public int HttpStatus { get; private set; }
 
-        public ErrorModel(ServicesLocator services) : base(services)
+        public ErrorModel(ServiceLocator services) : base(services)
         {
 
         }

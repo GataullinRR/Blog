@@ -25,7 +25,7 @@ namespace Blog.Pages
         public string SearchQuery { get; private set; }
         public int NumOfSearchResults { get; private set; }
 
-        public IndexModel(ServicesLocator serviceProvider) : base(serviceProvider)
+        public IndexModel(ServiceLocator serviceProvider) : base(serviceProvider)
         {
 
         }

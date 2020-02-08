@@ -35,7 +35,7 @@ namespace Blog.Pages.Account
         [BindProperty]
         public string RegistrationRole { get; set; }
 
-        public RegisterModel(ServicesLocator services) : base(services)
+        public RegisterModel(ServiceLocator services) : base(services)
         {
 
         }

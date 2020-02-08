@@ -3,44 +3,44 @@
 <div class="my-4">
     <div class="d-flex flex-row">
         <div class="d-flex flex-column align-self-center mr-4">
-            @await Html.PartialAsync("_ProfileImage", Model.Commentary.Author)
+            @await Html.PartialAsync("_ProfileImage", Model.AuthorProfileImage)
         </div>
         <div class="d-flex flex-column w-100">
             <div class="d-flex flex-row justify-content-between">
                 <div class="d-flex flex-column">
-                    <h4 id="#@Model.Commentary.Id" class="font-weight-normal">
-                        <a asp-page="/Commentary" asp-route-id="@Model.Commentary.Id">#@Model.Commentary.Id</a>
-                        <a asp-page="/Account/Profile" asp-route-id="@Model.Commentary.Author.Id">@Model.Commentary.Author.UserName</a>
-                        <span include-if="await Model.Permissions.CanEditCommentaryAsync(Model.Commentary)">| <a href="" class="no-redirect commentary-edit-button">Edit</a></span>
-                        <span include-if="await Model.Permissions.CanReportAsync(Model.Commentary)" class="btn-report">| <a class="no-redirect" href="" onclick="reportCommentary(this, @Model.Commentary.Id)">Report</a></span>
-                        <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Commentary)">| <a class="" asp-page="/ViolationReport" asp-page-handler="Commentary" asp-route-id="@Model.Commentary.Id">Report violation</a></span>
-                        <span include-if="await Model.Permissions.CanDeleteCommentaryAsync(Model.Commentary)">| <a class="operation-danger" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.DeleteCommentaryAsync)" asp-route-id="@Model.Commentary.Id">Delete</a></span>
-                        <span include-if="await Model.Permissions.CanUndeleteCommentaryAsync(Model.Commentary)">| <a class="operation-primary" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.UndeleteCommentaryAsync)" asp-route-id="@Model.Commentary.Id">Restore</a></span>
+                    <h4 id="#@Model.CommentaryId" class="font-weight-normal">
+                        <a asp-page="/Commentary" asp-route-id="@Model.CommentaryId">#@Model.CommentaryId</a>
+                        <a asp-page="/Account/Profile" asp-route-id="@Model.AuthorId">@Model.Author</a>
+                        <span include-if="Model.Permissions.CanEdit">| <a href="" class="no-redirect commentary-edit-button">Edit</a></span>
+                        <span include-if="Model.Permissions.CanReport" class="btn-report">| <a class="no-redirect" href="" onclick="reportCommentary(this, @Model.CommentaryId)">Report</a></span>
+                        <span include-if="Model.Permissions.CanReportViolation">| <a class="" asp-page="/ViolationReport" asp-page-handler="Commentary" asp-route-id="@Model.CommentaryId">Report violation</a></span>
+                        <span include-if="Model.Permissions.CanDelete">| <a class="operation-danger" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.DeleteCommentaryAsync)" asp-route-id="@Model.CommentaryId">Delete</a></span>
+                        <span include-if="Model.Permissions.CanRestore">| <a class="operation-primary" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.UndeleteCommentaryAsync)" asp-route-id="@Model.CommentaryId">Restore</a></span>
                     </h4>
                 </div>
                 <div class="d-none d-md-flex flex-column">
-                    <h4 class="text-right font-weight-normal">@Model.Commentary.CreationTime.ToString("hh:mm dd.MM.yyyy")</h4>
+                    <h4 class="text-right font-weight-normal">@Model.CreationTime.ToString("hh:mm dd.MM.yyyy")</h4>
                 </div>
             </div>
 
             <div class="d-flex flex-row">
                 <div class="d-flex flex-column text-justify">
-                    @if (!Model.Commentary.IsDeleted)
+                    @if (!Model.IsDeleted)
                     {
-                        @if (Model.Commentary.IsHidden)
+                        @if (Model.IsHidden)
                         {
-                            <span class="comment-hidden">@Model.Commentary.Body</span>
+                            <span class="comment-hidden">@Model.Body</span>
                         }
                         else
                         {
-                            <span>@Model.Commentary.Body</span>
+                            <span>@Model.Body</span>
                         }
 
                         <div class="mt-1">
-                            @foreach (var edit in Model.Commentary.Edits)
+                            @foreach (var edit in Model.Edits)
                             {
                                 <div>
-                                    <span>Edited at @edit.EditTime.ToString("hh:mm dd.MM.yy") by <a asp-page="/Account/Profile" asp-route-id="@edit.Author.Id">@edit.Author.UserName</a></span>
+                                    <span>Edited at @edit.Time.ToString("hh:mm dd.MM.yy") by <a asp-page="/Account/Profile" asp-route-id="@edit.AuthorId">@edit.Author</a></span>
                                     @if (edit.Reason.IsNotNullOrWhiteSpace())
                                     {
                                         <span>Reason: @edit.Reason</span>
@@ -51,7 +51,7 @@
                     }
                     else
                     {
-                        <span class="comment-deleted">This commentary has been deleted</span>
+                        <span class="comment-deleted">The commentary has been deleted</span>
                     }
                 </div>
             </div>

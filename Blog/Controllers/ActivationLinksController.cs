@@ -11,7 +11,7 @@ namespace Blog.Controllers
 {
     public class ActivationLinksController : ControllerBase
     {
-        public ActivationLinksController(ServicesLocator serviceProvider) : base(serviceProvider)
+        public ActivationLinksController(ServiceLocator serviceProvider) : base(serviceProvider)
         {
 
         }

@@ -19,6 +19,10 @@ namespace DBModels
         public event Action SavingChanges;
 
         readonly ModeManager _modeManager = new ModeManager();
+#warning
+        /// <summary>
+        /// Temp solution
+        /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public IDisposable LazyLoadingSuppressingMode => _modeManager.Holder;
 

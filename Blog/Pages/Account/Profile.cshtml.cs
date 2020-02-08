@@ -24,7 +24,7 @@ namespace Blog.Pages.Account
         public bool IsCurrentUser { get; private set; }
         public string ContactHelpEmail { get; private set; }
 
-        public ProfileModel(ServicesLocator serviceProvider) : base(serviceProvider)
+        public ProfileModel(ServiceLocator serviceProvider) : base(serviceProvider)
         {
 
         }

@@ -9,9 +9,9 @@ namespace Blog.Services
 {
     public class ServiceBase
     {
-        protected ServicesLocator S { get; }
+        protected ServiceLocator S { get; }
 
-        public ServiceBase(ServicesLocator services)
+        public ServiceBase(ServiceLocator services)
         {
             S = services;
         }

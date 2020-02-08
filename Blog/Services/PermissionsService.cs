@@ -1,6 +1,8 @@
-﻿using DBModels;
+﻿using Blog.Models;
+using DBModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,7 +22,7 @@ namespace Blog.Services
         public const int NUM_OF_DAYS_USER_CAN_EDIT_OWN_POST = 3;
         public const int MAX_COMMENTARY_EDITS_FOR_STANDARD_USER = 1;
 
-        public PermissionsService(ServicesLocator services) : base(services)
+        public PermissionsService(ServiceLocator services) : base(services)
         {
 
         }
@@ -132,12 +134,12 @@ namespace Blog.Services
 
         public async Task ValidateUndeletePostAsync(Post post)
         {
-            if (!await CanUndeletePostAsync(post))
+            if (!await CanRestorePostAsync(post))
             {
                 throw buildException();
             }
         }
-        public async Task<bool> CanUndeletePostAsync(Post post)
+        public async Task<bool> CanRestorePostAsync(Post post)
         {
             var user = await getCurrentUserOrNullAsync();
             if (user == null || user.Status.State != ProfileState.ACTIVE)
@@ -168,6 +170,43 @@ namespace Blog.Services
         #endregion
 
         #region ### Commentaries permissions ###
+
+        public async Task<IQueryable<CommentaryPermissionsModel>> GetCommentaryPermissionsAsync(int[] commentaryIds)
+        {
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
+            {
+                return new CommentaryPermissionsModel()
+                    .Repeat(commentaryIds.Length)
+                    .AsQueryable();
+            }
+            else
+            {
+                using (S.Db.LazyLoadingSuppressingMode)
+                {
+                    var isPowered = await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
+                    return S.Db.Commentaries.AsNoTracking()
+                        .Where(c => commentaryIds.Contains(c.Id))
+                        .Select(c => new CommentaryPermissionsModel
+                    {
+                        CanDelete = !c.IsDeleted && isPowered,
+                        CanRestore = c.IsDeleted && isPowered,
+                        CanEdit = !c.IsDeleted && (isPowered ||
+                         (!c.IsHidden &&
+                            c.Author.Id == user.Id &&
+                            c.CreationTime - DateTime.UtcNow < TimeSpan.FromDays(1) &&
+                            c.Edits.Count(e => e.Author.Id == user.Id) < 1)),
+                        CanReport = !c.IsDeleted &&
+                             c.Author.Id != user.Id &&
+                             c.Reports.Any(r => r.Reporter.Id == user.Id),
+                        CanReportViolation = !c.IsDeleted &&
+                             isPowered &&
+                             c.Author.Id != user.Id &&
+                             c.Violations.Any(r => r.Reporter.Id == user.Id)
+                    });
+                }
+            }
+        }
 
         public async Task ValidateAddCommentaryAsync(Post post)
         {
@@ -232,12 +271,12 @@ namespace Blog.Services
 
         public async Task ValidateUndeleteCommentaryAsync(Commentary comment)
         {
-            if (!await CanUndeleteCommentaryAsync(comment))
+            if (!await CanRestoreCommentaryAsync(comment))
             {
                 throw buildException();
             }
         }
-        public async Task<bool> CanUndeleteCommentaryAsync(Commentary comment)
+        public async Task<bool> CanRestoreCommentaryAsync(Commentary comment)
         {
             var user = await getCurrentUserOrNullAsync();
             if (user == null || user.Status.State != ProfileState.ACTIVE)
@@ -663,7 +702,9 @@ namespace Blog.Services
 
         async Task<User> getCurrentUserOrNullAsync()
         {
-            return await S.UserManager.GetUserAsync(S.HttpContext.User);
+            return S.HttpContext.User?.Identity?.IsAuthenticated ?? false
+                ? await S.UserManager.GetUserAsync(S.HttpContext.User)
+                : null;
         }
 
         Exception buildException(string reason = null)

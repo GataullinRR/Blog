@@ -65,4 +65,10 @@
 
         return eval(rawModel);
     }
+
+    function removeDisplayNone(elementsClass, doRemove) {
+        if (doRemove === true) {
+            $("." + elementsClass).removeClass("d-none");
+        }
+    }
 </script>

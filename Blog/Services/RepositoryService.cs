@@ -10,7 +10,7 @@ namespace Blog.Services
     [Service(ServiceType.SCOPED)]
     public class RepositoryService : ServiceBase
     {
-        public RepositoryService(ServicesLocator services) : base(services)
+        public RepositoryService(ServiceLocator services) : base(services)
         {
 
         }

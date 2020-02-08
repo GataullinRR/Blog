@@ -9,11 +9,14 @@ using Utilities.Extensions;
 namespace Blog.Models
 {
     [Serializable()]
-    public class ServerLayoutModel
+    public class LayoutModel
     {
-        public List<MessageServerModel> Messages { get; } = new List<MessageServerModel>();
+        public bool CanAccessAdminsPanel { get; private set; }
+        public bool CanAccessModsPanel { get; private set; }
+        public bool CanCreatePost { get; private set; }
+        public string UserName { get; private set; }
 
-        public LayoutModel LayoutModel { get; } = new LayoutModel();
+        public List<MessageServerModel> Messages { get; } = new List<MessageServerModel>();
 
         public void AddMessage(string message)
         {
@@ -29,29 +32,23 @@ namespace Blog.Models
             }
         }
 
-        public static async Task<ServerLayoutModel> LoadOrNewAsync(ServicesLocator services)
+        public static async Task<LayoutModel> LoadOrNewAsync(ServiceLocator services)
         {
-            var model = services.HttpContext.Session.Keys.Contains(nameof(ServerLayoutModel))
-                ? services.HttpContext.Session.GetString(nameof(ServerLayoutModel)).FromBase64().Deserialize<ServerLayoutModel>()
-                : new ServerLayoutModel();
+            var model = services.HttpContext.Session.Keys.Contains(nameof(LayoutModel))
+                ? services.HttpContext.Session.GetString(nameof(LayoutModel)).FromBase64().Deserialize<LayoutModel>()
+                : new LayoutModel();
             var currentUser = await services.Utilities.GetCurrentUserModelAsync();
-            model.LayoutModel.canAccessAdminsPanel = await services.Permissions.CanAccessAdminPanelAsync();
-            model.LayoutModel.canAccessModsPanel = await services.Permissions.CanAccessModeratorsPanelAsync(currentUser);
-            model.LayoutModel.canCreatePost = await services.Permissions.CanCreatePostAsync();
-            model.LayoutModel.messages = model.Messages.Select(m => new MessageModel()
-            {
-                text = m.Text,
-                jsActions = m.JSActions.Select(a => $"{a.Name}=>{a.FunctionName}").Aggregate(",")
-            }).ToArray();
-            model.LayoutModel.userName = currentUser?.UserName;
-            model.LayoutModel.userId = currentUser?.Id;
+            model.CanAccessAdminsPanel = await services.Permissions.CanAccessAdminPanelAsync();
+            model.CanAccessModsPanel = await services.Permissions.CanAccessModeratorsPanelAsync(currentUser);
+            model.CanCreatePost = await services.Permissions.CanCreatePostAsync();
+            model.UserName = currentUser?.UserName;
 
             return model;
         }
 
         public void Save(ISession session)
         {
-            session.SetString(nameof(ServerLayoutModel), this.Serialize().ToBase64());
+            session.SetString(nameof(Models.LayoutModel), (this).Serialize().ToBase64());
         }
     }
 }

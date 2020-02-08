@@ -17,7 +17,7 @@ namespace Blog
         [Required, BindProperty]
         public int PostId { get; set; }
 
-        public PostDeleteConfirmationModel(ServicesLocator services) : base(services)
+        public PostDeleteConfirmationModel(ServiceLocator services) : base(services)
         {
 
         }

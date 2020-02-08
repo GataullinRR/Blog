@@ -1,227 +1,200 @@
 ﻿@model ILayoutModelProvider
 
-@{
-    const string AUTH_USER_CONTROL = nameof(AUTH_USER_CONTROL);
-    const string NOT_AUTH_USER_CONTROLS = nameof(NOT_AUTH_USER_CONTROLS);
-    const string USER_NAME_HOLDER_ID = nameof(USER_NAME_HOLDER_ID);
-    const string CREATE_POST_CONTROLS = nameof(CREATE_POST_CONTROLS);
-    const string MOD_PANEL_CONTROLS = nameof(MOD_PANEL_CONTROLS);
-    const string ADMIN_PANEL_CONTROLS = nameof(ADMIN_PANEL_CONTROLS);
+<!DOCTYPE html>
 
-    var serverModel = Model.LayoutModel.LayoutModel;
-}
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="~/lib/bootstrap-4.3.1-dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/ js / tinymce / skins / ui / oxide / content.min.css" />
+    @*<link rel="stylesheet" href="~/js/tinymce/skins/content/default/content.min.css" />*@
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" />
+    @*<link href="~/css/site.css" rel="stylesheet" />*@
 
-    <!DOCTYPE html>
+    @RenderSection("Styles", required: false)
 
-    <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <link rel="stylesheet" href="~/lib/bootstrap-4.3.1-dist/css/bootstrap.min.css" />
-            <link rel="stylesheet" href="~/css/site.css" />
-            <link rel="stylesheet" href="~/ js / tinymce / skins / ui / oxide / content.min.css" />
-            @*<link rel="stylesheet" href="~/js/tinymce/skins/content/default/content.min.css" />*@
-            <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" />
-            @*<link href="~/css/site.css" rel="stylesheet" />*@
+    <title>@ViewData["Title"]</title>
 
-        @RenderSection("Styles", required: false)
-
-        <title>@ViewData["Title"]</title>
-
-        <script>
+    <script>
             var partialLoaders = [];
-            var model = @Json.Serialize(serverModel);
-        </script>
-    </head>
+    </script>
+</head>
 
-    <body>
-        <div>
-            <div id="busyModal" class="modal">
-                <div class="modal-content">
-                    <p id="busyModalTextContainer" align="center"></p>
-                </div>
+<body>
+    <div>
+        <div id="busyModal" class="modal">
+            <div class="modal-content">
+                <p id="busyModalTextContainer" align="center"></p>
             </div>
+        </div>
 
-            <nav class="navbar navbar-expand-md navbar-light bg-white">
-                <a class="navbar-brand" asp-page="/Index">Home</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="collapsibleNavbar">
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item @AUTH_USER_CONTROL d-none">
-                            <a id="@USER_NAME_HOLDER_ID" class="nav-link" asp-page="/Account/Profile"></a>
-                        </li>
-                        <li class="nav-item @AUTH_USER_CONTROL d-none">
-                            <a class="nav-link" asp-controller="Account" asp-action="Logout">Logout</a>
-                        </li>
+        <nav class="navbar navbar-expand-md navbar-light bg-white">
+            <a class="navbar-brand" asp-page="/Index">Home</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="collapsibleNavbar">
+                <ul class="navbar-nav mr-auto">
+                    <li include-if="Model.LayoutModel.UserName != null" class="nav-item">
+                        <a class="nav-link" asp-page="/Account/Profile">@Model.LayoutModel.UserName</a>
+                    </li>
+                    <li include-if="Model.LayoutModel.UserName != null" class="nav-item">
+                        <a class="nav-link" asp-controller="Account" asp-action="Logout">Logout</a>
+                    </li>
 
-                        <li class="nav-item @NOT_AUTH_USER_CONTROLS d-none">
-                            <a class="nav-link" asp-page="/Account/Login">Login</a>
-                        </li>
-                        <li class="nav-item @NOT_AUTH_USER_CONTROLS d-none">
-                            <a class="nav-link" asp-page="/Account/Register">Register</a>
-                        </li>
+                    <li include-if="Model.LayoutModel.UserName == null" class="nav-item">
+                        <a class="nav-link" asp-page="/Account/Login">Login</a>
+                    </li>
+                    <li include-if="Model.LayoutModel.UserName == null" class="nav-item">
+                        <a class="nav-link" asp-page="/Account/Register">Register</a>
+                    </li>
 
-                        <li class="nav-item @CREATE_POST_CONTROLS d-none">
-                            <a class="nav-link" asp-page="/PostCreate">New post</a>
-                        </li>
+                    <li include-if="Model.LayoutModel.CanCreatePost" class="nav-item">
+                        <a class="nav-link" asp-page="/PostCreate">New post</a>
+                    </li>
 
-                        <li class="nav-item @MOD_PANEL_CONTROLS d-none">
-                            <a class="nav-link" asp-page="/ModeratorPanel">Moderator panel</a>
-                        </li>
+                    <li include-if="Model.LayoutModel.CanAccessModsPanel" class="nav-item">
+                        <a class="nav-link" asp-page="/ModeratorPanel">Moderator panel</a>
+                    </li>
 
-                        <li class="nav-item @ADMIN_PANEL_CONTROLS d-none">
-                            <a class="nav-link" asp-page="/AdminPanel">Admin panel</a>
-                        </li>
-                    </ul>
+                    <li include-if="Model.LayoutModel.CanAccessAdminsPanel" class="nav-item">
+                        <a class="nav-link" asp-page="/AdminPanel">Admin panel</a>
+                    </li>
+                </ul>
 
-                    <form class="form-inline my-2" method="get" action="@SearchController.SEARCH_URI">
-                        <div class="input-group">
-                            <input name="query" class="form-control mr-2" type="search" placeholder="Search" aria-label="Search" />
-                            <button class="btn btn-light" type="submit">Search</button>
-                        </div>
-                    </form>
-                </div>
-            </nav>
+                <form class="form-inline my-2" method="get" action="@SearchController.SEARCH_URI">
+                    <div class="input-group">
+                        <input name="query" class="form-control mr-2" type="search" placeholder="Search" aria-label="Search" />
+                        <button class="btn btn-light" type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
+        </nav>
 
-            <div class="d-none">
-                <div id="message-template">
-                    <div class="message container-fluid">
-                        <div class="row justify-content-center py-3">
-                            <div class="col container-main">
-                                <div class="d-flex flex-sm-row d-flex">
-                                    <div class="message-text d-flex flex-sm-column flex-grow-1">
+        <div class="d-none">
+            <div id="message-template">
+                <div class="message container-fluid">
+                    <div class="row justify-content-center py-3">
+                        <div class="col container-main">
+                            <div class="d-flex flex-sm-row d-flex">
+                                <div class="message-text d-flex flex-sm-column flex-grow-1">
 
-                                    </div>
+                                </div>
 
-                                    <div class="d-flex flex-sm-column align-self-center ml-2">
-                                        <a href="" class="no-redirect" onclick="removeParent(this)">Dismiss</a>
-                                    </div>
+                                <div class="d-flex flex-sm-column align-self-center ml-2">
+                                    <a href="" class="no-redirect" onclick="removeParent(this)">Dismiss</a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div id="message-button-template">
-                    <div class="d-flex flex-sm-column align-self-center ml-2">
-                        <span><a href="" class="no-redirect message-button"></a> |</span>
-                    </div>
+            </div>
+            <div id="message-button-template">
+                <div class="d-flex flex-sm-column align-self-center ml-2">
+                    <span><a href="" class="no-redirect message-button"></a> |</span>
                 </div>
             </div>
-            <div id="messages"></div>
+        </div>
+        <div id="messages"></div>
 
-            @RenderBody()
+        @RenderBody()
 
-            <footer>
-                <span>Created by <a href="https://github.com/GataullinRR">GataullinRR</a></span>
-                <span style="float:right">Powered by ASP .NET Core 2.2</span>
-            </footer>
+        <footer>
+            <span>Created by <a href="https://github.com/GataullinRR">GataullinRR</a></span>
+            <span style="float:right">Powered by ASP .NET Core 2.2</span>
+        </footer>
 
-            <!-- Optional JavaScript -->
-            <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-            <partial name="_JQuery" />
-            <script src="~/lib/jquery-ajax-unobtrusive/dist/jquery.unobtrusive-ajax.min.js" type="text/javascript"></script>
-            <script src="~/lib/jquery-validation/dist/jquery.validate.js" type="text/javascript"></script>
-            <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js" type="text/javascript"></script>
-            <script src="~/lib/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
-            <script src="~/js/tinymce/tinymce.min.js"></script>
-            <script src="~/js/site.js"></script>
-            <partial name="_HelperFunctions" />
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <partial name="_JQuery" />
+        <script src="~/lib/jquery-ajax-unobtrusive/dist/jquery.unobtrusive-ajax.min.js" type="text/javascript"></script>
+        <script src="~/lib/jquery-validation/dist/jquery.validate.js" type="text/javascript"></script>
+        <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js" type="text/javascript"></script>
+        <script src="~/lib/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
+        <script src="~/js/tinymce/tinymce.min.js"></script>
+        <script src="~/js/site.js"></script>
+        <partial name="_HelperFunctions" />
 
-            <script>
+        <script>
                 // See https://www.tiny.cloud/docs/demo/full-featured/
                 // and https://www.tiny.cloud/docs/configure/editor-appearance/#menu
-                tinymce.init({
-                    mode: "specific_textareas",
-                    editor_selector: "rich-edit",
-                    plugins: 'preview paste searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen table image link codesample charmap hr pagebreak nonbreaking anchor insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons',
-                    imagetools_cors_hosts: ['picsum.photos'],
-                    toolbar: 'undo redo | bold italic underline strikethrough | outdent indent |  numlist bullist | removeformat | charmap emoticons | fullscreen preview | insertfile image media link anchor codesample',
-                    toolbar_sticky: true,
-                    autosave_ask_before_unload: true,
-                    autosave_interval: "30s",
-                    autosave_prefix: "{path}{query}-{id}-",
-                    autosave_restore_when_empty: false,
-                    autosave_retention: "10m",
-                    image_advtab: true,
-                    importcss_append: true,
-                    height: 400,
-                    height: 600,
-                    image_caption: true,
-                    quickbars_selection_toolbar: 'bold italic underline strikethrough | quicklink blockquote quickimage quicktable',
-                    noneditable_noneditable_class: "mceNonEditable",
-                    toolbar_drawer: 'sliding',
-                    contextmenu: "link image imagetools",
-                    menu: {
-                        file: { title: 'File', items: 'newdocument restoredraft | preview | print ' },
-                        edit: { title: 'Edit', items: 'undo redo | cut copy paste | selectall | searchreplace' },
-                        view: { title: 'View', items: 'code | visualaid visualchars visualblocks | spellchecker | preview fullscreen' },
-                        insert: { title: 'Insert', items: 'image link media codesample inserttable | charmap emoticons hr | anchor toc | insertdatetime' },
-                        format: { title: 'Format', items: 'bold italic underline strikethrough superscript subscript | removeformat' },
-                        tools: { title: 'Tools', items: 'code wordcount' },
-                        table: { title: 'Table', items: 'inserttable tableprops deletetable row column cell' },
-                        help: { title: 'Help', items: '' }
-                    }
-                });
+            tinymce.init({
+                mode: "specific_textareas",
+                editor_selector: "rich-edit",
+                plugins: 'preview paste searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen table image link codesample charmap hr pagebreak nonbreaking anchor insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons',
+                imagetools_cors_hosts: ['picsum.photos'],
+                toolbar: 'undo redo | bold italic underline strikethrough | outdent indent |  numlist bullist | removeformat | charmap emoticons | fullscreen preview | insertfile image media link anchor codesample',
+                toolbar_sticky: true,
+                autosave_ask_before_unload: true,
+                autosave_interval: "30s",
+                autosave_prefix: "{path}{query}-{id}-",
+                autosave_restore_when_empty: false,
+                autosave_retention: "10m",
+                image_advtab: true,
+                importcss_append: true,
+                height: 400,
+                height: 600,
+                image_caption: true,
+                quickbars_selection_toolbar: 'bold italic underline strikethrough | quicklink blockquote quickimage quicktable',
+                noneditable_noneditable_class: "mceNonEditable",
+                toolbar_drawer: 'sliding',
+                contextmenu: "link image imagetools",
+                menu: {
+                    file: { title: 'File', items: 'newdocument restoredraft | preview | print ' },
+                    edit: { title: 'Edit', items: 'undo redo | cut copy paste | selectall | searchreplace' },
+                    view: { title: 'View', items: 'code | visualaid visualchars visualblocks | spellchecker | preview fullscreen' },
+                    insert: { title: 'Insert', items: 'image link media codesample inserttable | charmap emoticons hr | anchor toc | insertdatetime' },
+                    format: { title: 'Format', items: 'bold italic underline strikethrough superscript subscript | removeformat' },
+                    tools: { title: 'Tools', items: 'code wordcount' },
+                    table: { title: 'Table', items: 'inserttable tableprops deletetable row column cell' },
+                    help: { title: 'Help', items: '' }
+                }
+            });
 
-                $(document).ready(function () {
-                    function render() {
-                        //var model = getCacheModel();
-                        setVisibility("@CREATE_POST_CONTROLS", model.@nameof(serverModel.canCreatePost));
-                        setVisibility("@MOD_PANEL_CONTROLS", model.@nameof(serverModel.canAccessModsPanel));
-                        setVisibility("@ADMIN_PANEL_CONTROLS", model.@nameof(serverModel.canAccessAdminsPanel));
-                        setVisibility("@AUTH_USER_CONTROL", model.@nameof(serverModel.userName) !== null);
-                        setVisibility("@NOT_AUTH_USER_CONTROLS", model.@nameof(serverModel.userName) === null);
-                        setVisibility("@CREATE_POST_CONTROLS", model.@nameof(serverModel.canCreatePost));
-                        $("#@USER_NAME_HOLDER_ID").html(model.@nameof(serverModel.userName));
+            $(document).ready(function () {
 
-                        for (var i = 0; i < model.@(nameof(serverModel.messages)).length; i++) {
-                            var message = model.@(nameof(serverModel.messages))[i];
-                            renderMessage(message.@nameof(MessageModel.text), message.@nameof(MessageModel.jsActions)); 
+                function applyClasses() {
+                    $('a').click(function (e) {
+                        if ($(this).hasClass("no-redirect")) {
+                            e.preventDefault();
                         }
+                        else {
 
-                        function setVisibility(elementsClass, visibility) {
-                            if (visibility === true) {
-                                $("." + elementsClass).removeClass("d-none");
-                            }
                         }
-                    }
-
-                    function applyClasses() {
-                        $('a').click(function (e) {
-                            if ($(this).hasClass("no-redirect")) {
-                                e.preventDefault();
-                            }
-                            else {
-
-                            }
-                        });
-                    }
-
-                    var observer = new MutationObserver(function (mutations) {
-                        mutations.forEach(function (mutation) {
-                            if (mutation.addedNodes && mutation.addedNodes.length > 0) {
-                                applyClasses();
-                            }
-                        });
                     });
+                }
 
-                    var config = {
-                        attributes: true,
-                        childList: true,
-                        characterData: true,
-                        subtree: true, // Important
-                    };
+                var observer = new MutationObserver(function (mutations) {
 
-                    render();
-                    observer.observe(document.body, config);
-                    applyClasses();
+                    mutations.forEach(function (mutation) {
+                        if (mutation.addedNodes && mutation.addedNodes.length > 0) {
 
-                    for (var i = 0; i < partialLoaders.length; i++) {
-                        partialLoaders[i]();
-                    }
+                            applyClasses();
+                        }
+                    });
                 });
+
+                var config = {
+                    attributes: true,
+                    childList: true,
+                    characterData: true,
+                    subtree: true, // Important
+                };
+
+                @foreach (var message in Model.LayoutModel.Messages)
+                {
+                    var actions = message.JSActions.Select(a => $"{a.Name}=>{a.FunctionName}").Aggregate(",");
+                    <text>renderMessage("@message.Text", "@actions");</text>
+                }
+                observer.observe(document.body, config);
+                applyClasses();
+
+                for (var i = 0; i < partialLoaders.length; i++) {
+                    partialLoaders[i]();
+                }
+            });
 
                 function showBusy(operationName) {
                     var modal = document.getElementById("busyModal");
@@ -272,24 +245,24 @@
                         renderMessage("An error occurred during submitting the report :(");
                     }
                 }
-            </script>
+        </script>
 
-            @RenderSection("Scripts", required: false)
+        @RenderSection("Scripts", required: false)
 
-            <script>
-                $(document).ready(function () {
-                    var widgets = $("div.widget");
-                    for (var i = 0; i < widgets.length; i++) {
-                        var loader = $(widgets[i]).attr("widget-loader");
-                        try {
-                            eval(loader.toString() + "();");
-                        }
-                        catch (ex) {
-                            console.error("Error while executing widget loader with name: " + loader + " ex: " + ex);
-                        }
+        <script>
+            $(document).ready(function () {
+                var widgets = $("div.widget");
+                for (var i = 0; i < widgets.length; i++) {
+                    var loader = $(widgets[i]).attr("widget-loader");
+                    try {
+                        eval(loader.toString() + "();");
                     }
-                });
-            </script>
-        </div>
-    </body>
+                    catch (ex) {
+                        console.error("Error while executing widget loader with name: " + loader + " ex: " + ex);
+                    }
+                }
+            });
+        </script>
+    </div>
+</body>
 </html>

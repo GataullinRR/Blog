@@ -16,7 +16,7 @@ namespace Blog
     {
         public string ContactEmail { get; set; }
 
-        public PasswordResetErrorModel(ServicesLocator services) : base(services)
+        public PasswordResetErrorModel(ServiceLocator services) : base(services)
         {
 
         }

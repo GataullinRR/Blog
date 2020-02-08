@@ -10,7 +10,7 @@ namespace Blog.Services
 {
     public class SessionMutatorsManagerService : ServiceBase
     {
-        public SessionMutatorsManagerService(ServicesLocator services) : base(services)
+        public SessionMutatorsManagerService(ServiceLocator services) : base(services)
         {
 
         }

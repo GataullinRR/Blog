@@ -9,7 +9,7 @@ namespace Blog.Controllers
 {
     public class ProfilePageTabsController : ControllerBase
     {
-        public ProfilePageTabsController(ServicesLocator serviceProvider) : base(serviceProvider)
+        public ProfilePageTabsController(ServiceLocator serviceProvider) : base(serviceProvider)
         {
         }
 

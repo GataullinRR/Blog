@@ -10,7 +10,7 @@ namespace Blog.Services
 {
     public class LinkBuilderService : ServiceBase
     {
-        public LinkBuilderService(ServicesLocator services) : base(services)
+        public LinkBuilderService(ServiceLocator services) : base(services)
         {
 
         }

@@ -21,7 +21,7 @@ namespace Blog.Pages.Account
         [BindProperty, DataType(DataType.MultilineText), MinLength(10), Required]
         public string Reason { get; set; }
 
-        public BanConfirmationModel(ServicesLocator serviceProvider) : base(serviceProvider)
+        public BanConfirmationModel(ServiceLocator serviceProvider) : base(serviceProvider)
         {
 
         }

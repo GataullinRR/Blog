@@ -17,10 +17,10 @@ namespace Blog.Controllers
 {
     public abstract class ControllerBase : Controller, ILayoutModelProvider
     {
-        internal ServicesLocator S { get; }
-        public ServerLayoutModel LayoutModel { get; private set; }
+        internal ServiceLocator S { get; }
+        public LayoutModel LayoutModel { get; private set; }
 
-        public ControllerBase(ServicesLocator serviceProvider)
+        public ControllerBase(ServiceLocator serviceProvider)
         {
             S = serviceProvider;
         }
@@ -36,7 +36,7 @@ namespace Blog.Controllers
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            LayoutModel = await ServerLayoutModel.LoadOrNewAsync(S);
+            LayoutModel = await LayoutModel.LoadOrNewAsync(S);
 
             try
             {

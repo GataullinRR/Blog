@@ -13,7 +13,7 @@ namespace Blog.Services
         const string LAST_URL_KEY = "LastGetRequestPath";
         public bool HasLastUri => S.HttpContext.Session.Keys.Contains(LAST_URL_KEY);
 
-        public HistoryService(ServicesLocator serviceProvider) : base(serviceProvider)
+        public HistoryService(ServiceLocator serviceProvider) : base(serviceProvider)
         {
 
         }

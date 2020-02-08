@@ -15,7 +15,7 @@ namespace Blog.Controllers
 {
     public class ReportingController : ControllerBase
     {
-        public ReportingController(ServicesLocator serviceProvider) : base(serviceProvider)
+        public ReportingController(ServiceLocator serviceProvider) : base(serviceProvider)
         {
 
         }

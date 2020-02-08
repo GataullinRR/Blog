@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Blog.Controllers;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,9 @@ namespace Blog.Models
     {
         [BindProperty, Required, BindRequired]
         public int PostId { get; set; }
-        [BindProperty(), Required(), MinLength(6), MaxLength(1000), BindRequired]
+        [BindProperty, Required, BindRequired,
+            MinLength(CommentaryController.MIN_COMMENTARY_LENGTH), 
+            MaxLength(CommentaryController.MAX_COMMENTARY_LENGTH)]
         public string Body { get; set; }
     }
 }

@@ -11,7 +11,7 @@ namespace Blog.Controllers
     {
         public static readonly string SEARCH_URI = getURIToAction(nameof(SearchController), nameof(Search));
 
-        public SearchController(ServicesLocator serviceProvider) : base(serviceProvider)
+        public SearchController(ServiceLocator serviceProvider) : base(serviceProvider)
         {
 
         }

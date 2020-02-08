@@ -16,7 +16,7 @@ namespace Blog.Services
     /// <summary>
     /// I know that it's wrong, but it makes development easier
     /// </summary>
-    public class ServicesLocator
+    public class ServiceLocator
     {
         readonly Lazy<BlogContext> _db;
         readonly Lazy<PermissionsService> _permissions;
@@ -75,7 +75,7 @@ namespace Blog.Services
         public ContactEmailProviderService ContactEmailProvider => _contactEmailProvider.Value;
         public CacheManagerService CacheManager => _cacheManager.Value;
 
-        public ServicesLocator(IServiceProvider serviceProvider)
+        public ServiceLocator(IServiceProvider serviceProvider)
         {
             ServiceProvider = serviceProvider;
 
