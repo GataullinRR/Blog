@@ -53,6 +53,7 @@ namespace DBModels
         [InverseProperty(nameof(UserAction.Author))]
         [Required] public virtual List<UserAction> Actions { get; set; } = new List<UserAction>();
         [Required] public virtual UserStatistic Statistic { get; set; } = new UserStatistic();
+        public Role Role { get; set; }
 
         /// <summary>
         /// Not null for User in <see cref="Roles.MODERATOR"/> role

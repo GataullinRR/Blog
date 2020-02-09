@@ -12,7 +12,7 @@ namespace Blog.Services
 {
     public class AutounbanService
     {
-        public static readonly TimeSpan UPDATE_INTERVAL = new TimeSpan(1, 0, 0);
+        public static readonly TimeSpan UPDATE_INTERVAL = TimeSpan.FromDays(1);
 
         readonly ILogger<AutounbanService> _log;
         readonly IServiceScopeFactory _scopeFactory;
@@ -28,7 +28,8 @@ namespace Blog.Services
 #warning slow...
         async void unbanLoopAsync()
         {
-            await ThreadingUtils.ContinueAtThreadPull();
+            await ThreadingUtils.ContinueAtDedicatedThread();
+
             while (true)
             {
                 using (var scope = _scopeFactory.CreateScope())

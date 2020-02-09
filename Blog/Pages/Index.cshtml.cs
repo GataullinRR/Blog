@@ -19,7 +19,7 @@ namespace Blog.Pages
     {
         const int NUM_OF_POSTS_ON_PAGE = 3;
 
-        public Post[] Posts { get; private set; }
+        public List<PostIndexModel> Posts { get; private set; }
         public int NumOfPages { get; private set; }
         public int CurrentPage { get; private set; }
         public string SearchQuery { get; private set; }
@@ -34,24 +34,38 @@ namespace Blog.Pages
         {
             CurrentPage = pageIndex ?? 0;
 
-            var viewablePosts = S.Db.Posts
+            var viewablePosts = S.Db.Posts.AsNoTracking()
                 .Where(p => p.ModerationInfo.State == ModerationState.MODERATED && !p.IsDeleted);
+
             if (filter != null)
             {
                 var keyword = filter.Split(" ").FirstElementOrDefault("");
                 viewablePosts = viewablePosts.Where(p => p.Title.Contains(keyword));
                 SearchQuery = filter;
-                NumOfSearchResults = viewablePosts.Count();
+                NumOfSearchResults = await viewablePosts.CountAsync();
+                NumOfPages = NumOfSearchResults / NUM_OF_POSTS_ON_PAGE + ((NumOfSearchResults % NUM_OF_POSTS_ON_PAGE == 0) ? 0 : 1);
             }
-            Posts = await viewablePosts
-                .OrderByDescending(p => p.CreationTime)
+
+            Posts = await viewablePosts.OrderByDescending(p => p.CreationTime)
                 .Skip(CurrentPage * NUM_OF_POSTS_ON_PAGE)
                 .Take(NUM_OF_POSTS_ON_PAGE)
-                .ToArrayAsync();
-            NumOfPages = await viewablePosts.CountAsync();
-            NumOfPages = NumOfPages / NUM_OF_POSTS_ON_PAGE + ((NumOfPages % NUM_OF_POSTS_ON_PAGE == 0) ? 0 : 1);
+                .Select(p => new PostIndexModel()
+                {
+                    Author = p.Author.UserName,
+                    AuthorId = p.Author.Id,
+                    BodyPreview = p.BodyPreview,
+                    CreationTime = p.CreationTime,
+                    PostId = p.Id,
+                    Title = p.Title
+                }).ToListAsync();
 
-            if (Posts.Length == 0 && CurrentPage != 0)
+            if (filter == null)
+            {
+                NumOfPages = await viewablePosts.CountAsync();
+                NumOfPages = NumOfPages / NUM_OF_POSTS_ON_PAGE + ((NumOfPages % NUM_OF_POSTS_ON_PAGE == 0) ? 0 : 1);
+            }
+
+            if (Posts.Count == 0 && CurrentPage != 0)
             {
                 return RedirectToPage(new { pageIndex = 0 });
             }

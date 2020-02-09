@@ -60,9 +60,10 @@ namespace Blog
                     UserName = "QTU100",
                     EmailConfirmed = true,
                     ModeratorsInChargeGroup = moderatorGroup1,
+                    Role = Role.ADMINISTRATOR
                 };
                 userManager.CreateAsync(radmir, "QTU100@yandex.ru").Wait();
-                userManager.AddToRoleAsync(radmir, Roles.OWNER).Wait();
+                userManager.AddToRoleAsync(radmir, Roles.ADMINISTRATOR).Wait();
 
                 var alex = new User(
                     new Profile(new DateTime(2010, 12, 9))
@@ -75,6 +76,7 @@ namespace Blog
                     UserName = "Alexandra",
                     EmailConfirmed = true,
                     ModeratorsInChargeGroup = moderatorGroup1,
+                    Role = Role.USER
                 };
                 userManager.CreateAsync(alex, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(alex, Roles.USER).Wait();
@@ -90,6 +92,7 @@ namespace Blog
                     UserName = "_KSY_",
                     EmailConfirmed = true,
                     ModeratorsInChargeGroup = moderatorGroup2,
+                    Role = Role.USER
                 };
                 userManager.CreateAsync(ksenya, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(ksenya, Roles.USER).Wait();
@@ -105,7 +108,8 @@ namespace Blog
                     UserName = "Oleg",
                     EmailConfirmed = true,
                     ModeratorsGroup = moderatorGroup1,
-                    ModeratorsInChargeGroup = moderatorGroup2
+                    ModeratorsInChargeGroup = moderatorGroup2,
+                    Role = Role.MODERATOR
                 };
                 userManager.CreateAsync(oleg, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(oleg, Roles.MODERATOR).Wait();
@@ -119,7 +123,8 @@ namespace Blog
                 {
                     Email = "Muddy@google.com",
                     UserName = "WhoAmI",
-                    EmailConfirmed = false
+                    EmailConfirmed = false,
+                    Role = Role.USER
                 };
                 userManager.CreateAsync(muddy, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(muddy, Roles.USER).Wait();
@@ -135,7 +140,8 @@ namespace Blog
                     UserName = "Arslan",
                     EmailConfirmed = true,
                     ModeratorsGroup = moderatorGroup2,
-                    ModeratorsInChargeGroup = moderatorGroup1
+                    ModeratorsInChargeGroup = moderatorGroup1,
+                    Role = Role.MODERATOR
                 };
                 userManager.CreateAsync(arslan, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(arslan, Roles.MODERATOR).Wait();
@@ -151,7 +157,8 @@ namespace Blog
                     UserName = "Anthon",
                     EmailConfirmed = true,
                     ModeratorsGroup = moderatorGroup2,
-                    ModeratorsInChargeGroup = moderatorGroup1
+                    ModeratorsInChargeGroup = moderatorGroup1,
+                    Role = Role.MODERATOR
                 };
                 userManager.CreateAsync(anthon, "QTU100@yandex.ru").Wait();
                 userManager.AddToRoleAsync(anthon, Roles.MODERATOR).Wait();

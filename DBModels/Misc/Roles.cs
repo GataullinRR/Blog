@@ -1,24 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using Utilities.Extensions;
 
 namespace DBModels
 {
+    public enum Role
+    {
+        [Description("User")]
+        USER = 0,
+        [Description("Moderator")]
+        MODERATOR = 1,
+        [Description("Administrator")]
+        ADMINISTRATOR = 2
+    }
+
     public static class Roles
     {
         public const string USER = "User";
         public const string MODERATOR = "Moderator";
-        public const string OWNER = "Owner";
+        public const string ADMINISTRATOR = "Administrator";
 
-        public const string NOT_RESTRICTED = USER + "," + MODERATOR + "," + OWNER;
+        public const string NOT_RESTRICTED = USER + "," + MODERATOR + "," + ADMINISTRATOR;
 
         public static readonly IEnumerable<string> AllRoles = new string[]
         {
             USER,
             MODERATOR,
-            OWNER
+            ADMINISTRATOR
         };
 
         public static bool IsLess(this string role, string checkRole)

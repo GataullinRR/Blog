@@ -11,20 +11,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace DBModels
 {
     public class BlogContext : IdentityDbContext<User>
     {
         public event Action SavingChanges;
-
-        readonly ModeManager _modeManager = new ModeManager();
-#warning
-        /// <summary>
-        /// Temp solution
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public IDisposable LazyLoadingSuppressingMode => _modeManager.Holder;
 
         public DbSet<Post> Posts { get; set; }
         public DbSet<Commentary> Commentaries { get; set; }
@@ -68,23 +61,15 @@ namespace DBModels
             // query
             // Database.EnsureCreated();
 
-            _modeManager.Activated += _modeManager_Activated;
-            _modeManager.Deactivated += _modeManager_Deactivated;
-
-            void _modeManager_Activated()
-            {
-                ChangeTracker.LazyLoadingEnabled = false;
-            }
-            void _modeManager_Deactivated()
-            {
-                ChangeTracker.LazyLoadingEnabled = true;
-            }
+            ChangeTracker.LazyLoadingEnabled = false;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseLazyLoadingProxies();
-            
+            //optionsBuilder.UseLazyLoadingProxies(); Not anymore!
+
+            optionsBuilder.ConfigureWarnings(warnings => warnings.Throw(RelationalEventId.QueryClientEvaluationWarning));
+
             base.OnConfiguring(optionsBuilder);
         }
 

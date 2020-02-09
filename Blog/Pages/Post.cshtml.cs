@@ -44,109 +44,106 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                using (S.Db.LazyLoadingSuppressingMode)
+                var post = await S.Db.Posts
+                    .AsNoTracking()
+                    .Include(p => p.Author)
+                    .ThenInclude(a => a.Profile)
+                    .Include(p => p.ModerationInfo)
+                    .Include(p => p.ViewStatistic)
+                    .Include(p => p.Edits)
+                    .ThenInclude(e => e.Author)
+                    .FirstOrDefaultAsync(p => p.Id == id);
+                if (post == null)
                 {
-                    var post = await S.Db.Posts
+                    throw new NotFoundException();
+                }
+                else
+                {
+                    await S.Permissions.ValidateViewPostAsync(post);
+
+                    var commentaries = await S.Db.Commentaries
                         .AsNoTracking()
-                        .Include(p => p.Author)
-                        .ThenInclude(a => a.Profile)
-                        .Include(p => p.ModerationInfo)
-                        .Include(p => p.ViewStatistic)
-                        .Include(p => p.Edits)
-                        .ThenInclude(e => e.Author)
-                        .FirstOrDefaultAsync(p => p.Id == id);
-                    if (post == null)
-                    {
-                        throw new NotFoundException();
-                    }
-                    else
-                    {
-                        await S.Permissions.ValidateViewPostAsync(post);
-
-                        var commentaries = await S.Db.Commentaries
-                            .AsNoTracking()
-                            .Where(c => c.Post.Id == id)
-                            .Select(c => new Models.CommentaryModel()
-                            {
-                                Author = c.Author.UserName,
-                                AuthorId = c.Author.Id,
-                                AuthorProfileImage = new ProfileImageModel()
-                                {
-                                    RelativeUri = c.Author.Profile.Image
-                                },
-                                Body = c.Body,
-                                CommentaryId = c.Id,
-                                CreationTime = c.CreationTime,
-                                Edits = c.Edits.Select(e => new CommentaryEditModel()
-                                {
-                                    Author = e.Author.UserName,
-                                    AuthorId = e.Author.Id,
-                                    Reason = e.Reason,
-                                    Time = e.EditTime
-                                }).ToArray(),
-                                IsDeleted = c.IsDeleted,
-                                IsHidden = c.IsHidden,
-                                ViewStatistic = c.ViewStatistic,
-                            }).ToListAsync();
-                        var permissions = await await S.Permissions
-                            .GetCommentaryPermissionsAsync(commentaries.Select(c => c.CommentaryId).ToArray())
-                            .ThenDo(async r => await r.ToArrayAsync());
-                        for (int i = 0; i < commentaries.Count; i++)
+                        .Where(c => c.Post.Id == id)
+                        .Select(c => new Models.CommentaryModel()
                         {
-                            commentaries[i].Permissions = permissions[i];
-                        }
-
-                        Post = new Models.PostModel()
-                        {
-                            Author = post.Author.UserName,
-                            AuthorId = post.Author.Id,
-                            Body = post.Body,
-                            PostId = post.Id,
-                            CreationTime = post.CreationTime,
-                            Title = post.Title,
-                            CommentarySectionModel = new CommentarySectionModel()
-                            {
-                                Commentaries = commentaries.ToArray()
-                            },
-                            Edits = post.Edits.Select(e => new Models.PostEditModel()
-                            {
-                                Author = e.Author.UserName,
-                                Reason = e.Reason,
-                                AuthorId = e.Author.Id,
-                                EditTime = e.EditTime
-                            }).ToArray(),
-                            AuthorBiography = post.Author.Profile.About,
-                            IsAuthentificated = S.HttpContext.User?.Identity?.IsAuthenticated ?? false,
-                            TotalViews = post.ViewStatistic.TotalViews,
-                            ModerationState = post.ModerationInfo.State,
+                            Author = c.Author.UserName,
+                            AuthorId = c.Author.Id,
                             AuthorProfileImage = new ProfileImageModel()
                             {
-                                 RelativeUri = post.Author.Profile.Image
+                                RelativeUri = c.Author.Profile.Image
                             },
+                            Body = c.Body,
+                            CommentaryId = c.Id,
+                            CreationTime = c.CreationTime,
+                            Edits = c.Edits.Select(e => new CommentaryEditModel()
+                            {
+                                Author = e.Author.UserName,
+                                AuthorId = e.Author.Id,
+                                Reason = e.Reason,
+                                Time = e.EditTime
+                            }).ToArray(),
+                            IsDeleted = c.IsDeleted,
+                            IsHidden = c.IsHidden,
+                            ViewStatistic = c.ViewStatistic,
+                        }).ToListAsync();
+                    var permissions = await await S.Permissions
+                        .GetCommentaryPermissionsAsync(commentaries.Select(c => c.CommentaryId).ToArray())
+                        .ThenDo(async r => await r.ToListAsync());
+                    for (int i = 0; i < commentaries.Count; i++)
+                    {
+                        commentaries[i].Permissions = permissions[i];
+                    }
 
-                            CanAddCommentary = await S.Permissions.CanAddCommentaryAsync(post),
-                            CanDelete = await S.Permissions.CanDeletePostAsync(post),
-                            CanRestore = await S.Permissions.CanRestorePostAsync(post),
-                            CanReport = await S.Permissions.CanReportAsync(post),
-                            CanReportViolation = await S.Permissions.CanReportViolationAsync(post),
-                            CanEdit = await S.Permissions.CanEditPostAsync(post),
-                            CanMarkAsModerated = await S.Permissions.CanMarkAsModeratedAsync(post),
-                            CanMarkAsNotPassedModeration = await S.Permissions.CanMarkAsNotPassedModerationAsync(post),
-                        };
+                    Post = new Models.PostModel()
+                    {
+                        Author = post.Author.UserName,
+                        AuthorId = post.Author.Id,
+                        Body = post.Body,
+                        PostId = post.Id,
+                        CreationTime = post.CreationTime,
+                        Title = post.Title,
+                        CommentarySectionModel = new CommentarySectionModel()
+                        {
+                            Commentaries = commentaries.ToArray()
+                        },
+                        Edits = post.Edits.Select(e => new Models.PostEditModel()
+                        {
+                            Author = e.Author.UserName,
+                            Reason = e.Reason,
+                            AuthorId = e.Author.Id,
+                            EditTime = e.EditTime
+                        }).ToArray(),
+                        AuthorBiography = post.Author.Profile.About,
+                        IsAuthentificated = S.HttpContext.User?.Identity?.IsAuthenticated ?? false,
+                        TotalViews = post.ViewStatistic.TotalViews,
+                        ModerationState = post.ModerationInfo.State,
+                        AuthorProfileImage = new ProfileImageModel()
+                        {
+                            RelativeUri = post.Author.Profile.Image
+                        },
 
-                        var viewStatistics = new Enumerable<IViewStatistic>
+                        CanAddCommentary = await S.Permissions.CanAddCommentaryAsync(post),
+                        CanDelete = await S.Permissions.CanDeletePostAsync(post),
+                        CanRestore = await S.Permissions.CanRestorePostAsync(post),
+                        CanReport = await S.Permissions.CanReportAsync(post),
+                        CanReportViolation = await S.Permissions.CanReportViolationAsync(post),
+                        CanEdit = await S.Permissions.CanEditPostAsync(post),
+                        CanMarkAsModerated = await S.Permissions.CanMarkAsModeratedAsync(post),
+                        CanMarkAsNotPassedModeration = await S.Permissions.CanMarkAsNotPassedModerationAsync(post),
+                    };
+
+                    var viewStatistics = new Enumerable<IViewStatistic>
                         {
                             post.ViewStatistic,
                             commentaries.Select(c => c.ViewStatistic),
                         }.ToArray();
 
-                        await S.CacheManager.CacheManager.SetRequestDataAsync(CacheManagerService.POST_GET_CACHE_KEY, viewStatistics);
-                        await updateViewStatisticAsync(S.DbUpdator, S.HttpContext.User?.Identity?.IsAuthenticated ?? false, viewStatistics);
+                    await S.CacheManager.CacheManager.SetRequestDataAsync(CacheManagerService.POST_GET_CACHE_KEY, viewStatistics);
+                    await updateViewStatisticAsync(S.DbUpdator, S.HttpContext.User?.Identity?.IsAuthenticated ?? false, viewStatistics);
 
-                        NewCommentary.PostId = id;
+                    NewCommentary.PostId = id;
 
-                        return Page();
-                    }
+                    return Page();
                 }
             }
             else

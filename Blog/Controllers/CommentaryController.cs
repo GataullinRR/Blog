@@ -51,41 +51,38 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                using (S.Db.LazyLoadingSuppressingMode)
-                {
-                    var commentaries = S.Db.Commentaries
-                        .AsNoTracking()
-                        .Where(c => c.Post.Id == id)
-                        .Select(c => new CommentaryModel()
-                        {
-                            Author = c.Author.UserName,
-                            AuthorId = c.Author.Id,
-                            AuthorProfileImage = new ProfileImageModel()
-                            {
-                                RelativeUri = c.Author.Profile.Image
-                            },
-                            Body = c.Body,
-                            CommentaryId = c.Id,
-                            CreationTime = c.CreationTime,
-                            Edits = c.Edits.Select(e => new CommentaryEditModel()
-                            {
-                                Author = e.Author.UserName,
-                                AuthorId = e.Author.Id,
-                                Reason = e.Reason,
-                                Time = e.EditTime
-                            }).ToArray(),
-                            IsDeleted = c.IsDeleted,
-                            IsHidden = c.IsHidden
-                        })
-                        .ToArray();
-
-                    var model = new CommentarySectionModel()
+                var commentaries = S.Db.Commentaries
+                    .AsNoTracking()
+                    .Where(c => c.Post.Id == id)
+                    .Select(c => new CommentaryModel()
                     {
-                        Commentaries = commentaries
-                    };
+                        Author = c.Author.UserName,
+                        AuthorId = c.Author.Id,
+                        AuthorProfileImage = new ProfileImageModel()
+                        {
+                            RelativeUri = c.Author.Profile.Image
+                        },
+                        Body = c.Body,
+                        CommentaryId = c.Id,
+                        CreationTime = c.CreationTime,
+                        Edits = c.Edits.Select(e => new CommentaryEditModel()
+                        {
+                            Author = e.Author.UserName,
+                            AuthorId = e.Author.Id,
+                            Reason = e.Reason,
+                            Time = e.EditTime
+                        }).ToArray(),
+                        IsDeleted = c.IsDeleted,
+                        IsHidden = c.IsHidden
+                    })
+                    .ToArray();
 
-                    return PartialView(Partials.COMMENTARIES_SECTION, model);
-                }
+                var model = new CommentarySectionModel()
+                {
+                    Commentaries = commentaries
+                };
+
+                return PartialView(Partials.COMMENTARIES_SECTION, model);
             }
             else
             {

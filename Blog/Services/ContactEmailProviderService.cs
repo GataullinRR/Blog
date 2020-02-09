@@ -21,34 +21,31 @@ namespace Blog.Services
         public async Task<string> GetHelpContactEmailAsync()
         {
             var currentUser = await S.Utilities.GetCurrentUserModelAsync();
-            using (S.Db.LazyLoadingSuppressingMode)
+            string email = null;
+            if (currentUser != null)
             {
-                string email = null;
-                if (currentUser != null)
-                {
 #warning quick fix
-                    if (currentUser.ModeratorsInChargeGroup == null)
-                    {
-                        return null;
-                    }
-
-                    var moderators = currentUser.ModeratorsInChargeGroup.Moderators
-                        .Where(m => m.EmailConfirmed)
-                        .ToArray();
-                    var moderator = _rnd.NextElementFrom(moderators);
-                    email = moderator.Email;
-                }
-                else
+                if (currentUser.ModeratorsInChargeGroup == null)
                 {
-                    var moderators = await S.Db.GetUsersInRoleAsync(Roles.MODERATOR).ThenDo(r => r
-                        .Where(m => m.EmailConfirmed)
-                        .ToArray());
-                    var moderator = _rnd.NextElementFrom(moderators);
-                    email = moderator.Email;
+                    return null;
                 }
 
-                return email;
+                var moderators = currentUser.ModeratorsInChargeGroup.Moderators
+                    .Where(m => m.EmailConfirmed)
+                    .ToArray();
+                var moderator = _rnd.NextElementFrom(moderators);
+                email = moderator.Email;
             }
+            else
+            {
+                var moderators = await S.Db.GetUsersInRoleAsync(Roles.MODERATOR).ThenDo(r => r
+                    .Where(m => m.EmailConfirmed)
+                    .ToArray());
+                var moderator = _rnd.NextElementFrom(moderators);
+                email = moderator.Email;
+            }
+
+            return email;
         }
     }
 }

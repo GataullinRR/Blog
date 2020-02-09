@@ -94,7 +94,7 @@ namespace Blog.Controllers
                 switch (tokenData.Data.Action)
                 {
                     case ActivationLinkAction.REGISTER_AS_OWNER:
-                        role = Roles.OWNER;
+                        role = Roles.ADMINISTRATOR;
                         break;
                     case ActivationLinkAction.REGISTER_AS_MODERATOR:
                         role = Roles.MODERATOR;

@@ -1,4 +1,5 @@
-﻿using Blog.Models;
+﻿using ASPCoreUtilities;
+using Blog.Models;
 using DBModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -178,12 +179,10 @@ namespace Blog.Services
             {
                 return new CommentaryPermissionsModel()
                     .Repeat(commentaryIds.Length)
-                    .AsQueryable();
+                    .AsAsyncQuerable();
             }
             else
             {
-                using (S.Db.LazyLoadingSuppressingMode)
-                {
                     var isPowered = await S.UserManager.IsInOneOfTheRolesAsync(user, Roles.GetAllNotLess(Roles.MODERATOR));
                     return S.Db.Commentaries.AsNoTracking()
                         .Where(c => commentaryIds.Contains(c.Id))
@@ -204,7 +203,6 @@ namespace Blog.Services
                              c.Author.Id != user.Id &&
                              c.Violations.Any(r => r.Reporter.Id == user.Id)
                     });
-                }
             }
         }
 
@@ -295,6 +293,56 @@ namespace Blog.Services
         #endregion
 
         #region ### Misc permissions ###
+
+        public async Task<ProfilePermissions> GetProfilePermissionsAsync(string targetUserId)
+        {
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
+            {
+                return new ProfilePermissions();
+            }
+            else
+            {
+                var targetUser = await S.Db.Users.AsNoTracking()
+                    .Include(u => u.Reports)
+                    .Include(u => u.Violations)
+                    .Include(u => u.Status)
+                    .FirstOrDefaultAsync(u => u.Id == targetUserId);
+                var isSameUser = user.Id == targetUser.Id;
+                var isPowered = user.Role >= Role.MODERATOR;
+                var result = new ProfilePermissions()
+                {
+                    CanBan = user.Status.State != ProfileState.BANNED &&
+                        user.Role > targetUser.Role &&
+                        isPowered,
+                    CanUnbanUser = user.Status.State == ProfileState.BANNED &&
+                        user.Role > targetUser.Role &&
+                        isPowered,
+                    CanSeeServiceInformation = user.Role >= Role.MODERATOR,
+                    CanReport = !isSameUser &&
+                        !targetUser.Reports.Any(r => r.Reporter.Id == user.Id),
+                    CanReportViolation = !isSameUser &&
+                        !targetUser.Violations.Any(r => r.Reporter.Id == user.Id) &&
+                        isPowered,
+                    CanSeeTabs = isSameUser ||
+                        isPowered,
+                    CanChangePassword = isSameUser &&
+                        targetUser.EmailConfirmed &&
+                        targetUser.Status.State == ProfileState.ACTIVE,
+                    CanSeePrivateInformation = isSameUser ||
+                        isPowered,
+                    CanEdit = isSameUser ||
+                        targetUser.Role < user.Role,
+                };
+                result.CanSeeActionsTab = result.CanSeeTabs;
+                result.CanSeeSettingsTab = result.CanSeeTabs;
+                result.CanSeeGeneralInformation = isSameUser || result.CanSeeTabs;
+                result.CanEdit = isSameUser || result.CanSeePrivateInformation ;
+                result.CanChangeEMail = result.CanChangePassword;
+
+                return result;
+            }
+        }
 
         public async Task<bool> CanSeeProfileTabsAsync(User targetUser)
         {
@@ -501,8 +549,7 @@ namespace Blog.Services
             }
             else
             {
-                return await isNotDeletedAsync(targetUser)
-                    && await CanSeePrivateInformationAsync(targetUser)
+                return await CanSeePrivateInformationAsync(targetUser)
                     && ((await S.UserManager.GetRolesAsync(targetUser)).Single().IsLess((await S.UserManager.GetRolesAsync(currentUser)).Single())
                         || currentUser.Id == targetUser.Id);
             }
@@ -588,7 +635,7 @@ namespace Blog.Services
             {
                 return await isNotDeletedAsync(entity)
                     && (await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.MODERATOR) 
-                        || (await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.OWNER) && currentUser == entity.Author))
+                        || (await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.ADMINISTRATOR) && currentUser == entity.Author))
                     && entity.ModerationInfo.State.IsOneOf(ModerationState.UNDER_MODERATION);
             }
         }
@@ -609,7 +656,7 @@ namespace Blog.Services
             }
             else
             {
-                return (await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.OWNER)) 
+                return (await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.GetAllNotLess(Roles.ADMINISTRATOR)) 
                         && currentUser != target)
                     || (await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.MODERATOR)
                         && currentUser == target);
@@ -632,7 +679,7 @@ namespace Blog.Services
             }
             else
             {
-                return await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.OWNER);
+                return await S.UserManager.IsInOneOfTheRolesAsync(currentUser, Roles.ADMINISTRATOR);
             }
         }
 
@@ -703,8 +750,17 @@ namespace Blog.Services
         async Task<User> getCurrentUserOrNullAsync()
         {
             return S.HttpContext.User?.Identity?.IsAuthenticated ?? false
-                ? await S.UserManager.GetUserAsync(S.HttpContext.User)
+                ? await getUserAsync()
                 : null;
+
+            async Task<User> getUserAsync()
+            {
+                var user = await S.UserManager.GetUserAsync(S.HttpContext.User);
+                return await S.Db.Users.AsNoTracking()
+                    .Include(u => u.Status)
+                    .Include(u => u.Profile)
+                    .FirstOrDefaultAsync(u => u.Id == user.Id);
+            }
         }
 
         Exception buildException(string reason = null)
