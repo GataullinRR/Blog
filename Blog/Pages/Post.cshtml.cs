@@ -61,39 +61,10 @@ namespace Blog.Pages
                 {
                     await S.Permissions.ValidateViewPostAsync(post);
 
-                    var commentaries = await S.Db.Commentaries
-                        .AsNoTracking()
-                        .Where(c => c.Post.Id == id)
-                        .Select(c => new Models.CommentaryModel()
-                        {
-                            Author = c.Author.UserName,
-                            AuthorId = c.Author.Id,
-                            AuthorProfileImage = new ProfileImageModel()
-                            {
-                                RelativeUri = c.Author.Profile.Image
-                            },
-                            Body = c.Body,
-                            CommentaryId = c.Id,
-                            CreationTime = c.CreationTime,
-                            Edits = c.Edits.Select(e => new CommentaryEditModel()
-                            {
-                                Author = e.Author.UserName,
-                                AuthorId = e.Author.Id,
-                                Reason = e.Reason,
-                                Time = e.EditTime
-                            }).ToArray(),
-                            IsDeleted = c.IsDeleted,
-                            IsHidden = c.IsHidden,
-                            ViewStatistic = c.ViewStatistic,
-                        }).ToListAsync();
-                    var permissions = await await S.Permissions
-                        .GetCommentaryPermissionsAsync(commentaries.Select(c => c.CommentaryId).ToArray())
-                        .ThenDo(async r => await r.ToListAsync());
-                    for (int i = 0; i < commentaries.Count; i++)
-                    {
-                        commentaries[i].Permissions = permissions[i];
-                    }
-
+                    var commentaries = await S.Repository.GetCommentaryModelsAsync(
+                            S.Db.Commentaries
+                            .AsNoTracking()
+                            .Where(c => c.Post.Id == id));
                     Post = new Models.PostModel()
                     {
                         Author = post.Author.UserName,
@@ -121,6 +92,8 @@ namespace Blog.Pages
                         {
                             RelativeUri = post.Author.Profile.Image
                         },
+                        IsDeleted = post.IsDeleted,
+                        DeleteReason = post.DeleteReason,
 
                         CanAddCommentary = await S.Permissions.CanAddCommentaryAsync(post),
                         CanDelete = await S.Permissions.CanDeletePostAsync(post),
@@ -165,18 +138,19 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-                var post = await S.Db.Posts.FirstOrDefaultAsync(p => p.Id == NewCommentary.PostId);
+                var post = await S.Db.Posts
+                    .Include(p => p.ModerationInfo)
+                    .FirstOrDefaultAsync(p => p.Id == NewCommentary.PostId);
                 await Permissions.ValidateAddCommentaryAsync(post);
 
+                var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 var comment = new Commentary(
-                        await S.Db.Users.FirstAsync(u => u.UserName == User.Identity.Name),
+                        currentUser,
                         DateTime.UtcNow,
-                        await S.Db.Posts.FindAsync(NewCommentary.PostId),
+                        post,
                         NewCommentary.Body);
                 S.Db.Commentaries.Add(comment);
-                await S.Db.SaveChangesAsync(); // To assign commentary id
-                currentUser.Actions.Add(new UserAction(ActionType.COMMENTARY_ADDED, comment));
+                await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.COMMENTARY_ADDED, comment));
                 await S.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Post", new { id = NewCommentary.PostId });

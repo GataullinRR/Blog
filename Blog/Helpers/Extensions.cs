@@ -104,10 +104,10 @@ namespace Blog
             return dateTime.ToString("dd.MM.yyyy");
         }
 
-        public static IDisposable SaveChangesMode(this BlogContext db)
-        {
-            return new DisposingAction(() => db.SaveChanges());
-        }
+        //public static IDisposable SaveChangesMode(this BlogContext db)
+        //{
+        //    return new DisposingAction(() => db.SaveChanges());
+        //}
 
         public static string GetUTF8StringOrDefault(this ISession session, string key, string defaultValue = null)
         {

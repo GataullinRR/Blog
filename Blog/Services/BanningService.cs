@@ -1,4 +1,5 @@
 ﻿using DBModels;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +42,8 @@ namespace Blog.Services
             targetUser.Status.State = ProfileState.BANNED;
             targetUser.Status.BannedTill = bannedTill.ToUniversalTime();
             targetUser.Status.StateReason = reason;
-            await S.Repository.AddUserActionAsync(performer, new UserAction(ActionType.BANNED, targetUser));
+            var action = new UserAction(ActionType.BANNED, targetUser) { Author = performer };
+            S.Db.UsersActions.Add(action);
             await S.Db.SaveChangesAsync();
 
             await S.EMail.TrySendMessageAsync(targetUser, "Administration", $"Profile has been banned{isForeverlyBanned.Ternar(" foreverly", "")}", $@"Profile name: {targetUser.UserName}
@@ -49,17 +51,20 @@ Reason: {reason}
 {isForeverlyBanned.Ternar("", $"Ban will expire at {bannedTill.ToString("dd.MM.yyyy")}")}");
         }
 
-        public async Task UnbanAsync(User targetUser)
+        public async Task UnbanAsync(string targetUserId)
         {
+            await S.Permissions.ValidateUnbanUserAsync(targetUserId);
             var performer = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-            await S.Permissions.ValidateUnbanUserAsync(targetUser);
+            var targetUser = await S.Db.Users
+                .Include(u => u.Status)
+                .FirstOrDefaultAsync(u => u.Id == targetUserId);
 
             targetUser.Status.State = targetUser.EmailConfirmed
                 ? ProfileState.ACTIVE
                 : ProfileState.RESTRICTED;
             targetUser.Status.StateReason = null;
             targetUser.Status.BannedTill = null;
-            await S.Repository.AddUserActionAsync(performer, new UserAction(ActionType.UNBANED, targetUser));
+            S.Db.UsersActions.Add(new UserAction(ActionType.UNBANED, targetUser, performer));
             await S.Db.SaveChangesAsync();
         }
     }

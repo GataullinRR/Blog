@@ -35,10 +35,10 @@ namespace Blog.Controllers
             {
                 var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 var post = await S.Db.Posts.FirstOrDefaultByIdAsync(id);
-                await S.Permissions.ValidateUndeletePostAsync(post);
+                await S.Permissions.ValidateRestorePostAsync(post);
 
                 post.IsDeleted = false;
-                await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.POST_UNDELETED, post));
+                await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.POST_RESTORED, post));
                 await S.Db.SaveChangesAsync();
 
                 return RedirectToPage("/Post", new { id = id });

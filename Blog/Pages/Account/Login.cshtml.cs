@@ -27,18 +27,16 @@ namespace Blog.Pages.Account
 
         }
 
-        public IActionResult OnGet(string userName)
+        public async Task<IActionResult> OnGetAsync(string userName)
         {
             if (User.Identity.IsAuthenticated)
             {
-                return RedirectToPage("/Index");
+                await S.SignInManager.SignOutAsync();
             }
-            else
-            {
-                Login = userName;
 
-                return Page();
-            }
+            Login = userName;
+
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()

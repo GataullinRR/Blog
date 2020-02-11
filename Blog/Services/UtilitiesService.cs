@@ -9,9 +9,18 @@ namespace Blog.Services
 {
     public class UtilitiesService : ServiceBase
     {
+        bool _isCurrentUserCacheSet;
+        User _curentUserCache;
+
         public UtilitiesService(ServiceLocator services) : base(services)
         {
 
+        }
+
+        public async Task<string> GetCurrentUserIdOrThrowAsync()
+        {
+            var user = await GetCurrentUserModelOrThrowAsync();
+            return user.Id;
         }
 
         public async Task<User> GetCurrentUserModelOrThrowAsync()
@@ -29,7 +38,16 @@ namespace Blog.Services
 
         public async Task<User> GetCurrentUserModelAsync()
         {
-            return await S.UserManager.GetUserAsync(S.HttpContext.User);
+            if (_isCurrentUserCacheSet)
+            {
+                return _curentUserCache;
+            }
+
+            var user = await S.UserManager.GetUserAsync(S.HttpContext.User);
+            _isCurrentUserCacheSet = true;
+            _curentUserCache = user;
+
+            return _curentUserCache;
         }
 
         public async Task<User> FindUserByIdOrGetCurrentOrThrowAsync(string userId)

@@ -6,7 +6,7 @@
 <div class="container container-main">
     <div class="row">
         <div class="col">
-            @{ await Html.RenderPartialAsync("_CommentaryContainer", Model.Commentary); }
+            <partial name="@Partials.COMMENTARY" model="Model.Commentary" />
 
             @if (await Model.Permissions.CanSeeServiceInformationAsync())
             {
@@ -15,10 +15,9 @@
                 <h4>Info</h4>
                 var parameters = new Dictionary<string, object>()
                 {
-                    { "Id", Model.Commentary.Id },
+                    { "Id", Model.Commentary.CommentaryId },
                     { "Registred users views", Model.Commentary.ViewStatistic.RegisteredUserViews },
                     { "Total views", Model.Commentary.ViewStatistic.TotalViews },
-                    { "Number of reports", Model.Commentary.Reports.Count() },
                 };
 
                 foreach (var parameter in parameters)

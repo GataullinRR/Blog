@@ -28,12 +28,12 @@ namespace DBModels
         COMMENTARY_EDIT = 450,
         [Description("Commentary deleted")]
         COMMENTARY_DELETE = 500,
-        [Description("Commentary undeleted")]
-        COMMENTARY_UNDELETE = 525,
+        [Description("Commentary restored")]
+        COMMENTARY_RESTORED = 525,
         [Description("Post deleted")]
         POST_DELETED = 550,
-        [Description("Post undeleted")]
-        POST_UNDELETED = 575,
+        [Description("Post restored")]
+        POST_RESTORED = 575,
         [Description("Report submitted")]
         REPORT = 600,
         [Description("User banned")]
@@ -86,7 +86,12 @@ namespace DBModels
 
         public UserAction() { }
 
-        public UserAction(ActionType actionType, object @object)
+        public UserAction(ActionType actionType, object @object) : this(actionType, @object, null)
+        {
+
+        }
+
+        public UserAction(ActionType actionType, object @object, User author)
         {
             ActionType = actionType;
             ActionDate = DateTime.UtcNow;
@@ -94,6 +99,7 @@ namespace DBModels
             PostObject = @object as Post;
             ProfileObject = @object as Profile;
             Owner = @object as User;
+            Author = author;
         }
     }
 }

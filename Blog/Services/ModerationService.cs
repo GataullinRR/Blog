@@ -1,4 +1,5 @@
 ﻿using DBModels;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,34 +20,21 @@ namespace Blog.Services
             await S.Db.SaveChangesAsync();
         }
 
-        public async Task MarkAsNotPassedModerationAsync(IModeratable moderatable, string stateReasoning)
+        public async Task MarkAsNotPassedModerationAsync(int postId, string stateReasoning)
         {
-            await markNotPassedModerationAsync(moderatable);
-            moderatable.ModerationInfo.StateReasoning = stateReasoning;
-            await S.Db.SaveChangesAsync();
+            var post = await S.Db.Posts
+                .Include(p => p.ModerationInfo)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            post.ModerationInfo.State = ModerationState.MODERATION_NOT_PASSED;
+            post.ModerationInfo.StateReasoning = stateReasoning;
+            var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+            await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.MARKED_AS_NOT_PASSED_MODERATION, post));
+
+            await deleteFromAnyModeratorPanelAsyn(post);
         }
 
-        //public async Task MarkPostEditAsModeratedAsync(PostEdit edit)
-        //{
-        //    edit.Post.Title = edit.NewTitle;
-        //    edit.Post.Body = edit.NewBody;
-        //    edit.Post.BodyPreview = edit.NewBodyPreview;
-        //    if (await S.Permissions.CanMarkAsModeratedAsync(edit.Post))
-        //    {
-        //        await markAsync(edit.Post); // Because edit body becomes post body and if this edit's body is corect so the post will also be correct
-        //    }
-        //    await markAsync(edit);
-        //    foreach (var editToClose in edit.Post.Edits.Where(e => e.EditTime < edit.EditTime))
-        //    {
-        //        if (await S.Permissions.CanMarkAsModeratedAsync(editToClose))
-        //        {
-        //            await markAsync(editToClose);
-        //        }
-        //    }
-        //    await S.Db.SaveChangesAsync();
-        //}
-
-        async Task markAsync(IModeratable moderatable)
+        async Task markAsync(Post moderatable)
         {
             await S.Permissions.ValidateMarkAsModeratedAsync(moderatable);
 
@@ -58,26 +46,17 @@ namespace Blog.Services
                 await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.MARKED_AS_MODERATED, moderatable));
             }
 
-            deleteFromAnyModeratorPanel(moderatable);
+            await deleteFromAnyModeratorPanelAsyn(moderatable);
         }
 
-        async Task markNotPassedModerationAsync(IModeratable moderatable)
+        async Task deleteFromAnyModeratorPanelAsyn(IModeratable moderatable)
         {
-            await S.Permissions.ValidateMarkAsNotPassedModerationAsync(moderatable);
-
-            moderatable.ModerationInfo.State = ModerationState.MODERATION_NOT_PASSED;
-            var currentUser = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-            await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.MARKED_AS_NOT_PASSED_MODERATION, moderatable));
-
-            deleteFromAnyModeratorPanel(moderatable);
-        }
-
-        void deleteFromAnyModeratorPanel(IModeratable moderatable)
-        {
-            var checkable = S.Db.EntitiesToCheck.FirstOrDefault(e => e.Entity == moderatable);
-            if (checkable != null)
+            var checkable = await S.Db.PostsToCheck
+                .Where(e => e.Entity.Id == moderatable.Id && e.ResolvingTime == null)
+                .ToListAsync();
+            foreach (var item in checkable)
             {
-                checkable.ResolvingTime = DateTime.UtcNow; // Delete from every moderators panel
+                item.ResolvingTime = DateTime.UtcNow; // Delete from every moderators panel
             }
         }
     }

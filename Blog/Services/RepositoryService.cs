@@ -1,8 +1,12 @@
 ﻿using Blog.Misc;
+using Blog.Models;
+using Utilities.Extensions;
 using DBModels;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Blog.Services
@@ -10,56 +14,57 @@ namespace Blog.Services
     [Service(ServiceType.SCOPED)]
     public class RepositoryService : ServiceBase
     {
+        static readonly Expression<Func<Commentary, CommentaryModel>> _commentaryModelExpression = c => new CommentaryModel()
+        {
+            Author = c.Author.UserName,
+            AuthorId = c.Author.Id,
+            AuthorProfileImage = new ProfileImageModel()
+            {
+                RelativeUri = c.Author.Profile.Image
+            },
+            Body = c.Body,
+            CommentaryId = c.Id,
+            CreationTime = c.CreationTime,
+            Edits = c.Edits.Select(e => new CommentaryEditModel()
+            {
+                Author = e.Author.UserName,
+                AuthorId = e.Author.Id,
+                Reason = e.Reason,
+                Time = e.EditTime
+            }).ToArray(),
+            IsDeleted = c.IsDeleted,
+            IsHidden = c.IsHidden,
+            ViewStatistic = c.ViewStatistic,
+        };
+
         public RepositoryService(ServiceLocator services) : base(services)
         {
 
         }
 
-        public async Task AddUserActionAsync(User targetUser, UserAction newAction)
+        public async Task AddUserActionAsync(User performer, UserAction action)
         {
-            targetUser.Actions.Add(newAction);
-            ensureHasThisDayStatistic();
-            ensureHasAppropriateCounter().Count++;
+            action.Author = performer;
+            S.Db.UsersActions.Add(action);
+        }
 
-            return; ////////////////////////////////////////////
+        public async Task<IQueryable<CommentaryModel>> GetCommentaryModelsQueryAsync(IQueryable<Commentary> commentaries)
+        {
+            return commentaries.Select(_commentaryModelExpression);
+        }
 
-            void ensureHasThisDayStatistic()
+        public async Task<List<CommentaryModel>> GetCommentaryModelsAsync(IQueryable<Commentary> commentaries)
+        {
+            var models = await commentaries.Select(_commentaryModelExpression).ToListAsync();
+            var permissions = await await S.Permissions
+                .GetCommentaryPermissionsAsync(models.Select(c => c.CommentaryId).ToArray())
+                .ThenDo(async r => await r.ToListAsync());
+            for (int i = 0; i < models.Count; i++)
             {
-                var today = newAction.ActionDate.Date;
-                UserDayStatistic dayStatistic;
-                if (today != targetUser.Statistic.LastDayStatistic?.Day)
-                {
-                    dayStatistic = new UserDayStatistic()
-                    {
-                        Day = today
-                    };
-                    targetUser.Statistic.DayStatistics.Add(dayStatistic);
-                }
-                else
-                {
-                    dayStatistic = targetUser.Statistic.LastDayStatistic;
-                }
+                models[i].Permissions = permissions[i];
             }
 
-            IActionStatistic ensureHasAppropriateCounter()
-            {
-                ActionStatistic<UserStatistic> actionCounter;
-                UserDayStatistic thisDayStatistic = targetUser.Statistic.LastDayStatistic;
-                if (thisDayStatistic.Actions.Any(s => s.ActionType == newAction.ActionType))
-                {
-                    actionCounter = thisDayStatistic.Actions.Find(s => s.ActionType == newAction.ActionType);
-                }
-                else
-                {
-                    actionCounter = new ActionStatistic<UserStatistic>()
-                    {
-                        ActionType = newAction.ActionType
-                    };
-                    thisDayStatistic.Actions.Add(actionCounter);
-                }
-
-                return actionCounter;
-            }
+            return models;
         }
     }
 }

@@ -12,12 +12,17 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using MVVMUtilities.Types;
 
 namespace DBModels
 {
     public class BlogContext : IdentityDbContext<User>
     {
-        public event Action SavingChanges;
+        /// <summary>
+        /// To wait each async event handler to finish execution
+        /// </summary>
+        readonly BusyObject _savingChanges = new BusyObject();
+        public event Action<BusyObject> SavingChanges;
 
         public DbSet<Post> Posts { get; set; }
         public DbSet<Commentary> Commentaries { get; set; }
@@ -33,11 +38,9 @@ namespace DBModels
         public DbSet<EntityToCheck<Post>> PostsToCheck { get; set; }
         public DbSet<EntityToCheck<Commentary>> CommentariesToCheck { get; set; }
         public DbSet<EntityToCheck<Profile>> ProfilesToCheck { get; set; }
-        public DbSet<EntityToCheck<PostEdit>> PostEditsToCheck { get; set; }
         public IEnumerable<IEntityToCheck> EntitiesToCheck =>
             new Enumerable<IEntityToCheck>()
             {
-                PostEditsToCheck,
                 PostsToCheck,
                 ProfilesToCheck,
                 CommentariesToCheck
@@ -47,6 +50,8 @@ namespace DBModels
         public DbSet<ViewStatistic<Post>> PostViews { get; set; }
         public DbSet<ViewStatistic<Profile>> ProfileViews { get; set; }
         public DbSet<ModeratorsGroupStatistic> ModeratorsGroupStatistics { get; set; }
+        public DbSet<BlogDayStatistic> BlogDayStatistics { get; set; }
+        public DbSet<BlogStatistic> BlogStatistics { get; set; }
         /// <summary>
         /// Contains single entity
         /// </summary>
@@ -59,7 +64,7 @@ namespace DBModels
             // Dont want to spend 4ms each time on
             // IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE') SELECT 1 ELSE SELECT 0
             // query
-            // Database.EnsureCreated();
+            Database.EnsureCreated();
 
             ChangeTracker.LazyLoadingEnabled = false;
         }
@@ -159,32 +164,31 @@ namespace DBModels
             //    .HasForeignKey<ModeratorsGroupStatistic>(b => b.Owner);
         }
 
+
         public override int SaveChanges()
         {
-            SavingChanges?.Invoke();
-
-            return base.SaveChanges();
+            throw new NotSupportedException();
         }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
-            SavingChanges?.Invoke();
-
-            return base.SaveChanges(acceptAllChangesOnSuccess);
+            throw new NotSupportedException();
         }
 
-        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
-            SavingChanges?.Invoke();
+            //SavingChanges?.Invoke(_savingChanges);
+            //await _savingChanges.WaitAsync();
 
-            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+            return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            SavingChanges?.Invoke();
+            SavingChanges?.Invoke(_savingChanges);
+            await _savingChanges.WaitAsync();
 
-            return base.SaveChangesAsync(cancellationToken);
+            return await base.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -1,30 +1,27 @@
 ﻿<script>
     $(document).ready(function () {
-        var commentaries = document.getElementsByClassName("commentary-container");
+        var commentaries = $(".commentary-container");
         for (var i = 0; i < commentaries.length; i++) {
             var container = commentaries[i];
-            var id = container.getAttribute("commentary-id");
+            var id = container.getAttribute("id").split("-")[1];
             loadCommentary(container, id);
         }
     });
 
     function loadCommentary(container, commentaryId) {
-        loadView('/Commentary/GetCommentaryAsync?id=' + commentaryId, function () {
-            container.getElementsByClassName("commentary-edit-button")[0].addEventListener('click', function () {
-                loadView('/Commentary/GetCommentaryEditAsync?id=' + commentaryId, function () {
-                    container.getElementsByClassName("commentary-edit-exit-button")[0].addEventListener('click', function () {
-                        loadCommentary(container, commentaryId);
-                    })
-                });
-            })
-        });
+        $(".commentary-edit-button", container).click(function () {
+            makeRequest('/Commentary/GetCommentaryEditAsync?id=' + commentaryId, "get", function (response) {
+                var editViewContainer = $(".commentary-edit-view", container).removeClass("d-none").html(response).show();
+                $.validator.unobtrusive.parse(editViewContainer); 
+                var commentaryView = $(".commentary-view", container).hide();
 
-        function loadView(route, onLoaded) {
-            makeRequest(route, "get", function (response) {
-                container.innerHTML = response;
-                onLoaded();
+                $(".commentary-edit-exit-button", editViewContainer).click(function () {
+                    editViewContainer.hide();
+                    editViewContainer.html("");
+                    commentaryView.show();
+                });
             });
-        }
+        });
     }
 
     @{
@@ -33,17 +30,5 @@
 
     function reportCommentary(element, id) {
         report(element, "@target.GetURI()", id);
-        @*makePost("@target.GetURI()", { "id": id }, true,
-            function () {
-                renderMessage("Report has been submitted");
-                var reportButton = element.parentElement.closest(".btn-report");
-                reportButton.parentElement.removeChild(reportButton);
-            },
-            reportError
-        );
-
-        function reportError() {
-            renderMessage("An error occurred during submitting the report :(");
-        }*@
     }
 </script>

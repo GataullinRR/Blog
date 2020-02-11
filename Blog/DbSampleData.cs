@@ -350,7 +350,7 @@ Ozone,
                     });
                 }
 
-                context.SaveChanges();
+                context.SaveChangesAsync().Wait();
             }
         }
     }

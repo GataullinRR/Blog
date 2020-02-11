@@ -53,7 +53,7 @@ namespace Blog.Models
                 S.History.SaveCurrentURL();
                 if (autoSaveDbChanges)
                 {
-                    S.Db.SaveChanges();
+                    await S.Db.SaveChangesAsync();
                 }
             }
         }

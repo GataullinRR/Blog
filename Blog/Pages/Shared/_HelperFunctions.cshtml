@@ -59,16 +59,15 @@
         xhr.send();
     }
 
-    function getCacheModel() {
-        // In JSON
-        var rawModel = $('@(CustomCache.CACHE_MODEL_TAG)[@CustomCache.CACHE_MODEL_TAG_ATTRIBUTE]').html();
-
-        return eval(rawModel);
-    }
-
     function removeDisplayNone(elementsClass, doRemove) {
         if (doRemove === true) {
             $("." + elementsClass).removeClass("d-none");
+        }
+    }
+
+    function setDisplayNone(elementsClass, doSet) {
+        if (doSet === true) {
+            $("." + elementsClass).addClass("d-none");
         }
     }
 </script>

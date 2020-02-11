@@ -29,7 +29,7 @@
                         <h4 class="font-weight-normal">
                             <a asp-page="/Post" asp-route-id="@post.PostId">@post.Title</a>
                         </h4>
-                        @Html.Raw(post.BodyPreview);
+                        @Html.Raw(post.BodyPreview)
                         <h6 class="font-weight-normal text-secondary">
                             Written by <a asp-page="/Account/Profile" asp-route-id="@post.AuthorId">@post.Author</a>
 

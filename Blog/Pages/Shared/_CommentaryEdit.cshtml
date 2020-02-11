@@ -1,101 +1,32 @@
-﻿@model Commentary
+﻿@model CommentaryEditinigModel
 
-@*<form method="post" asp-controller="Commentary" asp-action="UpdateCommentaryAsync" class="form">
-    <input type="hidden" asp-for="Id" />
-
-    <h4>
-        <a asp-page="/Account/Profile" asp-route-id="@Model.Author.Id">@Model.Author.UserName</a> - @Model.CreationTime.ToString("hh:mm dd.MM.yyyy")
-        <button type="submit" class="commentary-edit-save-button">Save</button>
-        <button type="button" class="commentary-edit-exit-button">Cancel</button>
-    </h4>
-    @await Html.PartialAsync("_ProfileImage", Model.Author)
-
-    <div>
-        <textarea id="" asp-for="Body"></textarea>
-    </div>
-    <div>
-        <span>Edit reason: </span>
-        <input type="text" name="editReason" placeholder="Edit reason" />
-    </div>
-</form>*@
-
-<form asp-controller="Commentary" asp-action="UpdateCommentaryAsync" class="form" style="margin-bottom:20px">
-    <input type="hidden" asp-for="Id" />
+<form asp-controller="Commentary" asp-action="UpdateCommentaryAsync" class="form" method="post" style="margin-bottom:20px">
+    <input type="hidden" asp-for="CommentaryId"/>
 
     <h4>
-        <a asp-page="/Commentary" asp-route-id="@Model.Id">#@Model.Id</a>
-        <a asp-page="/Account/Profile" asp-route-id="@Model.Author.Id">@Model.Author.UserName</a>
-        <span style="float:right">@Model.CreationTime.ToString("hh:mm dd.MM.yyyy")</span>
-        <button style="display:none;" id="save" type="submit" class="commentary-edit-save-button">Save</button>
-        <button style="display:none;" id="cancel" type="button" class="commentary-edit-exit-button">Cancel</button>
-        <span>| <a onclick="$('#save').trigger('click')" class="no-redirect operation-primary" href="#">Save</a></span>
-        <span>| <a onclick="$('#cancel').trigger('click')" class="no-redirect" href="#">Cancel</a></span>
+        <a asp-page="/Commentary" asp-route-id="@Model.CommentaryId">#@Model.CommentaryId</a>
+        <a asp-page="/Account/Profile" asp-route-id="@Model.AuthorId">@Model.Author</a>
+        <button style="display:none;" id="save-@Model.CommentaryId" type="submit" class="commentary-edit-save-button">Save</button>
+        <button style="display:none;" id="cancel-@Model.CommentaryId" type="button" class="commentary-edit-exit-button">Cancel</button>
+        <span>| <a onclick="$('#save-@Model.CommentaryId').trigger('click')" class="no-redirect operation-primary" href="#">Save</a></span>
+        <span>| <a onclick="$('#cancel-@Model.CommentaryId').trigger('click')" class="no-redirect" href="#">Cancel</a></span>
     </h4>
 
     <div class="d-flex flex-row">
-        <div class="d-flex flex-column align-self-center" style="margin-right:20px">
-            @await Html.PartialAsync("_ProfileImage", Model.Author)
-        </div>
         <div class="d-flex w-100 flex-column">
             <div class="form-group">
                 <label>New commentary body</label>
-                <textarea class="form-control" id="" asp-for="Body"></textarea>
+                <textarea class="form-control" asp-for="Body"></textarea>
+                <span class="text-danger" asp-validation-for="Body"></span>
             </div>
 
             <div class="form-group">
                 <label>Edit reason</label>
-                <input class="form-control" type="text" name="editReason" placeholder="Edit reason" />
+                <input class="form-control" type="text" asp-for="Reason" placeholder="Edit reason" />
+                <span class="text-danger" asp-validation-for="Reason"></span>
             </div>
 
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         </div>
     </div>
 </form>
-
-@*<div style="margin-bottom:20px">
-    <h4 id="#@Model.Commentary.Id">
-        <a asp-page="/Commentary" asp-route-id="@Model.Commentary.Id">#@Model.Commentary.Id</a>
-        <a asp-page="/Account/Profile" asp-route-id="@Model.Commentary.Author.Id">@Model.Commentary.Author.UserName</a>
-        <span style="float:right">@Model.Commentary.CreationTime.ToString("hh:mm dd.MM.yyyy")</span>
-        <span include-if="await Model.Permissions.CanEditCommentaryAsync(Model.Commentary)">| <a href="" class="no-redirect commentary-edit-button">Edit</a></span>
-        @await Html.PartialAsync("_Anchor", AnchorModel.ToController(
-            "Report", nameof(ReportingController), nameof(ReportingController.ReportCommentaryAsync),
-            "id", Model.Commentary.Id,
-            await Model.Permissions.CanReportAsync(Model.Commentary)))
-        <span include-if="await Model.Permissions.CanReportViolationAsync(Model.Commentary)">| <a asp-page="/ViolationReport" asp-page-handler="Commentary" asp-route-id="@Model.Commentary.Id">Report violation</a></span>
-        <span include-if="await Model.Permissions.CanDeleteCommentaryAsync(Model.Commentary)">| <a class="operation-danger" asp-controller="@nameof(CommentaryController).GetController()" asp-action="@nameof(CommentaryController.DeleteCommentaryAsync)" asp-route-id="@Model.Commentary.Id">Delete</a></span>
-    </h4>
-    <div class="d-flex flex-sm-row">
-        <div class="d-flex flex-sm-column" style="margin-right:20px">
-            @await Html.PartialAsync("_ProfileImage", Model.Commentary.Author)
-        </div>
-        <div class="d-flex flex-sm-column">
-            @if (!Model.Commentary.IsDeleted)
-            {
-                @if (Model.Commentary.IsHidden)
-                {
-                    <span class="comment-hidden">@Model.Commentary.Body</span>
-                }
-                else
-                {
-                    <span>@Model.Commentary.Body</span>
-                }
-            }
-            else
-            {
-                <span class="comment-deleted">This commentary has been deleted</span>
-            }
-
-            @foreach (var edit in Model.Commentary.Edits)
-            {
-                <div>
-                    <span>Edited at @edit.EditTime.ToString("hh:mm dd.MM.yy") by <a asp-page="/Account/Profile" asp-route-id="@edit.Author.Id">@edit.Author.UserName</a></span>
-                    @if (edit.Reason.IsNotNullOrWhiteSpace())
-                    {
-                        <span>Reason: @edit.Reason</span>
-                    }
-                </div>
-            }
-        </div>
-    </div>
-</div>*@

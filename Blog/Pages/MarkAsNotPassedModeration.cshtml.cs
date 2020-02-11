@@ -9,9 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using DBModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Blog.Pages
 {
+    [Authorize]
     public class MarkAsNotPassedModerationModel : PageModelBase
     {
         [BindProperty, BindRequired, Required]
@@ -29,9 +31,6 @@ namespace Blog.Pages
             if (ModelState.IsValid)
             {
                 PostId = id;
-
-                var entity = await getEntityAsync();
-                await Permissions.ValidateMarkAsNotPassedModerationAsync(entity);
             }
             else
             {
@@ -43,9 +42,9 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                var entity = await getEntityAsync();
-                await Permissions.ValidateMarkAsNotPassedModerationAsync(entity);
-                await S.Moderation.MarkAsNotPassedModerationAsync(entity, Reason);
+                await S.Permissions.ValidateMarkAsNotPassedModerationAsync(PostId);
+                await S.Moderation.MarkAsNotPassedModerationAsync(PostId, Reason);
+                await S.Db.SaveChangesAsync();
 
                 LayoutModel.AddMessage("The post has been marked as not passed moderation");
 

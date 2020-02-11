@@ -5,10 +5,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Blog.Services;
 using DBModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Controllers
 {
+    [Authorize]
     public class ModerationController : ControllerBase
     {
         public ModerationController(ServiceLocator serviceProvider) : base(serviceProvider)
@@ -20,7 +23,9 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var post = await S.Db.Posts.FirstOrDefaultByIdAsync(id);
+                var post = await S.Db.Posts
+                    .Include(p => p.ModerationInfo)
+                    .FirstOrDefaultAsync(p => p.Id == id);
                 await S.Moderation.MarkPostAsModeratedAsync(post);
 
                 return RedirectToPage("/Post", new { id = id });

@@ -7,6 +7,7 @@ using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Utilities.Extensions;
 
 namespace Blog.Pages
@@ -16,6 +17,7 @@ namespace Blog.Pages
         [BindProperty, Required(), MinLength(10), MaxLength(1000)]
         public string EditReason { get; set; }
         public Post Post { get; private set; }
+        public bool CanEditPostTitle { get; private set; }
 
         public PostEditModel(ServiceLocator serviceProvider) : base(serviceProvider)
         {
@@ -26,30 +28,47 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                var post = await S.Db.Posts.FirstOrDefaultByIdAsync(id);
+                var post = await S.Db.Posts
+                    .AsNoTracking()
+                    .Include(p => p.Author)
+                    .Include(p => p.ModerationInfo)
+                    .FirstOrDefaultAsync(p => p.Id == id);
                 if (post != null)
                 {
-                    await S.Permissions.ValidateEditPostAsync(post);
                     Title = post.Title;
                     Body = post.Body;
                     Post = post;
                     PostId = id;
+                    CanEditPostTitle = await S.Permissions.CanEditPostTitleAsync(post);
 
                     return Page();
                 }
+                else
+                {
+                    throw new NotFoundException();
+                }
             }
-
-            return Redirect(S.History.GetLastURL());
+            else
+            {
+                throw new Exception();
+            }
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             if (ModelState.IsValid)
             {
-                var editingPost = await S.Db.Posts.FirstOrDefaultByIdAsync(PostId);
+                var editingPost = await S.Db.Posts
+                    .Include(p => p.Edits)
+                    .Include(p => p.ModerationInfo)
+                    .Include(p => p.Author)
+                    .FirstOrDefaultAsync(p => p.Id == PostId);
                 await S.Permissions.ValidateEditPostAsync(editingPost);
 
-                var author = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+                var authorId = await S.Utilities.GetCurrentUserIdOrThrowAsync();
+                var author = await S.Db.Users
+                    .Include(u => u.ModeratorsInChargeGroup)
+                    .FirstOrDefaultAsync(u => u.Id == authorId);
                 if (!await S.Permissions.CanEditPostTitleAsync(editingPost))
                 {
                     Title = editingPost.Title;
@@ -70,7 +89,6 @@ namespace Blog.Pages
                 {
                     author.ModeratorsInChargeGroup.AddEntityToCheck(editingPost, CheckReason.CHECK_REQUIRED);
                 }
-                await S.Db.SaveChangesAsync();
                 await S.Repository.AddUserActionAsync(author, new UserAction(ActionType.POST_EDITED, editingPost));
                 await S.Db.SaveChangesAsync();
                 

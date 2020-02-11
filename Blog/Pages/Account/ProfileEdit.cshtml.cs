@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Utilities;
 using Utilities.Extensions;
 
@@ -41,7 +42,10 @@ namespace Blog.Pages.Account
         {
             EditUserId = id;
             var currentUser = await S.UserManager.GetUserAsync(User);
-            var editUser = await S.UserManager.FindByIdAsync(EditUserId);
+            var editUser = await S.Db.Users.AsNoTracking()
+                .Include(u => u.Profile)
+                .FirstAsync(u => u.Id == EditUserId);
+            await S.Permissions.CanEditProfileAsync(editUser);
             if (editUser != null &&
                (currentUser.Id == EditUserId || User.IsInOneOfTheRoles(Roles.GetAllNotLess(Roles.MODERATOR))))
             {

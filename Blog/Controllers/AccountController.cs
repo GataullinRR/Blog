@@ -17,16 +17,12 @@ using Utilities.Extensions;
 
 namespace Blog.Controllers
 {
+    [Authorize]
     public class AccountController : ControllerBase
     {
         public AccountController(ServiceLocator serviceProvider) : base(serviceProvider)
         {
-        }
-
-        [HttpGet()]
-        public async Task CheckIfAuthentificated()
-        {
-            await S.Utilities.GetCurrentUserModelOrThrowAsync();
+        
         }
 
         [HttpGet()]
@@ -38,7 +34,8 @@ namespace Blog.Controllers
             await S.SignInManager.SignOutAsync();
             if (currenUser != null)
             {
-                await S.Repository.AddUserActionAsync(currenUser, new UserAction(ActionType.SIGNED_OUT, currenUser));
+                var action = new UserAction(ActionType.SIGNED_OUT, currenUser, currenUser);
+                S.Db.UsersActions.Add(action);
                 await S.Db.SaveChangesAsync();
             }
 
@@ -50,11 +47,9 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var targetUser = await S.UserManager.FindByIdAsync(userId);
-                await S.Permissions.ValidateUnbanUserAsync(targetUser);
-                await S.Banning.UnbanAsync(targetUser);
+                await S.Banning.UnbanAsync(userId);
 
-                LayoutModel.AddMessage($"User \"{targetUser.UserName}\" has been unbanned");
+                LayoutModel.AddMessage($"User has been unbanned");
 
                 return Redirect(S.History.GetLastURL());
             }

@@ -13,7 +13,7 @@
 
                 <div class="form-group">
                     <label>Title</label>
-                    @if (await Model.Permissions.CanEditPostTitleAsync(Model.Post))
+                    @if (Model.CanEditPostTitle)
                     {
                         <input type="text" class="form-control" asp-for="Title" placeholder="Title" />
                     }

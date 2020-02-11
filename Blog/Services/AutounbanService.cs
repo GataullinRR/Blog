@@ -51,7 +51,7 @@ namespace Blog.Services
 
                     try
                     {
-                        db.SaveChanges();
+                        await db.SaveChangesAsync();
                     }
                     catch (Exception ex)
                     {

@@ -1,6 +1,7 @@
 ﻿using Blog.Misc;
 using DBModels;
 using Microsoft.EntityFrameworkCore;
+using MVVMUtilities.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,92 +19,156 @@ namespace Blog.Services
             S.Db.SavingChanges += Db_SavingChanges;
         }
 
-        void Db_SavingChanges()
+        async void Db_SavingChanges(BusyObject savingChanges)
         {
-            S.Db.ChangeTracker.DetectChanges();
-
-            foreach (var entry in S.Db.ChangeTracker.Entries().ToArray())
+            using (savingChanges.BusyMode)
             {
-                if (!entry.State.IsOneOf(EntityState.Unchanged, EntityState.Detached))
+                S.Db.ChangeTracker.DetectChanges();
+
+                foreach (var entry in S.Db.ChangeTracker.Entries().ToArray())
                 {
-                    var entity = entry.Entity;
-                    if (entity is ProfileStatus) // Update blog statistic
+                    if (!entry.State.IsOneOf(EntityState.Unchanged, EntityState.Detached))
                     {
-                        var stateProperty = entry.Property(nameof(ProfileStatus.State));
-                        if (entry.State == EntityState.Added)
+                        var entity = entry.Entity;
+                        if (entity is ProfileStatus) // Update blog statistic
                         {
-                            updateUsersWithStateCount(stateProperty.CurrentValue.To<ProfileState>());
+                            var stateProperty = entry.Property(nameof(ProfileStatus.State));
+                            if (entry.State == EntityState.Added)
+                            {
+                                await updateUsersWithStateCount(stateProperty.CurrentValue.To<ProfileState>());
+                            }
+                            else if (stateProperty.IsModified)
+                            {
+                                await updateUsersWithStateCount(stateProperty.OriginalValue.To<ProfileState>(), stateProperty.CurrentValue.To<ProfileState>());
+                            }
                         }
-                        else if (stateProperty.IsModified)
+                        if (entity is Post post) // Update blog statistic
                         {
-                            updateUsersWithStateCount(stateProperty.OriginalValue.To<ProfileState>(), stateProperty.CurrentValue.To<ProfileState>());
+                            await updatePostsCount(post, entry.State == EntityState.Added);
                         }
-                    }
-                    if (entity is Post post) // Update blog statistic
-                    {
-                        updatePostsCount(post, entry.State == EntityState.Added);
-                    }
-                    if (entity is Commentary commentary) // Update blog statistic
-                    {
-                        updateCommentariesCount(commentary, entry.State == EntityState.Added);
-                    }
-                    else if (entry.Entity is IViewStatistic viewStatistic && entry.State == EntityState.Modified) // Update blog statistic
-                    {
-                        var totalViewsProperty = entry.Property(nameof(IViewStatistic.TotalViews));
-                        var registredUserViewsProperty = entry.Property(nameof(IViewStatistic.RegisteredUserViews));
-                        var totalViewsDelta = totalViewsProperty.CurrentValue.To<int>() - totalViewsProperty.OriginalValue.To<int>();
-                        var registredUserViewsDelta = registredUserViewsProperty.CurrentValue.To<int>() - registredUserViewsProperty.OriginalValue.To<int>();
-                        if (viewStatistic is IViewStatistic<Commentary>)
+                        if (entity is Commentary commentary) // Update blog statistic
                         {
-                            updateCommentariesViewStatistic(totalViewsDelta, registredUserViewsDelta);
+                            await updateCommentariesCount(commentary, entry.State == EntityState.Added);
                         }
-                        else if (viewStatistic is IViewStatistic<Post>)
+                        else if (entry.Entity is IViewStatistic viewStatistic && entry.State == EntityState.Modified) // Update blog statistic
                         {
-                            updatePostsViewStatistic(totalViewsDelta, registredUserViewsDelta);
+                            var totalViewsProperty = entry.Property(nameof(IViewStatistic.TotalViews));
+                            var registredUserViewsProperty = entry.Property(nameof(IViewStatistic.RegisteredUserViews));
+                            var totalViewsDelta = totalViewsProperty.CurrentValue.To<int>() - totalViewsProperty.OriginalValue.To<int>();
+                            var registredUserViewsDelta = registredUserViewsProperty.CurrentValue.To<int>() - registredUserViewsProperty.OriginalValue.To<int>();
+                            if (viewStatistic is IViewStatistic<Commentary>)
+                            {
+                                await updateCommentariesViewStatistic(totalViewsDelta, registredUserViewsDelta);
+                            }
+                            else if (viewStatistic is IViewStatistic<Post>)
+                            {
+                                await updatePostsViewStatistic(totalViewsDelta, registredUserViewsDelta);
+                            }
                         }
-                    }
-                    else if (entity is UserAction userAction && entry.State == EntityState.Added) // Update user stat
-                    {
-                        updateUserActionsStatistic(userAction);
-                    }
-                    else if (entity is IEntityToCheck entityToCheck && entry.State == EntityState.Modified) // Update mod panel stat
-                    {
-                        var isResolvedProperty = entry.Property(nameof(IEntityToCheck.ResolvingTime));
-                        if (isResolvedProperty.IsModified && isResolvedProperty.CurrentValue.To<DateTime?>() != null && entityToCheck.AssignedModerator != null)
+                        else if (entity is UserAction userAction && entry.State == EntityState.Added) // Update user stat
                         {
-                            var moderatorPanel = entityToCheck.AssignedModerator.ModeratorsGroup;
-                            updateResolvedEntitiesStatistic(moderatorPanel, entityToCheck);
+                            updateUserActionsStatistic(userAction);
+                        }
+                        else if (entity is IEntityToCheck entityToCheck && entry.State == EntityState.Modified) // Update mod panel stat
+                        {
+                            var isResolvedProperty = entry.Property(nameof(IEntityToCheck.ResolvingTime));
+                            if (isResolvedProperty.IsModified && isResolvedProperty.CurrentValue.To<DateTime?>() != null && entityToCheck.AssignedModerator != null)
+                            {
+                                var moderatorPanel = entityToCheck.AssignedModerator.ModeratorsGroup;
+                                updateResolvedEntitiesStatistic(moderatorPanel, entityToCheck);
+                            }
                         }
                     }
                 }
             }
         }
 
+        public async Task UpdateAsync()
+        {
+            S.Db.ChangeTracker.DetectChanges();
+
+                foreach (var entry in S.Db.ChangeTracker.Entries().ToArray())
+                {
+                    if (!entry.State.IsOneOf(EntityState.Unchanged, EntityState.Detached))
+                    {
+                        var entity = entry.Entity;
+                        if (entity is ProfileStatus) // Update blog statistic
+                        {
+                            var stateProperty = entry.Property(nameof(ProfileStatus.State));
+                            if (entry.State == EntityState.Added)
+                            {
+                                await updateUsersWithStateCount(stateProperty.CurrentValue.To<ProfileState>());
+                            }
+                            else if (stateProperty.IsModified)
+                            {
+                                await updateUsersWithStateCount(stateProperty.OriginalValue.To<ProfileState>(), stateProperty.CurrentValue.To<ProfileState>());
+                            }
+                        }
+                        if (entity is Post post) // Update blog statistic
+                        {
+                            await updatePostsCount(post, entry.State == EntityState.Added);
+                        }
+                        if (entity is Commentary commentary) // Update blog statistic
+                        {
+                            await updateCommentariesCount(commentary, entry.State == EntityState.Added);
+                        }
+                        else if (entry.Entity is IViewStatistic viewStatistic && entry.State == EntityState.Modified) // Update blog statistic
+                        {
+                            var totalViewsProperty = entry.Property(nameof(IViewStatistic.TotalViews));
+                            var registredUserViewsProperty = entry.Property(nameof(IViewStatistic.RegisteredUserViews));
+                            var totalViewsDelta = totalViewsProperty.CurrentValue.To<int>() - totalViewsProperty.OriginalValue.To<int>();
+                            var registredUserViewsDelta = registredUserViewsProperty.CurrentValue.To<int>() - registredUserViewsProperty.OriginalValue.To<int>();
+                            if (viewStatistic is IViewStatistic<Commentary>)
+                            {
+                                await updateCommentariesViewStatistic(totalViewsDelta, registredUserViewsDelta);
+                            }
+                            else if (viewStatistic is IViewStatistic<Post>)
+                            {
+                                await updatePostsViewStatistic(totalViewsDelta, registredUserViewsDelta);
+                            }
+                        }
+                        else if (entity is UserAction userAction && entry.State == EntityState.Added) // Update user stat
+                        {
+                            updateUserActionsStatistic(userAction);
+                        }
+                        else if (entity is IEntityToCheck entityToCheck && entry.State == EntityState.Modified) // Update mod panel stat
+                        {
+                            var isResolvedProperty = entry.Property(nameof(IEntityToCheck.ResolvingTime));
+                            if (isResolvedProperty.IsModified && isResolvedProperty.CurrentValue.To<DateTime?>() != null && entityToCheck.AssignedModerator != null)
+                            {
+                                var moderatorPanel = entityToCheck.AssignedModerator.ModeratorsGroup;
+                                updateResolvedEntitiesStatistic(moderatorPanel, entityToCheck);
+                            }
+                        }
+                    }
+                }
+        }
+
         #region ### Blog-wide statistic ###
 
-        void updatePostsCount(Post post, bool isCreated)
+        async Task updatePostsCount(Post post, bool isCreated)
         {
-            var currentDayStatistic = ensureHasThisDayBlogStatistic();
+            var currentDayStatistic = await ensureHasThisDayBlogStatistic();
             currentDayStatistic.PostsCount += isCreated
                 ? 1
                 : (post.IsDeleted ? -1 : 0);
         }
-        void updateCommentariesCount(Commentary commentary, bool isCreated)
+        async Task updateCommentariesCount(Commentary commentary, bool isCreated)
         {
-            var currentDayStatistic = ensureHasThisDayBlogStatistic();
+            var currentDayStatistic = await ensureHasThisDayBlogStatistic();
             currentDayStatistic.CommentariesCount += isCreated
                 ? 1
                 : (commentary.IsDeleted ? -1 : 0);
         }
 
-        void updateUsersWithStateCount(ProfileState newState)
+        async Task updateUsersWithStateCount(ProfileState newState)
         {
-            var currentDayStatistic = ensureHasThisDayBlogStatistic();
+            var currentDayStatistic = await ensureHasThisDayBlogStatistic();
             updateUsersWithStateCount(currentDayStatistic, newState, 1);
         }
-        void updateUsersWithStateCount(ProfileState oldState, ProfileState newState)
+        async Task updateUsersWithStateCount(ProfileState oldState, ProfileState newState)
         {
-            var currentDayStatistic = ensureHasThisDayBlogStatistic();
+            var currentDayStatistic = await ensureHasThisDayBlogStatistic();
             updateUsersWithStateCount(currentDayStatistic, oldState, -1);
             updateUsersWithStateCount(currentDayStatistic, newState, 1);
         }
@@ -128,26 +193,32 @@ namespace Blog.Services
             }
         }
 
-        void updateCommentariesViewStatistic(int totalViewsDelta, int registredUserViewsDelta)
+        async Task  updateCommentariesViewStatistic(int totalViewsDelta, int registredUserViewsDelta)
         {
-            var statistic = ensureHasThisDayBlogStatistic();
+            var statistic = await ensureHasThisDayBlogStatistic();
             statistic.CommentariesViewStatistic.TotalViews += totalViewsDelta;
             statistic.CommentariesViewStatistic.RegisteredUserViews += registredUserViewsDelta;
         }
-        void updatePostsViewStatistic(int totalViewsDelta, int registredUserViewsDelta)
+        async Task updatePostsViewStatistic(int totalViewsDelta, int registredUserViewsDelta)
         {
-            var statistic = ensureHasThisDayBlogStatistic();
+            var statistic = await ensureHasThisDayBlogStatistic();
             statistic.PostsViewStatistic.TotalViews += totalViewsDelta;
             statistic.PostsViewStatistic.RegisteredUserViews += registredUserViewsDelta;
         }
 
-        BlogDayStatistic ensureHasThisDayBlogStatistic()
+        async Task<BlogDayStatistic> ensureHasThisDayBlogStatistic()
         {
             var today = DateTime.UtcNow.Date;
             BlogDayStatistic dayStatistic;
-            if (today != S.Db.Blog.Statistic.LastDayStatistic?.Day)
+
+            var lastStatistic = await S.Db.BlogDayStatistics
+                .Include(ds => ds.CommentariesViewStatistic)
+                .Include(ds => ds.PostsViewStatistic)
+                .OrderByDescending(ds => ds.Day)
+                .FirstOrDefaultAsync();
+            if (today != lastStatistic?.Day)
             {
-                var lastStatistic = S.Db.Blog.Statistic.LastDayStatistic ?? new BlogDayStatistic();
+                lastStatistic = lastStatistic ?? new BlogDayStatistic();
                 dayStatistic = new BlogDayStatistic()
                 {
                     Day = today,
@@ -165,13 +236,18 @@ namespace Blog.Services
                     {
                         RegisteredUserViews = lastStatistic.PostsViewStatistic.RegisteredUserViews,
                         TotalViews = lastStatistic.PostsViewStatistic.TotalViews,
-                    }
+                    },
                 };
-                S.Db.Blog.Statistic.DayStatistics.Add(dayStatistic);
+
+                await S.Db.Blogs
+                    .Include(b => b.Statistic)
+                    .ThenInclude(s => s.DayStatistics)
+                    .FirstOrDefaultAsync()
+                    .ThenDo(b => b.Statistic.DayStatistics.Add(dayStatistic));
             }
             else
             {
-                dayStatistic = S.Db.Blog.Statistic.LastDayStatistic;
+                dayStatistic = lastStatistic;
             }
 
             return dayStatistic;

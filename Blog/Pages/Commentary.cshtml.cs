@@ -8,12 +8,13 @@ using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Pages
 {
     public class CommentaryModel : PageModelBase
     {
-        public Commentary Commentary { get; private set; }   
+        public Models.CommentaryModel Commentary { get; private set; }
 
         public CommentaryModel(ServiceLocator services) : base(services)
         {
@@ -24,9 +25,20 @@ namespace Blog.Pages
         {
             if (ModelState.IsValid)
             {
-                Commentary = await S.Db.Commentaries.FirstOrDefaultByIdAsync(id);
+                var query = await S.Repository.GetCommentaryModelsAsync(
+                    S.Db.Commentaries
+                    .AsNoTracking()
+                    .Where(c => c.Id == id));
+                Commentary = query.SingleOrDefault();
 
-                return Page();
+                if (Commentary == null)
+                {
+                    throw new NotFoundException();
+                }
+                else
+                {
+                    return Page();
+                }
             }
             else
             {
