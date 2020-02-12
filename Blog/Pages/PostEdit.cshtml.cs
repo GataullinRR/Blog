@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Blog.Services;
 using DBModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using Utilities.Extensions;
 
 namespace Blog.Pages
 {
+    [Authorize]
     public class PostEditModel : PostCRUDPageModel
     {
         [BindProperty, Required(), MinLength(10), MaxLength(1000)]
@@ -91,7 +93,8 @@ namespace Blog.Pages
                 }
                 await S.Repository.AddUserActionAsync(author, new UserAction(ActionType.POST_EDITED, editingPost));
                 await S.Db.SaveChangesAsync();
-                
+                await S.CacheManager.ResetIndexPageCacheAsync();
+
                 LayoutModel.AddMessage("Changes applied!");
 
                 return RedirectToPage("/Post", new { id = editingPost.Id });

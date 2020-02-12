@@ -31,13 +31,6 @@ namespace Blog.Models
             S = services;
         }
 
-        //public override void OnPageHandlerSelected(PageHandlerSelectedContext context)
-        //{
-        //    LayoutModel = ServerLayoutModel.LoadOrNewAsync(HttpContext.Session);
-
-        //    base.OnPageHandlerSelected(context);
-        //}
-
         public override async Task OnPageHandlerExecutionAsync(PageHandlerExecutingContext context, PageHandlerExecutionDelegate next)
         {
             LayoutModel = await LayoutModel.LoadOrNewAsync(S);
@@ -57,18 +50,5 @@ namespace Blog.Models
                 }
             }
         }
-
-        //public override void OnPageHandlerExecuted(PageHandlerExecutedContext context)
-        //{
-        //    LayoutModel.UpdateMessages();
-        //    LayoutModel.Save(HttpContext.Session);
-        //    S.History.SaveCurrentURL();
-        //    if (autoSaveDbChanges)
-        //    {
-        //        S.Db.SaveChanges();
-        //    }
-
-        //    base.OnPageHandlerExecuted(context);
-        //}
     }
 }

@@ -5,6 +5,7 @@ using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using AspNetCore.IServiceCollection.AddIUrlHelper;
+using Blog.Filters;
 using Blog.Middlewares;
 using Blog.Misc;
 using Blog.Pages.Account;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -76,10 +78,7 @@ namespace Blog
             services.AddMvc(options =>
             {
                 options.Filters.Add(new AttributesProviderAsyncPageFilter());
-                //options.CacheProfiles.Add(ResponseCaching.DAILY, new CacheProfile()
-                //{
-                //    Duration = 60 * 60 * 24
-                //});
+                options.Filters.Add(new RequestDataProviderAsyncFilter());
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSession();
@@ -149,7 +148,8 @@ namespace Blog
 
             //app.UseResponseCaching();
             app.UseAuthentication();
-            app.UseMiddleware<CustomResponseCachingMiddleware>(); // disable for debugging
+            app.UseEndpointRouting();
+            app.UseMiddleware<CustomResponseCachingMiddleware>();
             app.UseMiddleware<ErrorsHandlerMiddleware>();
             app.UseMiddleware<ScopedServiceInstantiatorMiddleware<StatisticService>>(); // to execute before all other services
             app.UseStaticFiles(new StaticFileOptions

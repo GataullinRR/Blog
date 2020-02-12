@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Blog.HttpContextFeatures;
+using Microsoft.AspNetCore.Mvc.Filters;
 using System.Threading.Tasks;
 
-namespace Blog.Middlewares
+namespace Blog.Filters
 {
     public class AttributesProviderAsyncPageFilter : IAsyncPageFilter
     {

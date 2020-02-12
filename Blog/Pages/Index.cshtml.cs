@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Middlewares;
+using Blog.Misc;
 using Blog.Models;
 using Blog.Services;
 using DBModels;
@@ -14,10 +17,9 @@ using Utilities.Extensions;
 
 namespace Blog.Pages
 {
-#warning low performance
     public class IndexModel : PageModelBase
     {
-        const int NUM_OF_POSTS_ON_PAGE = 3;
+        public const int NUM_OF_POSTS_ON_PAGE = 3;
 
         public List<PostIndexModel> Posts { get; private set; }
         public int NumOfPages { get; private set; }
@@ -30,7 +32,13 @@ namespace Blog.Pages
 
         }
 
-        public async Task<IActionResult> OnGet(int? pageIndex, string filter)
+        [CustomResponseCache(20, 3 * 60, CacheMode.FOR_ANONYMOUS, CacheManagerService.INDEX_GET_CACHE_KEY)]
+        public async Task<IActionResult> OnGetAsync(int? pageIndex)
+        {
+            return await OnGetFilteredAsync(pageIndex, null);
+        }
+
+        public async Task<IActionResult> OnGetFilteredAsync(int? pageIndex, string filter)
         {
             CurrentPage = pageIndex ?? 0;
 

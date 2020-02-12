@@ -1,0 +1,10 @@
+﻿@model IndexPageButtonModel
+
+@if (Model.SearhQuery == null)
+{
+    <a class="page-link" asp-page="/Index" asp-route-pageIndex="@Model.PageIndex">@Html.Raw(Model.Content)</a>
+}
+else
+{
+    <a class="page-link" asp-page="/Index" asp-page-handler="Filtered" asp-route-filter="@Model.SearhQuery" asp-route-pageIndex="@Model.PageIndex">@Html.Raw(Model.Content)</a>
+}

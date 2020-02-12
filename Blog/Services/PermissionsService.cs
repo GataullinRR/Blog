@@ -446,7 +446,7 @@ namespace Blog.Services
             else
             {
                 return await CanEditProfileAsync(targetUser)
-                    && currentUser != targetUser
+                    && currentUser.Id != targetUser.Id
                     && currentUser.Role >= Role.MODERATOR;
             }
         }
@@ -468,7 +468,7 @@ namespace Blog.Services
             else
             {
                 return await isNotDeletedAsync(reportObject)
-                    && currentUser != reportObject.Author
+                    && currentUser.Id != reportObject.Author.Id
                     && !reportObject.Reports.Any(r => r.Reporter.Id == currentUser.Id) // Already reported
                     && (reportObject.As<IModeratable>()?.ModerationInfo?.State ?? ModerationState.MODERATED) == ModerationState.MODERATED
                     && currentUser.Role == Role.USER;
@@ -516,7 +516,7 @@ namespace Blog.Services
             {
                 return await isNotDeletedAsync(entity)
                     && (currentUser.Role == Role.MODERATOR
-                        || currentUser.Role > Role.MODERATOR && currentUser == entity.Author)
+                        || currentUser.Role > Role.MODERATOR && currentUser.Id == entity.Author.Id)
                     &&  entity.ModerationInfo.State.IsOneOf(ModerationState.UNDER_MODERATION);
             }
         }
@@ -538,9 +538,9 @@ namespace Blog.Services
             else
             {
                 return (currentUser.Role >= Role.ADMINISTRATOR
-                        && currentUser != target)
+                        && currentUser.Id != target.Id)
                     || (currentUser.Role == Role.MODERATOR
-                        && currentUser == target);
+                        && currentUser.Id == target.Id);
             }
         }
 
@@ -594,7 +594,7 @@ namespace Blog.Services
             else
             {
                 return await isNotDeletedAsync(post)
-                    && currentUser != post.Author
+                    && currentUser.Id != post.Author.Id
                     && post.ModerationInfo.State == ModerationState.UNDER_MODERATION
                     && post.Author.Role == Role.MODERATOR;
             }
@@ -613,7 +613,7 @@ namespace Blog.Services
                     .Include(p => p.Author)
                     .FirstOrDefaultAsync(p => p.Id == postId);
                 return await isNotDeletedAsync(post)
-                    && currentUser != post.Author
+                    && currentUser.Id != post.Author.Id
                     && post.ModerationInfo.State == ModerationState.UNDER_MODERATION
                     && post.Author.Role == Role.MODERATOR;
             }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Pages;
 using Blog.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +19,7 @@ namespace Blog.Controllers
 
         public IActionResult Search(string query)
         {
-            return RedirectToPage("/Index", new { filter = query });
+            return RedirectToPage("/Index", "Filtered", new { filter = query });
         }
     }
 }

@@ -14,6 +14,8 @@ namespace Blog.Middlewares
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     public class CustomResponseCacheAttribute : Attribute
     {
+        public string IgnoredParameters;
+
         public int ClientCacheDuration { get; }
         public int ServerCacheDuration { get; }
         public CacheMode Mode { get; }

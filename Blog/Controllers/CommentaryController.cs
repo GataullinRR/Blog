@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore.Query;
 
 namespace Blog.Controllers
 {
-    [Authorize(Roles = Roles.NOT_RESTRICTED)]
+    [Authorize]
     public class CommentaryController : ControllerBase
     {
         public const int MAX_COMMENTARY_LENGTH = 500;
@@ -58,7 +58,9 @@ namespace Blog.Controllers
             if (ModelState.IsValid)
             {
                 var currentUser = await S.UserManager.GetUserAsync(User);
-                var commentary = await S.Db.Commentaries.FirstAsync(c => c.Id == model.CommentaryId);
+                var commentary = await S.Db.Commentaries
+                    .Include(c => c.Post)
+                    .FirstOrDefaultAsync(c => c.Id == model.CommentaryId);
                 await S.Permissions.ValidateEditCommentaryAsync(commentary);
 
                 var user = await S.UserManager.GetUserAsync(User);
@@ -66,6 +68,7 @@ namespace Blog.Controllers
                 commentary.Edits.Add(new CommentaryEdit(user, model.Reason, DateTime.UtcNow));
                 await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.COMMENTARY_EDIT, commentary));
                 await S.Db.SaveChangesAsync();
+                await S.CacheManager.ResetPostPageCacheAsync(commentary.Post.Id);
             }
             else
             {
@@ -91,13 +94,16 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-                var commentary = await S.Db.Commentaries.FirstOrDefaultByIdAsync(id);
+                var commentary = await S.Db.Commentaries
+                    .Include(c => c.Post)
+                    .FirstOrDefaultAsync(c => c.Id == id);
                 await S.Permissions.ValidateDeleteCommentaryAsync(commentary);
                
+                var user = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 await S.Repository.AddUserActionAsync(user, new UserAction(ActionType.COMMENTARY_DELETE, commentary));
                 commentary.IsDeleted = true;
                 await S.Db.SaveChangesAsync();
+                await S.CacheManager.ResetPostPageCacheAsync(commentary.Post.Id);
 
                 return Redirect(S.History.GetLastURL());
             }
@@ -112,13 +118,16 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await S.Utilities.GetCurrentUserModelOrThrowAsync();
-                var commentary = await S.Db.Commentaries.FirstOrDefaultByIdAsync(id);
+                var commentary = await S.Db.Commentaries
+                    .Include(c => c.Post)
+                    .FirstOrDefaultAsync(c => c.Id == id);
                 await S.Permissions.ValidateRestoreCommentaryAsync(commentary);
                
+                var user = await S.Utilities.GetCurrentUserModelOrThrowAsync();
                 await S.Repository.AddUserActionAsync(user, new UserAction(ActionType.COMMENTARY_RESTORED, commentary));
                 commentary.IsDeleted = false;
                 await S.Db.SaveChangesAsync();
+                await S.CacheManager.ResetPostPageCacheAsync(commentary.Post.Id);
 
                 return Redirect(S.History.GetLastURL());
             }

@@ -111,7 +111,7 @@ namespace Blog.Pages
                             commentaries.Select(c => c.ViewStatistic),
                         }.ToArray();
 
-                    await S.CacheManager.CacheManager.SetRequestDataAsync(CacheManagerService.POST_GET_CACHE_KEY, viewStatistics);
+                    await S.CacheManager.CacheManager.SetRequestDataAsync(viewStatistics);
                     await updateViewStatisticAsync(S.DbUpdator, S.HttpContext.User?.Identity?.IsAuthenticated ?? false, viewStatistics);
 
                     NewCommentary.PostId = id;
@@ -152,6 +152,7 @@ namespace Blog.Pages
                 S.Db.Commentaries.Add(comment);
                 await S.Repository.AddUserActionAsync(currentUser, new UserAction(ActionType.COMMENTARY_ADDED, comment));
                 await S.Db.SaveChangesAsync();
+                await S.CacheManager.ResetPostPageCacheAsync(post.Id);
 
                 return RedirectToPage("/Post", new { id = NewCommentary.PostId });
             }

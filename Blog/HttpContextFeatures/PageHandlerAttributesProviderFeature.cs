@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Blog.Middlewares
+namespace Blog.HttpContextFeatures
 {
     public class PageHandlerAttributesProviderFeature
     {

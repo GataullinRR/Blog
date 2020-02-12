@@ -13,6 +13,7 @@ namespace Blog
         public static string COMMENTARY = "_Commentary";
         public static string COMMENTARY_EDIT = "_CommentaryEdit";
         public static string PROFILE_IMAGE = "_ProfileImage";
+        public static string INDEX_PAGE_BUTTON = "_IndexPageButton";
 
         public static class AdminPanel
         {

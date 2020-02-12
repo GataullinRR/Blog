@@ -15,6 +15,7 @@ using Utilities.Extensions;
 
 namespace Blog.Pages
 {
+    [Authorize]
     public class PostCreateModel : PostCRUDPageModel
     {
         public PostCreateModel(ServiceLocator serviceProvider) : base(serviceProvider)
@@ -24,7 +25,7 @@ namespace Blog.Pages
 
         public async Task OnGetAsync()
         {
-            await S.Permissions.ValidateCreatePostAsync();
+            
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -57,6 +58,7 @@ namespace Blog.Pages
                     }
                     await S.Repository.AddUserActionAsync(author, new UserAction(ActionType.POST_CREATED, post));
                     await S.Db.SaveChangesAsync();
+                    await S.CacheManager.ResetIndexPageCacheAsync();
 
                     return RedirectToPage("/Post", new { id = post.Id });
                 }
