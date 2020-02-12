@@ -76,6 +76,7 @@ namespace Blog.Pages.Account
                     currentUser.ModeratorsInChargeGroup.AddEntityToCheck(editingUser.Profile, CheckReason.CHECK_REQUIRED);
                 }
                 await S.Db.SaveChangesAsync();
+                await S.CacheManager.ResetProfilePageCacheAsync(EditUserId);
 
                 return RedirectToPage("/Account/Profile", new { id = editingUser.Id });
             }

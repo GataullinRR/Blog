@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Utilities.Extensions;
+using Blog.Attributes;
+using Blog.Middlewares.CachingMiddleware.Policies;
 
 namespace Blog.Pages.Account
 {
@@ -25,6 +27,7 @@ namespace Blog.Pages.Account
 
         }
 
+        [CustomResponseCache(3 * 60, CachePolicy.UNATHORZED_USER_SCOPED, CacheManagerService.PROFILE_GET_CACHE_KEY)]
         public async Task<IActionResult> OnGetAsync(string id)
         {
             if (id == null)
@@ -146,32 +149,5 @@ namespace Blog.Pages.Account
 
             return Page();
         }
-
-        //public async Task<IActionResult> OnPostBanAsync(string id)
-        //{
-        //    var currentUser = await S.UserManager.GetUserAsync(HttpContext.User);
-        //    if (id == null)
-        //    {
-        //        if (currentUser == null)
-        //        {
-        //            throw new ArgumentOutOfRangeException("Can't determine target user");
-        //        }
-        //        else
-        //        {
-        //            UserModel = currentUser;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        UserModel = await S.UserManager.FindByIdAsync(id);
-        //    }
-
-        //    IsCurrentUser = currentUser?.Id == UserModel.Id;
-        //    UserModel.Posts = await S.Db.Posts
-        //        .Where(p => p.Author == UserModel)
-        //        .ToListAsync();
-        //    Role = (await S.UserManager.GetRolesAsync(UserModel)).Single();
-        //    return Page();
-        //}
     }
 }

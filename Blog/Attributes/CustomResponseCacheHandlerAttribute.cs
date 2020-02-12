@@ -2,7 +2,7 @@
 using Utilities.Types;
 using System.Threading.Tasks;
 
-namespace Blog.Middlewares
+namespace Blog.Attributes
 {
     /// <summary>
     /// Must be set on a static method taking <see cref="CacheScope"/> and returning <see cref="Task"/>

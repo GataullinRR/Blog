@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Attributes;
 using Blog.Misc;
 using Blog.Models;
 using Blog.Services;
@@ -28,7 +29,7 @@ namespace Blog.Controllers
 
         }
 
-        [HttpGet()]
+        [HttpGet, AJAX]
         public async Task<IActionResult> GetCommentaryEditAsync([Required]int id)
         {
             if (ModelState.IsValid)
@@ -52,7 +53,7 @@ namespace Blog.Controllers
             }
         }
 
-        [HttpPost()]
+        [HttpPost, AJAX]
         public async Task<IActionResult> UpdateCommentaryAsync([Required]CommentaryEditinigModel model)
         {
             if (ModelState.IsValid)
@@ -89,7 +90,7 @@ namespace Blog.Controllers
             return Redirect(S.History.GetLastURL());
         }
 
-        [HttpGet()]
+        [HttpGet, AJAX]
         public async Task<IActionResult> DeleteCommentaryAsync([Required]int id)
         {
             if (ModelState.IsValid)
@@ -113,7 +114,7 @@ namespace Blog.Controllers
             }
         }
 
-        [HttpGet()]
+        [HttpGet, AJAX]
         public async Task<IActionResult> RestoreCommentaryAsync([Required]int id)
         {
             if (ModelState.IsValid)

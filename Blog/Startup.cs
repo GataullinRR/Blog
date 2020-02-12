@@ -5,6 +5,7 @@ using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using AspNetCore.IServiceCollection.AddIUrlHelper;
+using Blog.Attributes;
 using Blog.Filters;
 using Blog.Middlewares;
 using Blog.Misc;
@@ -90,7 +91,6 @@ namespace Blog
             services.AddScoped<HistoryService>();
             services.AddSingleton<AutounbanService>();
             services.AddScoped<DecisionsService>();
-            //services.AddScoped<DbEntitiesUpdateService>();
             services.AddScoped<LinkBuilderService>();
             services.AddScoped<ServiceLocator>();
             services.AddScoped<ActivationLinkGeneratorService>();
@@ -106,21 +106,22 @@ namespace Blog
                 var allTypes = Assembly.GetExecutingAssembly().DefinedTypes
                     .Select(t => t.AsType())
                     .ToArray();
-                foreach (var type in allTypes)
+                foreach (var implementationType in allTypes)
                 {
-                    var serviceType = type.GetCustomAttribute<ServiceAttribute>()?.ServiceType;
-                    if (serviceType.HasValue)
+                    var serviceInfo = implementationType.GetCustomAttribute<ServiceAttribute>();
+                    if (serviceInfo != null)
                     {
-                        switch (serviceType.Value)
+                        var serviceType = serviceInfo.RegisterAs ?? implementationType;
+                        switch (serviceInfo.ServiceType)
                         {
                             case ServiceType.SCOPED:
-                                services.AddScoped(type);
+                                services.AddScoped(serviceType, implementationType);
                                 break;
                             case ServiceType.SINGLETON:
-                                services.AddSingleton(type);
+                                services.AddSingleton(serviceType, implementationType);
                                 break;
                             case ServiceType.TRANSIENT:
-                                services.AddTransient(type);
+                                services.AddTransient(serviceType, implementationType);
                                 break;
 
                             default:

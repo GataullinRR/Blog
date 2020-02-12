@@ -11,6 +11,8 @@ using Utilities.Extensions;
 using Blog.Middlewares;
 using DBModels;
 using System.ComponentModel.DataAnnotations;
+using Blog.Attributes;
+using Blog.Middlewares.CachingMiddleware.Policies;
 
 namespace Blog.Controllers
 {
@@ -35,7 +37,7 @@ namespace Blog.Controllers
             public double RepPPub { get; set; }
         }
 
-        [CustomResponseCache(3600, 3600 * 24, CacheMode.USER_SCOPED)]
+        [CustomResponseCache(3600 * 24, CachePolicy.AUTHORIZED_USER_SCOPED), AJAX]
         public async Task<IActionResult> LoadFullUsersTableAsync()
         {
             await S.Permissions.ValidateAccessBlogControlPanelAsync();
@@ -43,7 +45,7 @@ namespace Blog.Controllers
             return await generateTableData(S.Db.Users);
         }
 
-        [CustomResponseCache(3600, 3600 * 24, CacheMode.USER_SCOPED)]
+        [CustomResponseCache(3600 * 24, CachePolicy.AUTHORIZED_USER_SCOPED), AJAX]
         public async Task<IActionResult> LoadModeratorsUsersTableAsync([Required]string id)
         {
             if (ModelState.IsValid)

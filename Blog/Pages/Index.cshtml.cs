@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Attributes;
 using Blog.Middlewares;
+using Blog.Middlewares.CachingMiddleware.Policies;
 using Blog.Misc;
 using Blog.Models;
 using Blog.Services;
@@ -32,7 +34,7 @@ namespace Blog.Pages
 
         }
 
-        [CustomResponseCache(20, 3 * 60, CacheMode.FOR_ANONYMOUS, CacheManagerService.INDEX_GET_CACHE_KEY)]
+        [CustomResponseCache(3 * 60, CachePolicy.UNATHORZED_USER_SCOPED, CacheManagerService.INDEX_GET_CACHE_KEY)]
         public async Task<IActionResult> OnGetAsync(int? pageIndex)
         {
             return await OnGetFilteredAsync(pageIndex, null);

@@ -17,6 +17,8 @@ using Utilities.Types;
 using System.Reflection;
 using Microsoft.AspNetCore.Routing;
 using Blog.HttpContextFeatures;
+using Blog.Attributes;
+using Blog.Middlewares.CachingMiddleware.Policies;
 
 namespace Blog.Middlewares
 {
@@ -29,11 +31,16 @@ namespace Blog.Middlewares
     {
         delegate Task CacheHandlerDelegate(CacheScope cacheManager);
 
-        readonly static Dictionary<Key, CacheHandlerDelegate> _cacheHandlers = new Dictionary<Key, CacheHandlerDelegate>();
-        readonly static ICacheStorage _storage = new CacheStorage();
+        readonly Dictionary<Key, CacheHandlerDelegate> _cacheHandlers = new Dictionary<Key, CacheHandlerDelegate>();
+        readonly ICacheStorage _storage = new CacheStorage();
+        readonly Dictionary<string, ICachePolicy> _cachePolicies = new Dictionary<string, ICachePolicy>();
 
-        static CustomResponseCachingMiddleware()
+        readonly RequestDelegate _next;
+
+        public CustomResponseCachingMiddleware(RequestDelegate next, IEnumerable<ICachePolicy> cachePolicies)
         {
+            _next = next ?? throw new ArgumentNullException(nameof(next));
+
             _cacheHandlers = (from t in Assembly.GetExecutingAssembly().DefinedTypes
                               from mi in t.GetMethods(BindingFlags.Static | BindingFlags.Public)
                               let info = mi.GetCustomAttribute<CustomResponseCacheHandlerAttribute>()
@@ -42,13 +49,12 @@ namespace Blog.Middlewares
                               where @delegate != null
                               select new { info.CacheEntryKey, d = @delegate }).ToDictionary(v => v.CacheEntryKey, v => v.d);
             new CacheCleaner(512 * 1024 * 1024, _storage);
-        }
 
-        readonly RequestDelegate _next;
-
-        public CustomResponseCachingMiddleware(RequestDelegate next)
-        {
-            _next = next ?? throw new ArgumentNullException(nameof(next));
+            foreach (var policy in cachePolicies)
+            {
+                var name = policy.GetType().Name;
+                _cachePolicies.Add(name, policy);
+            }
         }
 
         public async Task InvokeAsync(HttpContext httpContext, URIProviderService uriProvider, IServiceProvider serviceProvider, ILoggerFactory loggerFactory, UserManager<User> userManager)
@@ -103,7 +109,7 @@ namespace Blog.Middlewares
                 {
                     foreach (var c in cache)
                     {
-                        if (await c.Policy.CanBeServedAsync(httpContext, serviceProvider))
+                        if (await c.Policy.CanBeServedAsync(httpContext, serviceProvider, c.PolicyMetadata))
                         {
                             return c;
                         }
@@ -135,24 +141,16 @@ namespace Blog.Middlewares
                 }
 
                 var endpoint = httpContext.Features.Get<IEndpointFeature>()?.Endpoint;
-                var routePattern = (endpoint as RouteEndpoint);
                 // Endpoint will be null if the URL didn't match an action, e.g. a 404 response
                 if (endpoint != null && httpContext.Response.IsSuccessStatusCode())
                 {
                     var cachingInfo = tryGetCacheAttribute();
                     if (cachingInfo != null)
                     {
-                        if (cachingInfo.ClientCacheDuration > 0)
+                        if (cachingInfo.CacheDuration > 0)
                         {
-                            if (httpContext.Response.GetTypedHeaders().CacheControl == null)
-                            {
-                                logger.LogWarning($"Client side cahing requested, but cache-control headers aren't set! Configure cache filters!");
-                            }
-                        }
-                        if (cachingInfo.ServerCacheDuration > 0)
-                        {
-                            var policy = tryGetPolicy();
-                            if (policy != null)
+                            var policy = _cachePolicies[cachingInfo.CachePolicy];
+                            if (await policy.CanBeSavedAsync(httpContext, serviceProvider))
                             {
                                 var routeData = httpContext.Features
                                     .Get<RouteDataProviderFeature>().RouteData
@@ -164,39 +162,12 @@ namespace Blog.Middlewares
                                                             manager.IsRequestDataSet,
                                                             manager.RequestData,
                                                             routeData,
-                                                            policy);
+                                                            policy,
+                                                            await policy.GenerateMetadata(httpContext, serviceProvider));
                                 await _storage.TryAddAsync(cacheKey, cache);
                             
-                                logger.LogInformation($"Response for request to {requestURI} has been added to cache for {cachingInfo.ServerCacheDuration}s");
+                                logger.LogInformation($"Response for request to {requestURI} has been added to cache for {cachingInfo.CacheDuration}s");
                             }
-                        }
-                    }
-
-                    ICachePolicy tryGetPolicy()
-                    {
-                        switch (cachingInfo.Mode)
-                        {
-                            case CacheMode.USER_SCOPED:
-                                if (httpContext.User?.Identity?.Name == null)
-                                {
-                                    return null;
-                                }
-                                else
-                                {
-                                    return new UserScopedCachePolicy(httpContext.User.Identity.Name);
-                                }
-                            case CacheMode.FOR_ANONYMOUS:
-                                if (httpContext.User?.Identity?.Name == null)
-                                {
-                                    return new UserScopedCachePolicy(null);
-                                }
-                                else
-                                {
-                                    return null;
-                                }
-
-                            default:
-                                throw new NotSupportedException();
                         }
                     }
 

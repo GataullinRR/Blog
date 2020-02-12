@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Attributes;
 using Blog.Middlewares;
+using Blog.Middlewares.CachingMiddleware.Policies;
 using Blog.Models;
 using Blog.Services;
 using DBModels;
@@ -38,8 +40,8 @@ namespace Blog.Pages
 
             await updateViewStatisticAsync(services.DbUpdator, false, viewStatistics);
         }
-
-        [CustomResponseCache(20, 3 * 60, CacheMode.FOR_ANONYMOUS, CacheManagerService.POST_GET_CACHE_KEY)]
+         
+        [CustomResponseCache(3 * 60, CachePolicy.UNATHORZED_USER_SCOPED, CacheManagerService.POST_GET_CACHE_KEY)]
         public async Task<IActionResult> OnGetAsync([Required]int id)
         {
             if (ModelState.IsValid)

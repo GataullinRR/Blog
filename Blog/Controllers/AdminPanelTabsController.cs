@@ -10,6 +10,8 @@ using DBModels;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Blog.Attributes;
+using Blog.Middlewares.CachingMiddleware.Policies;
 
 namespace Blog.Controllers
 {
@@ -32,7 +34,7 @@ namespace Blog.Controllers
 
         }
 
-        [CustomResponseCache(3600, 3600 * 24, CacheMode.USER_SCOPED)]
+        [CustomResponseCache(24 * 3600, CachePolicy.AUTHORIZED_USER_SCOPED)]
         public async Task<IActionResult> LoadOverviewTabAsync()
         {
             await S.Permissions.ValidateAccessBlogControlPanelAsync();
@@ -53,7 +55,7 @@ namespace Blog.Controllers
             return PartialView("AdminPanel/_OverviewTab", daysStatistic);
         }
 
-        [CustomResponseCache(3600, 3600 * 24, CacheMode.USER_SCOPED)]
+        [CustomResponseCache(3600 * 24, CachePolicy.AUTHORIZED_USER_SCOPED)]
         public async Task<IActionResult> LoadFullPostsTableAsync()
         {
             S.Db.ChangeTracker.LazyLoadingEnabled = false;
@@ -79,7 +81,7 @@ namespace Blog.Controllers
         }
 
 #warning Refactor! Hadn't had time to do better!
-        [CustomResponseCache(3600, 3600 * 24, CacheMode.USER_SCOPED)]
+        [CustomResponseCache(3600 * 24, CachePolicy.AUTHORIZED_USER_SCOPED)]
         public async Task<IActionResult> LoadModeratorsTabAsync()
         {
             S.Db.ChangeTracker.LazyLoadingEnabled = false;

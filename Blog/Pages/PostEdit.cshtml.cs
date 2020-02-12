@@ -93,7 +93,7 @@ namespace Blog.Pages
                 }
                 await S.Repository.AddUserActionAsync(author, new UserAction(ActionType.POST_EDITED, editingPost));
                 await S.Db.SaveChangesAsync();
-                await S.CacheManager.ResetIndexPageCacheAsync();
+                await S.CacheManager.ResetPostPageCacheAsync(PostId);
 
                 LayoutModel.AddMessage("Changes applied!");
 
