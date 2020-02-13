@@ -1,4 +1,5 @@
-﻿using DBModels;
+﻿using Blog.Attributes;
+using DBModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using Utilities.Extensions;
 
 namespace Blog.Services
 {
+    [Service(ServiceType.SCOPED)]
     public class BanningService : ServiceBase
     {
         public BanningService(ServiceLocator services) : base(services)

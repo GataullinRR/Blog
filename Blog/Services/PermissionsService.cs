@@ -1,4 +1,5 @@
 ﻿using ASPCoreUtilities;
+using Blog.Attributes;
 using Blog.Models;
 using DBModels;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +18,7 @@ using Utilities.Extensions;
 
 namespace Blog.Services
 {
+    [Service(ServiceType.SCOPED)]
     public class PermissionsService : ServiceBase
     {
         public const int MAX_POST_EDITS_FOR_STANDARD_USER = 3;

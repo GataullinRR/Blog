@@ -32,7 +32,7 @@ namespace Blog.Pages
             NewCommentary = new CommentaryCreateModel();
         }
 
-        [CustomResponseCacheHandler(CacheManagerService.POST_GET_CACHE_KEY)]
+        [ServerResponseCacheHandler(CacheManagerService.POST_GET_CACHE_KEY)]
         public static async Task HandelCachedOnGetAsync(CacheScope scope)
         {
             var services = scope.ServiceProvider.GetService<ServiceLocator>();
@@ -41,7 +41,7 @@ namespace Blog.Pages
             await updateViewStatisticAsync(services.DbUpdator, false, viewStatistics);
         }
          
-        [CustomResponseCache(3 * 60, CachePolicy.UNATHORZED_USER_SCOPED, CacheManagerService.POST_GET_CACHE_KEY)]
+        [ServerResponseCache(3 * 60, CachePolicy.UNATHORZED_USER_SCOPED, CacheManagerService.POST_GET_CACHE_KEY)]
         public async Task<IActionResult> OnGetAsync([Required]int id)
         {
             if (ModelState.IsValid)

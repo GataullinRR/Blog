@@ -37,7 +37,7 @@ namespace Blog.Controllers
             public double RepPPub { get; set; }
         }
 
-        [CustomResponseCache(3600 * 24, CachePolicy.AUTHORIZED_USER_SCOPED), AJAX]
+        [ServerResponseCache(3600 * 24, CachePolicy.AUTHORIZED_USER_SCOPED), AJAX]
         public async Task<IActionResult> LoadFullUsersTableAsync()
         {
             await S.Permissions.ValidateAccessBlogControlPanelAsync();
@@ -45,7 +45,7 @@ namespace Blog.Controllers
             return await generateTableData(S.Db.Users);
         }
 
-        [CustomResponseCache(3600 * 24, CachePolicy.AUTHORIZED_USER_SCOPED), AJAX]
+        [ServerResponseCache(3600 * 24, CachePolicy.AUTHORIZED_USER_SCOPED), AJAX]
         public async Task<IActionResult> LoadModeratorsUsersTableAsync([Required]string id)
         {
             if (ModelState.IsValid)

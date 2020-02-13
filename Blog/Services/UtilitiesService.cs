@@ -1,4 +1,5 @@
-﻿using DBModels;
+﻿using Blog.Attributes;
+using DBModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Blog.Services
 {
+    [Service(ServiceType.SCOPED)]
     public class UtilitiesService : ServiceBase
     {
         bool _isCurrentUserCacheSet;

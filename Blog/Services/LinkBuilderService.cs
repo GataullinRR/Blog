@@ -1,4 +1,5 @@
 ﻿using ASPCoreUtilities;
+using Blog.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Blog.Services
 {
+    [Service(ServiceType.SCOPED)]
     public class LinkBuilderService : ServiceBase
     {
         public LinkBuilderService(ServiceLocator services) : base(services)

@@ -1,4 +1,5 @@
-﻿using DBModels;
+﻿using Blog.Attributes;
+using DBModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,7 @@ using Utilities;
 
 namespace Blog.Services
 {
+    [Service(ServiceType.SINGLETON)]
     public class AutounbanService
     {
         public static readonly TimeSpan UPDATE_INTERVAL = TimeSpan.FromDays(1);

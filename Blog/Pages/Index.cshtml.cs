@@ -34,7 +34,7 @@ namespace Blog.Pages
 
         }
 
-        [CustomResponseCache(3 * 60, CachePolicy.UNATHORZED_USER_SCOPED, CacheManagerService.INDEX_GET_CACHE_KEY)]
+        [ServerResponseCache(1 * 3600, CachePolicy.UNATHORZED_USER_SCOPED, CacheManagerService.INDEX_GET_CACHE_KEY)]
         public async Task<IActionResult> OnGetAsync(int? pageIndex)
         {
             return await OnGetFilteredAsync(pageIndex, null);

@@ -8,7 +8,7 @@ namespace Blog.Middlewares
 {
     class CacheEntry
     {
-        public CustomResponseCacheAttribute CachingInfo { get; }
+        public ServerResponseCacheAttribute CachingInfo { get; }
         public byte[] ResponseBody { get; }
         public int StatusCode { get; }
         public IHeaderDictionary Headers { get; }
@@ -21,7 +21,7 @@ namespace Blog.Middlewares
 
         public int ApproximateSizeInMemory { get; set; }
 
-        public CacheEntry(CustomResponseCacheAttribute cachingInfo, byte[] responseBody, int statusCode,
+        public CacheEntry(ServerResponseCacheAttribute cachingInfo, byte[] responseBody, int statusCode,
                           IHeaderDictionary headers, bool isRequestDataSet, object requestData,
                           KeyValuePair<string, object>[] routeData, ICachePolicy policy, object policyMetadata)
         {

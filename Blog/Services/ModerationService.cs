@@ -1,4 +1,5 @@
-﻿using DBModels;
+﻿using Blog.Attributes;
+using DBModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Blog.Services
 {
+    [Service(ServiceType.SCOPED)]
     public class ModerationService : ServiceBase
     {
         public ModerationService(ServiceLocator services) : base(services)

@@ -8,14 +8,14 @@ namespace Blog.Attributes
     /// Must be set on a static method taking <see cref="CacheScope"/> and returning <see cref="Task"/>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-    public class CustomResponseCacheHandlerAttribute : Attribute
+    public class ServerResponseCacheHandlerAttribute : Attribute
     {
         /// <summary>
-        /// An unique key, used inside <see cref="CustomResponseCacheAttribute"/>
+        /// An unique key, used inside <see cref="ServerResponseCacheAttribute"/>
         /// </summary>
         public Key CacheEntryKey { get; }
 
-        public CustomResponseCacheHandlerAttribute(string cacheEntryKey)
+        public ServerResponseCacheHandlerAttribute(string cacheEntryKey)
         {
             CacheEntryKey = cacheEntryKey ?? throw new ArgumentNullException();
         }

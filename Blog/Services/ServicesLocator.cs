@@ -1,4 +1,5 @@
-﻿using Blog.Services.Models;
+﻿using Blog.Attributes;
+using Blog.Services.Models;
 using DBModels;
 using Ganss.XSS;
 using Microsoft.AspNetCore.DataProtection;
@@ -13,9 +14,7 @@ using System.Threading.Tasks;
 
 namespace Blog.Services
 {
-    /// <summary>
-    /// I know that it's wrong, but it makes development easier
-    /// </summary>
+    [Service(ServiceType.SCOPED)]
     public class ServiceLocator
     {
         readonly Lazy<BlogContext> _db;
@@ -37,7 +36,6 @@ namespace Blog.Services
         readonly Lazy<UtilitiesService> _utilities;
         readonly Lazy<BanningService> _banning;
         readonly Lazy<PostSanitizerService> _sanitizer;
-        readonly Lazy<EntitiesProviderService> _entities;
         readonly Lazy<ModerationService> _moderation;
         readonly Lazy<StorageService> _storage;
         readonly Lazy<RepositoryService> _repository;
@@ -67,7 +65,6 @@ namespace Blog.Services
         public UtilitiesService Utilities => _utilities.Value;
         public BanningService Banning => _banning.Value;
         public PostSanitizerService Sanitizer => _sanitizer.Value;
-        public EntitiesProviderService Entities => _entities.Value;
         public ModerationService Moderation => _moderation.Value;
         public StorageService Storage => _storage.Value;
         public RepositoryService Repository => _repository.Value;
@@ -100,7 +97,6 @@ namespace Blog.Services
             _utilities = ServiceProvider.GetLazyService<UtilitiesService>();
             _banning = ServiceProvider.GetLazyService<BanningService>();
             _sanitizer = ServiceProvider.GetLazyService<PostSanitizerService>();
-            _entities = ServiceProvider.GetLazyService<EntitiesProviderService>();
             _moderation = ServiceProvider.GetLazyService<ModerationService>();
             _storage = ServiceProvider.GetLazyService<StorageService>();
             _repository = ServiceProvider.GetLazyService<RepositoryService>();

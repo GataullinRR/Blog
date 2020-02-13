@@ -1,4 +1,5 @@
-﻿using DBModels;
+﻿using Blog.Attributes;
+using DBModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Blog.Services
 {
+    [Service(ServiceType.SCOPED)]
     public class EMailService
     {
         readonly MailAddress _fromAddress = new MailAddress("QTU100@gmail.com", "Administration");

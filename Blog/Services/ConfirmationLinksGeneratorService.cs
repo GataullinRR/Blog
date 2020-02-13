@@ -21,6 +21,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.DataProtection;
 using System.IO.Compression;
 using Blog.Services.Models;
+using Blog.Attributes;
 
 namespace Blog.Services
 {
@@ -74,6 +75,7 @@ namespace Blog.Services
         }
     }
 
+    [Service(ServiceType.SCOPED)]
     public class ConfirmationLinksGeneratorService : TokensBaseService
     {
         protected override TimeSpan _tokenLifespan { get; } = TimeSpan.FromMinutes(30);

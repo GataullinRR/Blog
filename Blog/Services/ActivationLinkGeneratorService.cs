@@ -1,4 +1,5 @@
-﻿using Blog.Controllers;
+﻿using Blog.Attributes;
+using Blog.Controllers;
 using Blog.Services.Models;
 using DBModels;
 using Microsoft.AspNetCore.DataProtection;
@@ -28,6 +29,7 @@ namespace Blog.Services
         }
     }
 
+    [Service(ServiceType.SCOPED)]
     public class ActivationLinkGeneratorService : TokensBaseService
     {
         protected override TimeSpan _tokenLifespan { get; } = TimeSpan.FromMinutes(30);

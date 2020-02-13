@@ -27,7 +27,7 @@ namespace Blog.Middlewares
     /// https://github.com/aspnet/ResponseCaching/blob/master/src/Microsoft.AspNetCore.ResponseCaching
     /// Must be set before MVC and after Authentication
     /// </summary>
-    public class CustomResponseCachingMiddleware
+    public class ServerResponseCachingMiddleware
     {
         delegate Task CacheHandlerDelegate(CacheScope cacheManager);
 
@@ -37,13 +37,13 @@ namespace Blog.Middlewares
 
         readonly RequestDelegate _next;
 
-        public CustomResponseCachingMiddleware(RequestDelegate next, IEnumerable<ICachePolicy> cachePolicies)
+        public ServerResponseCachingMiddleware(RequestDelegate next, IEnumerable<ICachePolicy> cachePolicies)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
 
             _cacheHandlers = (from t in Assembly.GetExecutingAssembly().DefinedTypes
                               from mi in t.GetMethods(BindingFlags.Static | BindingFlags.Public)
-                              let info = mi.GetCustomAttribute<CustomResponseCacheHandlerAttribute>()
+                              let info = mi.GetCustomAttribute<ServerResponseCacheHandlerAttribute>()
                               where info != null
                               let @delegate = mi.CreateDelegate(typeof(CacheHandlerDelegate)) as CacheHandlerDelegate
                               where @delegate != null
@@ -171,10 +171,10 @@ namespace Blog.Middlewares
                         }
                     }
 
-                    CustomResponseCacheAttribute tryGetCacheAttribute()
+                    ServerResponseCacheAttribute tryGetCacheAttribute()
                     {
                         // Does not work for page handlers
-                        var attr = endpoint.Metadata.GetMetadata<CustomResponseCacheAttribute>();
+                        var attr = endpoint.Metadata.GetMetadata<ServerResponseCacheAttribute>();
                         if (attr == null) // Fallback for page handlers
                         {
                             var attributesProvider = httpContext.Features
@@ -183,7 +183,7 @@ namespace Blog.Middlewares
                                 .FirstOrDefault();
                             attr = attributesProvider == null
                                 ? attr
-                                : attributesProvider.Attributes.Select(a => a as CustomResponseCacheAttribute)
+                                : attributesProvider.Attributes.Select(a => a as ServerResponseCacheAttribute)
                                     .SkipNulls()
                                     .FirstOrDefault();
                         }

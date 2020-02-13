@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Blog.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,6 +8,7 @@ using Utilities.Extensions;
 
 namespace Blog.Services
 {
+    [Service(ServiceType.SCOPED)]
     public class HistoryService : ServiceBase
     {
         const string PREV_LAST_URL_KEY = "PrevLastGetRequestPath";

@@ -80,25 +80,12 @@ namespace Blog
             {
                 options.Filters.Add(new AttributesProviderAsyncPageFilter());
                 options.Filters.Add(new RequestDataProviderAsyncFilter());
+                options.Filters.Add(new ClientResponseCacheAsyncFilter());
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSession();
             services.AddMemoryCache();
             services.AddUrlHelper();
-            services.AddScoped<EMailService>();
-            services.AddScoped<ConfirmationLinksGeneratorService>();
-            services.AddScoped<PermissionsService>();
-            services.AddScoped<HistoryService>();
-            services.AddSingleton<AutounbanService>();
-            services.AddScoped<DecisionsService>();
-            services.AddScoped<LinkBuilderService>();
-            services.AddScoped<ServiceLocator>();
-            services.AddScoped<ActivationLinkGeneratorService>();
-            services.AddScoped<SessionMutatorsManagerService>();
-            services.AddScoped<BanningService>();
-            services.AddScoped<UtilitiesService>();
-            services.AddScoped<EntitiesProviderService>();
-            services.AddScoped<ModerationService>();
             registerServices();
 
             void registerServices()
@@ -150,7 +137,7 @@ namespace Blog
             //app.UseResponseCaching();
             app.UseAuthentication();
             app.UseEndpointRouting();
-            app.UseMiddleware<CustomResponseCachingMiddleware>();
+            app.UseMiddleware<ServerResponseCachingMiddleware>();
             app.UseMiddleware<ErrorsHandlerMiddleware>();
             app.UseMiddleware<ScopedServiceInstantiatorMiddleware<StatisticService>>(); // to execute before all other services
             app.UseStaticFiles(new StaticFileOptions
