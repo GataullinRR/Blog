@@ -20,7 +20,6 @@ namespace DBModels
 
         [NotMapped]
         public virtual TDayStatistic LastDayStatistic => DayStatistics
-            .AsQueryable()
             .OrderByDescending(s => s.Day)
             .FirstOrDefault();
         [Required]

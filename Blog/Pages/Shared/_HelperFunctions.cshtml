@@ -48,11 +48,16 @@
         });
     }
 
-    function makeRequest(route, requestType, onLoaded) {
+    function makeRequest(route, requestType, onLoaded, onError) {
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
                 onLoaded(this.responseText);
+            }
+            else if (this.readyState == 4) {
+                if (onError) {
+                    onError();
+                }
             }
         };
         xhr.open(requestType, route);

@@ -50,6 +50,8 @@ namespace Blog.Pages.Account
                 .ThenInclude(p => p.PostObject)
                 .Include(u => u.Actions)
                 .ThenInclude(p => p.CommentaryObject)
+                .Include(u => u.Actions)
+                .ThenInclude(p => p.Owner)
 
                 .Include(u => u.Violations)
                 .ThenInclude(v => v.Reporter)
@@ -104,7 +106,7 @@ namespace Blog.Pages.Account
                     ActionDate = a.ActionDate,
                     ActionObject = a.ActionObject,
                     Type = a.ActionType,
-                    IsSelfAction = a.ProfileObject?.Id == targetUser.Profile.Id,
+                    IsSelfAction = a.ProfileObject?.Id == targetUser.Profile.Id || a.Owner?.Id == targetUser.Id,
                 }).ToArray(),
                 Posts = await S.Db.Posts.Where(p => p.Author.Id == targetUser.Id)
                     .Select(p => new PostProfileModel()

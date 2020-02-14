@@ -25,15 +25,6 @@ namespace Blog.Controllers
             S = serviceProvider;
         }
 
-        //public override void OnActionExecuted(ActionExecutedContext context)
-        //{
-        //    LayoutModel.UpdateMessages();
-        //    LayoutModel.Save(HttpContext.Session);
-
-        //    base.OnActionExecuted(context);
-        //}
-
-
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             LayoutModel = await LayoutModel.LoadOrNewAsync(S);

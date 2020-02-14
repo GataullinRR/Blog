@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace DBModels
@@ -18,8 +19,8 @@ namespace DBModels
         public virtual ModeratorsGroupStatistic Owner { get; set; }
 
         public int ResolvedEntitiesCount { get; set; }
-        public TimeSpan SummedTimeToAssignation { get; set; }
-        public TimeSpan SummedTimeFromAssignationToResolving { get; set; }
-        public TimeSpan SummedResolveTime { get; set; }
+        public double SummedTimeToAssignation { get; set; }
+        public double SummedTimeFromAssignationToResolving { get; set; }
+        public double SummedResolveTime { get; set; }
     }
 }

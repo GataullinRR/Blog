@@ -19,6 +19,45 @@ namespace Blog
 {
     public static class Extensions
     {
+        public static IQueryable<User> IncludeEntitiesToCheckSlim(this IQueryable<User> group)
+        {
+            return group
+                .Include(u => u.ModeratorsGroup)
+                .ThenInclude(g => g.PostsToCheck)
+                .ThenInclude(p => p.AssignedModerator)
+                .Include(u => u.ModeratorsGroup)
+                .ThenInclude(g => g.ProfilesToCheck)
+                .ThenInclude(p => p.AssignedModerator)
+                .Include(u => u.ModeratorsGroup)
+                .ThenInclude(g => g.CommentariesToCheck)
+                .ThenInclude(p => p.AssignedModerator);
+        }
+
+        public static IQueryable<ModeratorsGroup> IncludeEntitiesToCheck(this IQueryable<ModeratorsGroup> group)
+        {
+            return group
+                .Include(g => g.PostsToCheck)
+                .ThenInclude(p => p.Entity)
+                .Include(g => g.PostsToCheck)
+                .ThenInclude(p => p.EntityOwner)
+                .Include(g => g.PostsToCheck)
+                .ThenInclude(p => p.AssignedModerator)
+
+                .Include(g => g.ProfilesToCheck)
+                .ThenInclude(p => p.Entity)
+                .Include(g => g.ProfilesToCheck)
+                .ThenInclude(p => p.EntityOwner)
+                .Include(g => g.ProfilesToCheck)
+                .ThenInclude(p => p.AssignedModerator)
+
+                .Include(g => g.CommentariesToCheck)
+                .ThenInclude(p => p.Entity)
+                .Include(g => g.CommentariesToCheck)
+                .ThenInclude(p => p.EntityOwner)
+                .Include(g => g.CommentariesToCheck)
+                .ThenInclude(p => p.AssignedModerator);
+        }
+
         public static string AbsoluteContent(this IUrlHelper url, string contentPath)
         {
             HttpRequest request = url.ActionContext.HttpContext.Request;

@@ -86,6 +86,18 @@ namespace DBModels
 
         public UserAction() { }
 
+        //public UserAction(ActionType actionType, Post @object) : this(actionType, @object, null)
+        //{
+
+        //}
+        //public UserAction(ActionType actionType, Profile @object) : this(actionType, @object, null)
+        //{
+
+        //}
+        //public UserAction(ActionType actionType, Commentary @object) : this(actionType, @object, null)
+        //{
+
+        //}
         public UserAction(ActionType actionType, object @object) : this(actionType, @object, null)
         {
 

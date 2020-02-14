@@ -39,7 +39,8 @@
         var table = $('#@tableId').DataTable({
             ajax: {
                 url: '@Model',
-                dataSrc: ''
+                dataSrc: '',
+                cache: true
             },
             columns: [
                 {

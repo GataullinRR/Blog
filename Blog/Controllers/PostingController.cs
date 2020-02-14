@@ -5,10 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Blog.Services;
 using DBModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Controllers
 {
+    [Authorize]
     public class PostingController : ControllerBase
     {
         public PostingController(ServiceLocator serviceProvider) : base(serviceProvider)

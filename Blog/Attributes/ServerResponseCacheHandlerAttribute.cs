@@ -13,7 +13,7 @@ namespace Blog.Attributes
         /// <summary>
         /// An unique key, used inside <see cref="ServerResponseCacheAttribute"/>
         /// </summary>
-        public Key CacheEntryKey { get; }
+        public string CacheEntryKey { get; }
 
         public ServerResponseCacheHandlerAttribute(string cacheEntryKey)
         {

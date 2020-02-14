@@ -42,7 +42,10 @@ namespace Blog.Pages
                 }
                 else
                 {
-                    var author = await S.Utilities.GetCurrentUserModelOrThrowAsync();
+                    var author = await (await S.Utilities.GetCurrentUserAsQueryableOrThrowAsync())
+                        .Include(u => u.ModeratorsInChargeGroup)
+                        .ThenInclude(g => g.PostsToCheck)
+                        .SingleAsync();
                     var body = await getEscapedPostBodyAsync();
                     var preview = getPostBodyPreview(body);
                     var post = new Post(DateTime.UtcNow, author, Title, body, preview);
@@ -50,6 +53,7 @@ namespace Blog.Pages
                     if (await S.Permissions.CanCreatePostsWithoutModerationAsync())
                     {
                         await S.Moderation.MarkPostAsModeratedAsync(post);
+                        post.Author.ModeratorsInChargeGroup.AddEntityToCheck(post, CheckReason.CHECK_REQUIRED);
                     }
                     else
                     {

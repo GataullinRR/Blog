@@ -69,7 +69,8 @@ namespace Blog.Pages.Account
                     {
                         UserName = Username,
                         Email = EMail,
-                        ModeratorsInChargeGroup = getModeratorGroup()
+                        Role = Roles.GetRole(S.MutatorsManager.RegistrationRole),
+                        ModeratorsInChargeGroup = await getModeratorGroupAsync()
                     };
                     var result = await S.UserManager.CreateAsync(newUser, Password);
                     if (result.Succeeded)
@@ -95,12 +96,14 @@ namespace Blog.Pages.Account
             return Page();
         }
 
-        ModeratorsGroup getModeratorGroup()
+        async Task<ModeratorsGroup> getModeratorGroupAsync()
         {
-            return S.Db.ModeratorsGroups
+            return await S.Db.ModeratorsGroups
                 .OrderByDescending(mg => mg.Moderators.Count) // Because empty group should be taken in the last place
-                .ThenBy(mg => mg.TargetUsers.Count / (double)mg.Moderators.Count.Exchange(0, 1)) // Take lest "busy" first
-                .First();
+                .ThenBy(mg => mg.Moderators.Count == 0 
+                    ? mg.TargetUsers.Count 
+                    : mg.TargetUsers.Count / (double)mg.Moderators.Count) // Take lest "busy" first
+                .FirstOrDefaultAsync();
         }
     }
 }

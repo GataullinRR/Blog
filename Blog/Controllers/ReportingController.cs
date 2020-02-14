@@ -7,6 +7,7 @@ using Blog.Attributes;
 using Blog.Misc;
 using Blog.Services;
 using DBModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ using Utilities.Extensions;
 
 namespace Blog.Controllers
 {
+    [Authorize]
     public class ReportingController : ControllerBase
     {
         public ReportingController(ServiceLocator serviceProvider) : base(serviceProvider)

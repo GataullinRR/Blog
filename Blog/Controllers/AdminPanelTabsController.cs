@@ -12,9 +12,11 @@ using Utilities.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Blog.Attributes;
 using Blog.Middlewares.CachingMiddleware.Policies;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Blog.Controllers
 {
+    [Authorize]
     public class AdminPanelTabsController : ControllerBase
     {
         class PostsTableRowModel
@@ -34,7 +36,7 @@ namespace Blog.Controllers
 
         }
 
-        [ServerResponseCache(24 * 3600, CachePolicy.AUTHORIZED_USER_SCOPED)]
+        [ServerResponseCache(24 * 3600, CachePolicy.ADMINISTRATOR_PANEL_SCOPED)]
         public async Task<IActionResult> LoadOverviewTabAsync()
         {
             await S.Permissions.ValidateAccessBlogControlPanelAsync();
@@ -55,10 +57,9 @@ namespace Blog.Controllers
             return PartialView("AdminPanel/_OverviewTab", daysStatistic);
         }
 
-        [ServerResponseCache(3600 * 24, CachePolicy.AUTHORIZED_USER_SCOPED)]
+        [ServerResponseCache(3600 * 24, CachePolicy.ADMINISTRATOR_PANEL_SCOPED)]
         public async Task<IActionResult> LoadFullPostsTableAsync()
         {
-            S.Db.ChangeTracker.LazyLoadingEnabled = false;
             var result = S.Db.Posts
                 .AsNoTracking()
                 .Select(post =>
@@ -66,7 +67,9 @@ namespace Blog.Controllers
                     {
                         Author = $"{post.Author.Id}|{post.Author.UserName}",
                         ComCnt = post.Commentaries.Count(),
-                        Post = $"{post.Id}|{post.Title.Take(30).Aggregate()}...",
+                        Post = post.Title.Length > 30 
+                            ? $"{post.Id}|{post.Title.Substring(0, 30)}..."
+                            : $"{post.Id}|{post.Title}",
                         CreatTime = new DateTimeOffset(post.CreationTime).ToUnixTimeSeconds(),
                         ViewsCnt = post.ViewStatistic.TotalViews,
                         RepPView = post.ViewStatistic.TotalViews == 0 
@@ -81,21 +84,19 @@ namespace Blog.Controllers
         }
 
 #warning Refactor! Hadn't had time to do better!
-        [ServerResponseCache(3600 * 24, CachePolicy.AUTHORIZED_USER_SCOPED)]
+        [ServerResponseCache(3600 * 24, CachePolicy.ADMINISTRATOR_PANEL_SCOPED)]
         public async Task<IActionResult> LoadModeratorsTabAsync()
         {
-            S.Db.ChangeTracker.LazyLoadingEnabled = false;
-            var groups = S.Db.ModeratorsGroups
+            var groups = await S.Db.ModeratorsGroups
                 .AsNoTracking()
                 .OrderBy(mg => mg.CreationTime)
                 .Include(mg => mg.Statistic)
                 .ThenInclude(s => s.DayStatistics)
-                .Include(mg => mg.PostEditsToCheck)
                 .Include(mg => mg.CommentariesToCheck)
                 .Include(mg => mg.ProfilesToCheck)
                 .Include(mg => mg.PostsToCheck)
                 .Include(mg => mg.Moderators)
-                .ToArray();
+                .ToListAsync();
             var startDate = groups[0].CreationTime.Date;
             var endDate = DateTime.UtcNow.Date;
             var xAxis = ((endDate - startDate).TotalDays + 1)
@@ -105,7 +106,7 @@ namespace Blog.Controllers
                 .ToArray();
 
             var i = 0;
-            var groupsInfos = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo[groups.Length];
+            var groupsInfos = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo[groups.Count];
             foreach (var group in groups)
             {
                 var moderatorsInfos = new AdminPanelModeratorsTabModel.SummaryModel.GroupInfo[group.Moderators.Count()];
@@ -119,7 +120,7 @@ namespace Blog.Controllers
                     var dayStatistic = statistic.FirstOrDefault(s => s.Day == day) ?? new ModeratorsGroupDayStatistic();
                     resolvedEntities[j] = dayStatistic.ResolvedEntitiesCount;
                     resolveTime[j] = dayStatistic.SummedResolveTime != default
-                        ? dayStatistic.SummedResolveTime.TotalSeconds.Round() 
+                        ? dayStatistic.SummedResolveTime.Round() 
                         : double.NaN;
                 }
 

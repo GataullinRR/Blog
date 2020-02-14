@@ -1,17 +1,14 @@
 ﻿@page
 @model Blog.Pages.ModeratorPanelModel
-@inject Microsoft.AspNetCore.Identity.UserManager<User> UserManager
 @{
     ViewData["Title"] = "Moderator panel";
 }
 
 @{
-    var assignedEntities = Model.Entities.Where(e => e.AssignedModerator == Model.Owner && !e.IsResolved);
-    var unassignedEntities = Model.Entities.Where(e => e.AssignedModerator == null && !e.IsResolved);
-    var resolvedEntities = Model.Entities.Where(e => e.AssignedModerator == Model.Owner && e.IsResolved);
+    var assignedEntities = Model.Entities.Where(e => e.AssignedModerator?.Id == Model.Owner.Id && !e.IsResolved);
+    var unassignedEntities = Model.Entities.Where(e => e.AssignedModerator?.Id == null && !e.IsResolved);
+    var resolvedEntities = Model.Entities.Where(e => e.AssignedModerator?.Id == Model.Owner.Id && e.IsResolved);
 }
-
-
 
 <div class="container">
     <div class="row">
@@ -72,7 +69,7 @@
                         <div>None at the moment :(</div>
                         if (unassignedEntities.Any())
                         {
-                            <div>You can <a href="" class="no-redirect" onclick="$('#v-pills-profile-tab').trigger('click')">assign</a> new ones</div>
+                            <div>You can <a href="" class="no-redirect mt-1" onclick="$('#v-pills-profile-tab').trigger('click')">assign</a> new ones</div>
                         }
                     }
                     else
@@ -102,7 +99,10 @@
                                         <td>@dT.ToCurrentTimeRelativeString()</td>
                                         <td>@entity.CheckReason.GetEnumValueDescription()</td>
                                         <td>@{ await Html.RenderPartialAsync("_ObjectReference", new ObjectReferenceModel(entity.Entity)); }</td>
-                                        <td><span exclude-if="@Model.ReadOnlyAccess"><a asp-page-handler="Check" asp-route-id="@entity.Id">mark as resolved</a></span></td>
+                                        <td>
+                                            <partial exclude-if="@Model.ReadOnlyAccess" name="@Partials.ModeratorPanel.MARK_AS_RESOLVED_BUTTON" model="entity" />
+                                            <span include-if="@Model.ReadOnlyAccess">mark as resolved</span>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
@@ -142,29 +142,7 @@
                             </tbody>
                         </table>
 
-
-                        <form exclude-if="@Model.ReadOnlyAccess" method="post" asp-page-handler="Assign" class="my-2">
-                            <input type="hidden" asp-for="@Model.TargetModeratorId" />
-
-                            <div class="row align-content-center">
-                                <div class="col my-auto">
-                                    <span class="">Number of entities to assign</span>
-                                </div>
-                                <div class="col">
-                                    <input class="form-control" asp-for="NumOfEntitiesToAssign" type="number" />
-                                </div>
-
-                                <div class="col">
-                                    <button type="submit" style="width:100%" class="btn btn-primary">Assign</button>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col">
-                                    <span class="text-danger" asp-validation-for="NumOfEntitiesToAssign"></span>
-                                </div>
-                            </div>
-                        </form>
+                        <partial exclude-if="Model.ReadOnlyAccess" name="@Partials.ModeratorPanel.ASSIGN_ENTITIES" model="Model.AssignModel" />
                     }
                     else
                     {
@@ -214,17 +192,12 @@
                 <div class="tab-pane fade" id="v-pills-settings" role="tabpanel">
                     <h3 class="mb-3">Users you are in charge of</h3>
 
-                    <partial name="@Partials.USERS_TABLE" model="@(PanelsTableController.MODERATORS_PANEL_USERS_URI + "?id=" + Model.Owner.Id)"/>
+                    <partial name="@Partials.USERS_TABLE" model="@(PanelsTableController.MODERATORS_PANEL_USERS_URI + "?id=" + Model.Owner.ModeratorsGroup.Id)" />
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-@section Styles
-{
-    @*//<link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" />*@
-}
 
 @section Scripts
 {
@@ -242,7 +215,13 @@
             //    tables[i].DataTable();
             //}
         });
-    </script>
 
-    @*@{ await Html.RenderPartialAsync("_DataTableScripts"); }*@
+        function markAsResolved(id, uri, modId, entityId) {
+            makeRequest(uri + "?moderatorId=" + modId + "&id=" + entityId, 'get', function () {
+                $("#" + id).parent().html("Done!");
+            }, function () {
+                $("#" + id).parent().html("Error :(");
+            });
+        }
+    </script>
 }

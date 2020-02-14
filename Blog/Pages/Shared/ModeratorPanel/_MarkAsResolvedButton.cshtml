@@ -1,0 +1,21 @@
+﻿@model IEntityToCheck
+
+@if (Model is EntityToCheck<Commentary> commentEntity)
+{
+    var id = $"c-{Model.Id}";
+    <a href="" id="@id" class="no-redirect" onclick="markAsResolved('@id', '@ModerationController.MARK_COMMENTARY_URI', '@Model.AssignedModerator.Id', '@Model.Id');">mark as resolved</a>
+}
+else if (Model is EntityToCheck<Post> postEntity)
+{
+    var id = $"p-{Model.Id}";
+    <a href="" id="@id" class="no-redirect" onclick="markAsResolved('@id', '@ModerationController.MARK_POST_URI', '@Model.AssignedModerator.Id', '@Model.Id');">mark as resolved</a>
+}
+else if (Model is EntityToCheck<Profile> profileEntity)
+{
+    var id = $"pr-{Model.Id}";
+    <a href="" id="@id" class="no-redirect" onclick="markAsResolved('@id', '@ModerationController.MARK_PROFILE_URI', '@Model.AssignedModerator.Id', '@Model.Id');">mark as resolved</a>
+}
+else
+{
+    throw new NotSupportedException();
+}

@@ -13,6 +13,7 @@ using DBModels;
 using System.ComponentModel.DataAnnotations;
 using Blog.Attributes;
 using Blog.Middlewares.CachingMiddleware.Policies;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Controllers
 {
@@ -37,23 +38,28 @@ namespace Blog.Controllers
             public double RepPPub { get; set; }
         }
 
-        [ServerResponseCache(3600 * 24, CachePolicy.AUTHORIZED_USER_SCOPED), AJAX]
+        [ServerResponseCache(3600 * 24, CachePolicy.ADMINISTRATOR_PANEL_SCOPED), AJAX]
         public async Task<IActionResult> LoadFullUsersTableAsync()
         {
             await S.Permissions.ValidateAccessBlogControlPanelAsync();
 
-            return await generateTableData(S.Db.Users);
+            return await generateTableData(S.Db.Users.AsNoTracking());
         }
 
-        [ServerResponseCache(3600 * 24, CachePolicy.AUTHORIZED_USER_SCOPED), AJAX]
-        public async Task<IActionResult> LoadModeratorsUsersTableAsync([Required]string id)
+        [ServerResponseCache(3600 * 24, CachePolicy.MODERATOR_PANEL_SCOPED), AJAX]
+        public async Task<IActionResult> LoadModeratorsUsersTableAsync([Required]int id)
         {
             if (ModelState.IsValid)
             {
-                var targetModerator = await S.UserManager.FindByIdAsync(id);
-                await S.Permissions.ValidateAccessModeratorsPanelAsync(targetModerator);
+                var targetModeratorGroup = await S.Db.ModeratorsGroups
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.Id == id);
+                await S.Permissions.ValidateAccessModeratorsPanelUsersTableAsync(targetModeratorGroup);
 
-                return await generateTableData(targetModerator.ModeratorsGroup.TargetUsers.AsQueryable());
+                var users = S.Db.Users
+                    .Where(u => u.ModeratorsInChargeGroup.Id == targetModeratorGroup.Id)
+                    .AsNoTracking();
+                return await generateTableData(users);
             }
             else
             {
@@ -63,25 +69,23 @@ namespace Blog.Controllers
 
         async Task<JsonResult> generateTableData(IQueryable<User> users)
         {
-            S.Db.ChangeTracker.LazyLoadingEnabled = false;
-            var query = users
+            var query = await users.AsNoTracking()
                 .Select(user => new
                 {
                     Name = $"{user.Id}|{user.UserName}",
-                    RoleId = S.Db.UserRoles.First(r => r.UserId == user.Id).RoleId,
+                    Role = user.Role,
                     ActCnt = user.Actions.Count(),
                     State = user.Status.State,
                     RegTime = user.Profile.RegistrationDate,
                     PubCnt = user.Commentaries.Count() + user.Posts.Count(),
                     RepCnt = user.Reports.Where(r => r.PostObject != null || r.CommentaryObject != null).Count()
                 })
-                .ToArray();
-            var roles = S.Db.Roles.ToDictionary(r => r.Id, r => r.Name);
+                .ToListAsync();
             var result = query
                 .Select(user => new UsersTableRowModel()
                 {
                     Name = user.Name,
-                    Role = roles[user.RoleId],
+                    Role = user.Role.GetEnumValueDescription(),
                     ActCnt = user.ActCnt,
                     State = user.State.GetEnumValueDescription(),
                     RegTime = new DateTimeOffset(user.RegTime).ToUnixTimeSeconds(),

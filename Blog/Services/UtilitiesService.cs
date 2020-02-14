@@ -25,6 +25,31 @@ namespace Blog.Services
             return user.Id;
         }
 
+        public async Task<IQueryable<User>> GetCurrentUserAsQueryableAsync()
+        {
+            var user = await GetCurrentUserModelAsync();
+            if (user == null)
+            {
+                return null;
+            }
+            else
+            {
+                return S.Db.Users.Where(u => u.Id == user.Id);
+            }
+        }
+        public async Task<IQueryable<User>> GetCurrentUserAsQueryableOrThrowAsync()
+        {
+            var user = await GetCurrentUserAsQueryableAsync();
+            if (user == null)
+            {
+                throw new AuthenticationException();
+            }
+            else
+            {
+                return user;
+            }
+        }
+
         public async Task<User> GetCurrentUserModelOrThrowAsync()
         {
             var user = await GetCurrentUserModelAsync();
@@ -44,7 +69,6 @@ namespace Blog.Services
             {
                 return _curentUserCache;
             }
-
             var user = await S.UserManager.GetUserAsync(S.HttpContext.User);
             _isCurrentUserCacheSet = true;
             _curentUserCache = user;

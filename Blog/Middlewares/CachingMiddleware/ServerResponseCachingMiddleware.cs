@@ -31,7 +31,7 @@ namespace Blog.Middlewares
     {
         delegate Task CacheHandlerDelegate(CacheScope cacheManager);
 
-        readonly Dictionary<Key, CacheHandlerDelegate> _cacheHandlers = new Dictionary<Key, CacheHandlerDelegate>();
+        readonly Dictionary<string, CacheHandlerDelegate> _cacheHandlers = new Dictionary<string, CacheHandlerDelegate>();
         readonly ICacheStorage _storage = new CacheStorage();
         readonly Dictionary<string, ICachePolicy> _cachePolicies = new Dictionary<string, ICachePolicy>();
 
@@ -45,6 +45,7 @@ namespace Blog.Middlewares
                               from mi in t.GetMethods(BindingFlags.Static | BindingFlags.Public)
                               let info = mi.GetCustomAttribute<ServerResponseCacheHandlerAttribute>()
                               where info != null
+                              where info.CacheEntryKey != null
                               let @delegate = mi.CreateDelegate(typeof(CacheHandlerDelegate)) as CacheHandlerDelegate
                               where @delegate != null
                               select new { info.CacheEntryKey, d = @delegate }).ToDictionary(v => v.CacheEntryKey, v => v.d);
@@ -94,8 +95,11 @@ namespace Blog.Middlewares
 
             async Task executeHandlerAsync()
             {
-                var has = _cacheHandlers.TryGetValue(cacheEntry.CachingInfo.CacheEntryKey, out var handler);
-                if (has)
+                CacheHandlerDelegate handler = null;
+                var has = cacheEntry.CachingInfo.CacheEntryKey == null 
+                    ? false 
+                    : _cacheHandlers.TryGetValue(cacheEntry.CachingInfo.CacheEntryKey, out handler);
+                if (has && handler != null)
                 {
                     var scope = new CacheScope(cacheEntry.IsRequestDataSet, cacheEntry.RequestData, serviceProvider);
                     await handler(scope);

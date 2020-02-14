@@ -4,11 +4,13 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Blog.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Utilities;
 
 namespace Blog.Controllers
 {
+    [Authorize]
     public class ActivationLinksController : ControllerBase
     {
         public ActivationLinksController(ServiceLocator serviceProvider) : base(serviceProvider)

@@ -61,7 +61,7 @@
         @if (addStartElipsis)
         {
             <li class="page-item">
-                <span>...</span>
+                <a href="" class="page-link">...</a>
             </li>
         }
         @foreach (var i in MAX.Range().Select(i => i + Model.CurrentPage - SIDE_LENGTH).Where(i => i < Model.NumOfPages - 1).SkipNegative())
@@ -73,7 +73,7 @@
         @if (addEndElipsis)
         {
             <li class="page-item">
-                <span>...</span>
+                <a href="" class="page-link no-redirect">...</a>
             </li>
         }
         @if (Model.NumOfPages > 1)

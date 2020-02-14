@@ -43,7 +43,8 @@ namespace Blog.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var user = await S.UserManager.FindByNameAsync(Login);
+                var user = await S.Db.Users
+                    .FirstOrDefaultAsync(u => u.UserName == Login);
                 if (user == null)
                 {
                     ModelState.AddModelError("", "This login is not registered");

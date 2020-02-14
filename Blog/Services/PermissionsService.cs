@@ -50,7 +50,10 @@ namespace Blog.Services
             }
             else
             {
-                return currentUser == post.Author
+                // to make explicit loading work for the case when post was loaded in non-tracking context
+                post = await S.Db.FindAsync<Post>(post.Id);
+                await S.Db.Entry(post).Reference(p => p.Author).LoadAsync();
+                return currentUser.Id == post.Author.Id
                     || (currentUser.Role == Role.USER && canNotAuthenticatedUserViewPost)
                     || currentUser.Role > Role.USER;
             }
@@ -201,7 +204,7 @@ namespace Blog.Services
                             CanEdit = !c.IsDeleted && (isPowered ||
                          (!c.IsHidden &&
                             c.Author.Id == user.Id &&
-                            c.CreationTime - DateTime.UtcNow < TimeSpan.FromDays(1) &&
+                            (c.CreationTime - DateTime.UtcNow).TotalDays < 1 &&
                             c.Edits.Count(e => e.Author.Id == user.Id) < 1)),
                             CanReport = !c.IsDeleted &&
                              c.Author.Id != user.Id &&
@@ -294,7 +297,7 @@ namespace Blog.Services
 
             ProfilePermissions result;
             var user = await getCurrentUserOrNullAsync();
-            if (user == null || user.Status.State != ProfileState.ACTIVE)
+            if (user == null || user.Status.State != ProfileState.ACTIVE && targetUserId != user.Id)
             {
                 result = new ProfilePermissions();
             }
@@ -543,6 +546,47 @@ namespace Blog.Services
                         && currentUser.Id != target.Id)
                     || (currentUser.Role == Role.MODERATOR
                         && currentUser.Id == target.Id);
+            }
+        }
+
+        public async Task ValidateAccessModeratorsPanelUsersTableAsync(ModeratorsGroup target)
+        {
+            if (!await CanAccessModeratorsPanelUsersTableAsync(target))
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanAccessModeratorsPanelUsersTableAsync(ModeratorsGroup target)
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
+            {
+                return false;
+            }
+            else
+            {
+                return currentUser.Role >= Role.MODERATOR;
+            }
+        }
+
+        public async Task ValidateMarkAsResolvedAsync(User target)
+        {
+            if (!await CanMarkAsResolvedAsync(target))
+            {
+                throw buildException();
+            }
+        }
+        public async Task<bool> CanMarkAsResolvedAsync(User target)
+        {
+            var currentUser = await getCurrentUserOrNullAsync();
+            if (currentUser == null || currentUser.Status.State != ProfileState.ACTIVE)
+            {
+                return false;
+            }
+            else
+            {
+                return await CanAccessModeratorsPanelAsync(target)
+                    && currentUser.Id == target.Id;
             }
         }
 

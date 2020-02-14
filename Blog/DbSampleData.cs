@@ -44,7 +44,7 @@ namespace Blog
                         moderatorsGroup.Statistic.DayStatistics.Add(
                             new ModeratorsGroupDayStatistic()
                             {
-                                SummedResolveTime = Global.Random.NextTimeSpan(TimeSpan.FromSeconds(timeFrom), TimeSpan.FromSeconds(timeTo)),
+                                SummedResolveTime = Global.Random.NextDouble(timeFrom, timeTo),
                                 Day = moderatorsGroup.CreationTime.AddDays(i + startDay).Date,
                                 ResolvedEntitiesCount = Global.Random.Next(minEntities, maxEntities)
                             }

@@ -73,76 +73,23 @@ namespace Blog.Services
                         else if (entity is IEntityToCheck entityToCheck && entry.State == EntityState.Modified) // Update mod panel stat
                         {
                             var isResolvedProperty = entry.Property(nameof(IEntityToCheck.ResolvingTime));
-                            if (isResolvedProperty.IsModified && isResolvedProperty.CurrentValue.To<DateTime?>() != null && entityToCheck.AssignedModerator != null)
+                            if (isResolvedProperty.IsModified && 
+                                isResolvedProperty.CurrentValue.To<DateTime?>() != null && 
+                                entityToCheck.AssignedModerator != null)
                             {
+                                await S.Db.Entry(entityToCheck)
+                                    .Reference(e => e.AssignedModerator)
+                                    .LoadAsync();
+                                await S.Db.Entry(entityToCheck.AssignedModerator)
+                                    .Reference(m => m.ModeratorsGroup)
+                                    .LoadAsync();
                                 var moderatorPanel = entityToCheck.AssignedModerator.ModeratorsGroup;
-                                updateResolvedEntitiesStatistic(moderatorPanel, entityToCheck);
+                                await updateResolvedEntitiesStatisticAsync(moderatorPanel, entityToCheck);
                             }
                         }
                     }
                 }
             }
-        }
-
-        public async Task UpdateAsync()
-        {
-            S.Db.ChangeTracker.DetectChanges();
-
-                foreach (var entry in S.Db.ChangeTracker.Entries().ToArray())
-                {
-                    if (!entry.State.IsOneOf(EntityState.Unchanged, EntityState.Detached))
-                    {
-                        var entity = entry.Entity;
-                        if (entity is ProfileStatus) // Update blog statistic
-                        {
-                            var stateProperty = entry.Property(nameof(ProfileStatus.State));
-                            if (entry.State == EntityState.Added)
-                            {
-                                await updateUsersWithStateCount(stateProperty.CurrentValue.To<ProfileState>());
-                            }
-                            else if (stateProperty.IsModified)
-                            {
-                                await updateUsersWithStateCount(stateProperty.OriginalValue.To<ProfileState>(), stateProperty.CurrentValue.To<ProfileState>());
-                            }
-                        }
-                        if (entity is Post post) // Update blog statistic
-                        {
-                            await updatePostsCount(post, entry.State == EntityState.Added);
-                        }
-                        if (entity is Commentary commentary) // Update blog statistic
-                        {
-                            await updateCommentariesCount(commentary, entry.State == EntityState.Added);
-                        }
-                        else if (entry.Entity is IViewStatistic viewStatistic && entry.State == EntityState.Modified) // Update blog statistic
-                        {
-                            var totalViewsProperty = entry.Property(nameof(IViewStatistic.TotalViews));
-                            var registredUserViewsProperty = entry.Property(nameof(IViewStatistic.RegisteredUserViews));
-                            var totalViewsDelta = totalViewsProperty.CurrentValue.To<int>() - totalViewsProperty.OriginalValue.To<int>();
-                            var registredUserViewsDelta = registredUserViewsProperty.CurrentValue.To<int>() - registredUserViewsProperty.OriginalValue.To<int>();
-                            if (viewStatistic is IViewStatistic<Commentary>)
-                            {
-                                await updateCommentariesViewStatistic(totalViewsDelta, registredUserViewsDelta);
-                            }
-                            else if (viewStatistic is IViewStatistic<Post>)
-                            {
-                                await updatePostsViewStatistic(totalViewsDelta, registredUserViewsDelta);
-                            }
-                        }
-                        else if (entity is UserAction userAction && entry.State == EntityState.Added) // Update user stat
-                        {
-                            updateUserActionsStatistic(userAction);
-                        }
-                        else if (entity is IEntityToCheck entityToCheck && entry.State == EntityState.Modified) // Update mod panel stat
-                        {
-                            var isResolvedProperty = entry.Property(nameof(IEntityToCheck.ResolvingTime));
-                            if (isResolvedProperty.IsModified && isResolvedProperty.CurrentValue.To<DateTime?>() != null && entityToCheck.AssignedModerator != null)
-                            {
-                                var moderatorPanel = entityToCheck.AssignedModerator.ModeratorsGroup;
-                                updateResolvedEntitiesStatistic(moderatorPanel, entityToCheck);
-                            }
-                        }
-                    }
-                }
         }
 
         #region ### Blog-wide statistic ###
@@ -258,22 +205,28 @@ namespace Blog.Services
 
         #region ### ModeratorsGroup statistic ###
 
-        void updateResolvedEntitiesStatistic(ModeratorsGroup entityOwner, IEntityToCheck entity)
+        async Task updateResolvedEntitiesStatisticAsync(ModeratorsGroup entityOwner, IEntityToCheck entity)
         {
             if (entity.IsResolved)
             {
-                var statistic = ensureHasThisDayModeratorsGroupStatistic(entityOwner);
-                statistic.SummedTimeToAssignation += entity.AssignationTime.Value - entity.AddTime;
-                statistic.SummedTimeFromAssignationToResolving += entity.ResolvingTime.Value - entity.AssignationTime.Value;
-                statistic.SummedResolveTime += entity.ResolvingTime.Value - entity.AddTime;
+                var statistic = await ensureHasThisDayModeratorsGroupStatisticAsync(entityOwner);
+                statistic.SummedTimeToAssignation += (entity.AssignationTime.Value - entity.AddTime).TotalSeconds;
+                statistic.SummedTimeFromAssignationToResolving += (entity.ResolvingTime.Value - entity.AssignationTime.Value).TotalSeconds;
+                statistic.SummedResolveTime += (entity.ResolvingTime.Value - entity.AddTime).TotalSeconds;
                 statistic.ResolvedEntitiesCount++;
             }
         }
 
-        ModeratorsGroupDayStatistic ensureHasThisDayModeratorsGroupStatistic(ModeratorsGroup moderatorsGroup)
+        async Task<ModeratorsGroupDayStatistic> ensureHasThisDayModeratorsGroupStatisticAsync(ModeratorsGroup moderatorsGroup)
         {
             var today = DateTime.UtcNow.Date;
             ModeratorsGroupDayStatistic dayStatistic;
+            await S.Db.Entry(moderatorsGroup)
+                .Reference(g => g.Statistic)
+                .LoadAsync();
+            await S.Db.Entry(moderatorsGroup.Statistic)
+                .Collection(s => s.DayStatistics)
+                .LoadAsync();
             if (today != moderatorsGroup.Statistic.LastDayStatistic?.Day)
             {
                 var lastStatistic = moderatorsGroup.Statistic.LastDayStatistic ?? new ModeratorsGroupDayStatistic();
@@ -283,7 +236,7 @@ namespace Blog.Services
                     ResolvedEntitiesCount = lastStatistic.ResolvedEntitiesCount,
                     SummedResolveTime = lastStatistic.SummedResolveTime,
                     SummedTimeFromAssignationToResolving = lastStatistic.SummedTimeFromAssignationToResolving,
-                    SummedTimeToAssignation = lastStatistic.SummedTimeToAssignation
+                    SummedTimeToAssignation = lastStatistic.SummedTimeToAssignation,
                 };
                 moderatorsGroup.Statistic.DayStatistics.Add(dayStatistic);
             }

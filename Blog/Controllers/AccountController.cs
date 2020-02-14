@@ -17,7 +17,6 @@ using Utilities.Extensions;
 
 namespace Blog.Controllers
 {
-    [Authorize]
     public class AccountController : ControllerBase
     {
         public AccountController(ServiceLocator serviceProvider) : base(serviceProvider)
@@ -34,8 +33,7 @@ namespace Blog.Controllers
             await S.SignInManager.SignOutAsync();
             if (currenUser != null)
             {
-                var action = new UserAction(ActionType.SIGNED_OUT, currenUser, currenUser);
-                S.Db.UsersActions.Add(action);
+                await S.Repository.AddUserActionAsync(currenUser, new UserAction(ActionType.SIGNED_OUT, currenUser));
                 await S.Db.SaveChangesAsync();
             }
 
@@ -184,6 +182,7 @@ namespace Blog.Controllers
             }
             else
             {
+                await S.Db.Entry(user).Reference(u => u.Status).LoadAsync();
                 user.EmailConfirmed = true;
                 user.Status.State = ProfileState.ACTIVE;
                 await S.Repository.AddUserActionAsync(user, new UserAction(ActionType.EMAIL_CONFIRMED, user));

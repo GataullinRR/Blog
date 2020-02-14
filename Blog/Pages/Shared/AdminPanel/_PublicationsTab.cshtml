@@ -34,7 +34,8 @@
         var table = $('#@tableId').DataTable({
             ajax: {
                 url: '@AdminPanelTabsController.FULL_POSTS_TABLE_URI',
-                dataSrc: ''
+                dataSrc: '',
+                cache: true
             },
             columns: [
                 {

@@ -1,6 +1,7 @@
 ﻿using Blog.Attributes;
 using Blog.Misc;
 using DBModels;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,11 +22,15 @@ namespace Blog.Services
 
         public async Task<string> GetHelpContactEmailAsync()
         {
-            var currentUser = await S.Utilities.GetCurrentUserModelAsync();
+            var currentUserQuery = await S.Utilities.GetCurrentUserAsQueryableAsync();
             string email = null;
-            if (currentUser != null)
+            if (currentUserQuery != null)
             {
-#warning quick fix
+                var currentUser = await currentUserQuery
+                    .Include(u => u.ModeratorsInChargeGroup)
+                    .ThenInclude(g => g.Moderators)
+                    .AsNoTracking()
+                    .SingleAsync();
                 if (currentUser.ModeratorsInChargeGroup == null)
                 {
                     return null;
@@ -39,10 +44,10 @@ namespace Blog.Services
             }
             else
             {
-                var moderators = await S.Db.GetUsersInRoleAsync(Roles.MODERATOR).ThenDo(r => r
-                    .Where(m => m.EmailConfirmed)
-                    .ToArray());
-                var moderator = _rnd.NextElementFrom(moderators);
+                var moderators = await S.Db.Users.Where(u => u.Role == Role.MODERATOR && u.EmailConfirmed)
+                    .AsNoTracking()
+                    .ToListAsync();
+                var moderator = _rnd.NextElementFromList(moderators);
                 email = moderator.Email;
             }
 

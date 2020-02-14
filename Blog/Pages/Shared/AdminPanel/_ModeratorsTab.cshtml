@@ -59,15 +59,15 @@
                     </thead>
                     <tbody>
                         @foreach (var moderator in Db.ModeratorsGroups
-                                   .Select(mg => mg.Moderators.Select(m => new { m.Profile, m.Status, m.UserName, m.ModeratorsGroup.Id }).ToArray())
+                                   .Select(mg => mg.Moderators.Select(m => new { m.Profile, m.Status, m.UserName, mid = m.Id, m.ModeratorsGroup.Id }).ToArray())
                                    .Flatten()
                                    .ToArray())
                         {
                             <tr>
-                            <td><a asp-page = "/Account/Profile" asp-route-id="@moderator.Id" > @moderator.UserName </a ></td >
+                            <td><a asp-page = "/Account/Profile" asp-route-id="@moderator.mid" > @moderator.UserName </a ></td >
                             <td> @moderator.Profile.RegistrationDate.ToDateString() </td >
                             <td> @moderator.Status.State.GetEnumValueDescription() </td >
-                            <td ><a asp-page = "/ModeratorPanel" asp-route-id="@moderator.Id" > @Model.Summary.Groups.Find(g => g.GroupId.Value == moderator.Id).Value.GroupName </a ></td >
+                            <td ><a asp-page = "/ModeratorPanel" asp-route-id="@moderator.mid" > @Model.Summary.Groups.Find(g => g.GroupId.Value == moderator.Id).Value.GroupName </a ></td >
                             </tr >
                         }
                     </tbody>

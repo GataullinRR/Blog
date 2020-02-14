@@ -44,7 +44,7 @@ namespace Blog.Pages.Account
                     if (result.Succeeded)
                     {
                         await S.SignInManager.SignOutAsync();
-                        user.Actions.Add(new DBModels.UserAction(ActionType.PASSWORD_CHANGED, null));
+                        user.Actions.Add(new UserAction(ActionType.PASSWORD_CHANGED, user));
                         await S.Db.SaveChangesAsync();
 
                         LayoutModel.AddMessage("Password has been changed");
