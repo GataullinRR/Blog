@@ -13,39 +13,6 @@ using Utilities.Extensions;
 
 namespace PerformanceTest
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-    class CommandHandlerAttribute : Attribute
-    {
-        public CommandHandlerAttribute(string commandName) 
-        {
-            CommandName = commandName ?? throw new ArgumentNullException(nameof(commandName));
-        }
-        public CommandHandlerAttribute(string commandName, string commandDescription)
-        {
-            CommandName = commandName ?? throw new ArgumentNullException(nameof(commandName));
-            CommandDescription = commandDescription ?? throw new ArgumentNullException(nameof(commandDescription));
-        }
-
-        public string CommandName { get; }
-        public string CommandDescription { get; }
-    }
-
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-    class ParameterAttribute : Attribute
-    {
-        public ParameterAttribute(string parameterName, string parameterDescription)
-        {
-            ParameterName = parameterName ?? throw new ArgumentNullException(nameof(parameterName));
-            ParameterDescription = parameterDescription;
-        }
-        public ParameterAttribute(string parameterName) :this(parameterName, null)
-        {
-
-        }
-        public string ParameterName { get; }
-        public string ParameterDescription { get; }
-    }
-
     class Program
     {
         class RequestInfo 
@@ -80,12 +47,14 @@ namespace PerformanceTest
         static async Task Main(string[] args)
         {
             var commands = (from mi in typeof(Program).GetMethods(BindingFlags.Static | BindingFlags.Public)
-                           let info = mi.GetCustomAttribute<CommandHandlerAttribute>()
-                           where info != null
-                           let parameters = (from pi in mi.GetParameters()
-                                            let pInfo = pi.GetCustomAttribute<ParameterAttribute>() ?? new ParameterAttribute(pi.Name, pi.Name)
-                                            select new { Type = pi.ParameterType, Info = pInfo }).ToArray()
-                           select new { Handler = mi, HandlerInfo = info, Parameters = parameters  }).ToArray();
+                            let info = mi.GetCustomAttribute<CommandHandlerAttribute>()
+                            where info != null
+                            let parameters = (from pi in mi.GetParameters()
+                                              let pInfo = pi.GetCustomAttribute<ParameterAttribute>()
+                                              let description = pInfo?.ParameterDescription ?? pi.Name
+                                              let name = pInfo?.ParameterName ?? pi.Name
+                                             select new { Type = pi.ParameterType, Info = new ParameterAttribute(name, description) }).ToArray()
+                            select new { Handler = mi, HandlerInfo = info, Parameters = parameters }).ToArray();
 
             Console.WriteLine("Following commands are awailable:");
             foreach (var command in commands)
@@ -167,6 +136,9 @@ namespace PerformanceTest
             }
         }
 
+        const string URI = "http://localhost:5000";
+        //const string URI = "http://localhost:14971";
+
         [CommandHandler("pt", "Post requests")]
         public static async Task PostReq([Parameter("nor")]int numOfRequests, [Parameter("ic")]int connectionsCount, [Parameter("rd")]int delay)
         {
@@ -174,17 +146,21 @@ namespace PerformanceTest
             {
                 await waitServerLoadsAsync(client);
 
-                var response = await client.GetAsync("http://localhost:14971/Testing/GetAllPostsAsync");
+                var response = await client.GetAsync($"{URI}/Testing/GetAllPostsAsync");
                 var content = await response.Content.ReadAsStringAsync();
                 var uris = JsonSerializer.Deserialize<List<string>>(content);
 
                 var futures = new List<RequestInfo>();
                 var urisIterator = uriStream().Take(numOfRequests).ToArray().StartEnumeration();
+                var sw = Stopwatch.StartNew();
                 while (futures.Count < numOfRequests)
                 {
                     if (futures.Count(f => !f.IsCompleted) < connectionsCount )
                     {
-                        await Task.Delay(delay);
+                        if (delay != 0)
+                        {
+                            await Task.Delay(delay);
+                        }
                         var uri = urisIterator.AdvanceOrThrow();
                         futures.Add(new RequestInfo(client.GetAsync(uri)));
                     }
@@ -196,10 +172,14 @@ namespace PerformanceTest
                 foreach (var future in futures)
                 {
                     await future.WaitCompletionAsync();
+                }
+                sw.Stop();
+                foreach (var future in futures)
+                {
                     Console.WriteLine(future);
                 }
 
-                showStatistic(futures);
+                showStatistic(futures, sw.Elapsed.TotalMilliseconds);
 
                 Console.WriteLine("Benchmark has been completed");
 
@@ -220,7 +200,7 @@ namespace PerformanceTest
                 {
                     try
                     {
-                        response = await client.GetAsync("http://localhost:14971/");
+                        response = await client.GetAsync(URI);
                     }
                     catch (HttpRequestException ex)
                     {
@@ -233,15 +213,17 @@ namespace PerformanceTest
                 Console.WriteLine("Server has been loaded!");
             }
 
-            void showStatistic(IList<RequestInfo> requests)
+            void showStatistic(IList<RequestInfo> requests, double elapsedMs)
             {
                 var avgResponseTime = requests.Sum(r => r.Duration) / requests.Count;
+                var avgTotalResponseTime = elapsedMs / requests.Count;
                 var minResponseTime = requests.Min(r => r.Duration);
                 var maxResponseTime = requests.Max(r => r.Duration);
 
                 Console.WriteLine($"Min response time: {minResponseTime}");
                 Console.WriteLine($"Max response time: {maxResponseTime}");
                 Console.WriteLine($"Avg response time: {avgResponseTime}");
+                Console.WriteLine($"Avg total response time: {avgTotalResponseTime}");
             }
         }
     }

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Controllers
 {
-#if DEBUG
+#if TESTING
     public class TestingController : ControllerBase
     {
         public TestingController(ServiceLocator serviceProvider) : base(serviceProvider)

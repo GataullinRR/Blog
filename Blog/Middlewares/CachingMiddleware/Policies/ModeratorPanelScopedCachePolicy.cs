@@ -14,20 +14,23 @@ namespace Blog.Middlewares.CachingMiddleware.Policies
     {
         public async Task<bool> CanBeSavedAsync(HttpContext httpContext, IServiceProvider serviceProvider)
         {
-            return await tryGetModeratorsGroupIdAsync(httpContext, serviceProvider) != null;
-        }
-
-        public async Task<bool> CanBeServedAsync(HttpContext httpContext, IServiceProvider serviceProvider, object metadata)
-        {
-            return await tryGetModeratorsGroupIdAsync(httpContext, serviceProvider) == metadata.To<int>();
+            return await tryGetCurrentUserModeratorsGroupIdAsync(serviceProvider) != null;
         }
 
         public async Task<object> GenerateMetadata(HttpContext httpContext, IServiceProvider serviceProvider)
         {
-            return (await tryGetModeratorsGroupIdAsync(httpContext, serviceProvider)).Value;
+            return await tryGetCurrentUserModeratorsGroupIdAsync(serviceProvider);
         }
 
-        async Task<int?> tryGetModeratorsGroupIdAsync(HttpContext httpContext, IServiceProvider serviceProvider)
+        public async Task<bool> CanBeServedAsync(HttpContext httpContext, IServiceProvider serviceProvider, object metadata)
+        {
+            var cacheOwner = metadata.To<int>();
+            var cacheTarget = await tryGetCurrentUserModeratorsGroupIdAsync(serviceProvider);
+           
+            return cacheTarget == cacheOwner;
+        }
+
+        async Task<int?> tryGetCurrentUserModeratorsGroupIdAsync(IServiceProvider serviceProvider)
         {
             var utilities = serviceProvider.GetService<UtilitiesService>();
             var userQuery = await utilities.GetCurrentUserAsQueryableAsync();

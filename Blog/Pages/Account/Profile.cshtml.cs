@@ -27,7 +27,7 @@ namespace Blog.Pages.Account
 
         }
 
-        [ServerResponseCache(3 * 60, CachePolicy.UNATHORZED_USER_SCOPED, CacheManagerService.PROFILE_GET_CACHE_KEY)]
+        [ServerResponseCache(3 * 60, CachePolicy.UNAUTHENTICATED_USER_SCOPED, CacheManagerService.PROFILE_GET_CACHE_KEY)]
         public async Task<IActionResult> OnGetAsync(string id)
         {
             if (id == null)

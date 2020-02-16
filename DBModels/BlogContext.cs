@@ -64,7 +64,7 @@ namespace DBModels
             // Dont want to spend 4ms each time on
             // IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE') SELECT 1 ELSE SELECT 0
             // query
-            Database.EnsureCreated();
+            //Database.EnsureCreated();
 
             ChangeTracker.LazyLoadingEnabled = false;
         }

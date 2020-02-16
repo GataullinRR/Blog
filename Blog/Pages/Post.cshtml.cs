@@ -41,7 +41,7 @@ namespace Blog.Pages
             await updateViewStatisticAsync(services.DbUpdator, false, viewStatistics);
         }
          
-        [ServerResponseCache(3 * 60, CachePolicy.UNATHORZED_USER_SCOPED, CacheManagerService.POST_GET_CACHE_KEY)]
+        [ServerResponseCache(3 * 60, CachePolicy.UNAUTHENTICATED_USER_SCOPED, CacheManagerService.POST_GET_CACHE_KEY)]
         public async Task<IActionResult> OnGetAsync([Required]int id)
         {
             if (ModelState.IsValid)
