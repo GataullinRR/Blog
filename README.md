@@ -6,7 +6,7 @@ Although this is my first ASP project it features quite a good performance. This
 - Most common resources (Profile/Index/Post pages) are fully server-side response cached for unauthenticated user, effectively 90% of all requests will be fully cached what lead to response time less than 5 ms (acording to Chrome Dev Tools). While serving these request Db queries are not performed. The dveloped custom caching infrastracture allows having multiple caches for the same route with diferent scopes (e.g. scoped to users in moderator role, scoped to unauthenticated users... etc). The custom cache supports execution of a cache handler method which is called each time cache is served and allows, for example, adding view statistic update logic. The cache also  supports expiration by key and/or route parameters.
 - Heavy resources like table of all users inside AdminPanel are also response cached
 - View statistics are server cached so there are no Db update queries on each Post/Commentary/Profile request, only after 5 minutes view statistic changes are commited to the database
-- Lazy Loading is not utilized (though it has been used initially), Db queryes are performed mostly by Select and Eager loading, sometimes via Explicit loading
+- Lazy Loading is not utilized (though it has been used initially), Db queries are performed mostly by Select and Eager loading, sometimes via Explicit loading
 
 Post page cache setup code:
 
