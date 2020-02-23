@@ -78,6 +78,7 @@ namespace Blog
             });
             services.AddMvc(options =>
             {
+                options.Filters.Add(new ReturnIfModelStateInvalidAsyncFilter());
                 options.Filters.Add(new AttributesProviderAsyncPageFilter());
                 options.Filters.Add(new RequestDataProviderAsyncFilter());
                 options.Filters.Add(new ClientResponseCacheAsyncFilter());

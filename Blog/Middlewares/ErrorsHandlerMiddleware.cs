@@ -28,7 +28,8 @@ namespace Blog.Middlewares
             try
             {
                 await _next(httpContext);
-                shouldRedirectToErrorPage = httpContext.Response.StatusCode >= 400;
+                statusCode = (HttpStatusCode)httpContext.Response.StatusCode;
+                shouldRedirectToErrorPage = (int)statusCode >= 400;
             }
             catch (UnauthorizedAccessException)
             {
