@@ -9,6 +9,7 @@ using Blog.Attributes;
 using Blog.Filters;
 using Blog.Middlewares;
 using Blog.Misc;
+using Blog.Misc.ModelBinder;
 using Blog.Pages.Account;
 using Blog.Services;
 using DBModels;
@@ -20,6 +21,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Internal;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,7 +45,7 @@ namespace Blog
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<BlogContext>(options => options
                     //.UseLazyLoadingProxies()
-                    .UseSqlServer(connection, 
+                    .UseSqlServer(connection,
                         sqlOpt => sqlOpt.CommandTimeout(60)));
             //services.AddResponseCaching();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -82,12 +84,26 @@ namespace Blog
                 options.Filters.Add(new AttributesProviderAsyncPageFilter());
                 options.Filters.Add(new RequestDataProviderAsyncFilter());
                 options.Filters.Add(new ClientResponseCacheAsyncFilter());
+
+                options.ModelBinderProviders.Insert(0, new IdToEntityModelBinderProvider());
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSession();
             services.AddMemoryCache();
             services.AddUrlHelper();
             registerServices();
+            overrideObjectModelValidator();
+
+            void overrideObjectModelValidator()
+            {
+                IObjectModelValidator defaultValidator = null;
+                using (var sp = services.BuildServiceProvider())
+                {
+                    defaultValidator = sp.GetRequiredService<IObjectModelValidator>();
+                }
+                var conditionalValidator = new ConditionalObjectModelValidatorProxy(defaultValidator);
+                services.AddSingleton<IObjectModelValidator>(conditionalValidator);
+            }
 
             void registerServices()
             {
@@ -125,6 +141,7 @@ namespace Blog
         {
             // Required to run
             app.ApplicationServices.GetService<AutounbanService>();
+            app.ApplicationServices.GetRequiredService<IObjectModelValidator>();
 
             if (env.IsDevelopment())
             {

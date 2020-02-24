@@ -107,6 +107,20 @@ namespace Blog.Services
             }
         }
 
+        public async Task<IQueryable<Post>> CanEditPostTitleIncludeAsync(IQueryable<Post> postQuery)
+        {
+            var user = await getCurrentUserOrNullAsync();
+            if (user == null || user.Status.State != ProfileState.ACTIVE)
+            {
+                return postQuery;
+            }
+            else
+            {
+                return postQuery
+                        .Include(p => p.ModerationInfo)
+                        .Include(p => p.Author);
+            }
+        }
         public async Task<bool> CanEditPostTitleAsync(Post post)
         {
             var user = await getCurrentUserOrNullAsync();

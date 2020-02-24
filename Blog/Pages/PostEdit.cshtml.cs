@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Blog.Attributes;
 using Blog.Services;
 using DBModels;
 using Microsoft.AspNetCore.Authorization;
@@ -26,34 +27,47 @@ namespace Blog.Pages
 
         }
 
-        public async Task<IActionResult> OnGetAsync([Required]int id)
+        public async Task<IActionResult> OnGetAsync([FromEntityId]IQueryable<Post> postQuery)
         {
-            if (ModelState.IsValid)
-            {
-                var post = await S.Db.Posts
-                    .AsNoTracking()
-                    .Include(p => p.Author)
-                    .Include(p => p.ModerationInfo)
-                    .FirstOrDefaultAsync(p => p.Id == id);
-                if (post != null)
-                {
-                    Title = post.Title;
-                    Body = post.Body;
-                    Post = post;
-                    PostId = id;
-                    CanEditPostTitle = await S.Permissions.CanEditPostTitleAsync(post);
+            postQuery = postQuery.AsNoTracking();
+            postQuery = await S.Permissions.CanEditPostTitleIncludeAsync(postQuery);
+            // Will return 404 status code if there is no such post (because RequiredAttribute is present)
+            var post = await postQuery.FirstOrDefaultAsync();
 
-                    return Page();
-                }
-                else
-                {
-                    throw new NotFoundException();
-                }
-            }
-            else
-            {
-                throw new Exception();
-            }
+            Title = post.Title;
+            Body = post.Body;
+            Post = post;
+            PostId = post.Id;
+            CanEditPostTitle = await S.Permissions.CanEditPostTitleAsync(post);
+
+            return Page();
+
+            //if (ModelState.IsValid)
+            //{
+            //    var post = await S.Db.Posts
+            //        .AsNoTracking()
+            //        .Include(p => p.Author)
+            //        .Include(p => p.ModerationInfo)
+            //        .FirstOrDefaultAsync(p => p.Id == id);
+            //    if (post != null)
+            //    {
+            //        Title = post.Title;
+            //        Body = post.Body;
+            //        Post = post;
+            //        PostId = id;
+            //        CanEditPostTitle = await S.Permissions.CanEditPostTitleAsync(post);
+
+            //        return Page();
+            //    }
+            //    else
+            //    {
+            //        throw new NotFoundException();
+            //    }
+            //}
+            //else
+            //{
+            //    throw new Exception();
+            //}
         }
 
         public async Task<IActionResult> OnPostAsync()
