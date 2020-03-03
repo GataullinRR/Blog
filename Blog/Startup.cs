@@ -5,6 +5,7 @@ using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using AspNetCore.IServiceCollection.AddIUrlHelper;
+using ASPCoreUtilities.Extensions;
 using Blog.Attributes;
 using Blog.Filters;
 using Blog.Middlewares;
@@ -91,7 +92,7 @@ namespace Blog
             services.AddSession();
             services.AddMemoryCache();
             services.AddUrlHelper();
-            registerServices();
+            Assembly.GetExecutingAssembly().FindAndRegisterServicesTo(services);
             overrideObjectModelValidator();
 
             void overrideObjectModelValidator()
@@ -103,36 +104,6 @@ namespace Blog
                 }
                 var conditionalValidator = new ConditionalObjectModelValidatorProxy(defaultValidator);
                 services.AddSingleton<IObjectModelValidator>(conditionalValidator);
-            }
-
-            void registerServices()
-            {
-                var allTypes = Assembly.GetExecutingAssembly().DefinedTypes
-                    .Select(t => t.AsType())
-                    .ToArray();
-                foreach (var implementationType in allTypes)
-                {
-                    var serviceInfo = implementationType.GetCustomAttribute<ServiceAttribute>();
-                    if (serviceInfo != null)
-                    {
-                        var serviceType = serviceInfo.RegisterAs ?? implementationType;
-                        switch (serviceInfo.ServiceType)
-                        {
-                            case ServiceType.SCOPED:
-                                services.AddScoped(serviceType, implementationType);
-                                break;
-                            case ServiceType.SINGLETON:
-                                services.AddSingleton(serviceType, implementationType);
-                                break;
-                            case ServiceType.TRANSIENT:
-                                services.AddTransient(serviceType, implementationType);
-                                break;
-
-                            default:
-                                throw new NotSupportedException();
-                        }
-                    }
-                }
             }
         }
 

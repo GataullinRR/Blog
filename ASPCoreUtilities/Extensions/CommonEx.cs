@@ -1,19 +1,52 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ASPCoreUtilities.Types;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Utilities.Extensions;
 
-namespace ASPCoreUtilities
+namespace ASPCoreUtilities.Extensions
 {
-    public static class Extensions
+    public static class CommonEx
     {
+        public static void FindAndRegisterServicesTo(this Assembly assemblyWithServices, IServiceCollection services)
+        {
+            var allTypes = assemblyWithServices.DefinedTypes
+                .Select(t => t.AsType())
+                .ToArray();
+            foreach (var implementationType in allTypes)
+            {
+                var serviceInfo = implementationType.GetCustomAttribute<ServiceAttribute>();
+                if (serviceInfo != null)
+                {
+                    var serviceType = serviceInfo.RegisterAs ?? implementationType;
+                    switch (serviceInfo.ServiceType)
+                    {
+                        case ServiceType.SCOPED:
+                            services.AddScoped(serviceType, implementationType);
+                            break;
+                        case ServiceType.SINGLETON:
+                            services.AddSingleton(serviceType, implementationType);
+                            break;
+                        case ServiceType.TRANSIENT:
+                            services.AddTransient(serviceType, implementationType);
+                            break;
+
+                        default:
+                            throw new NotSupportedException();
+                    }
+                }
+            }
+        }
+
         public static IQueryable<T> AsAsyncQuerable<T>(this IEnumerable<T> sequence)
         {
             return new TestAsyncEnumerable<T>(sequence).AsQueryable();

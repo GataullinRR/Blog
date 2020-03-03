@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.DataProtection;
 using System.IO.Compression;
 using Blog.Services.Models;
 using Blog.Attributes;
+using ASPCoreUtilities.Types;
 
 namespace Blog.Services
 {

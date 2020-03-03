@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyVersion>2020.2.24.2933</AssemblyVersion>
-    <FileVersion>2020.2.24.2933</FileVersion>
+    <AssemblyVersion>2020.3.3.2937</AssemblyVersion>
+    <FileVersion>2020.3.3.2937</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,5 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\GeneralPurposeLibs\MVVMUtilities\MVVMUtilitiesStandard\MVVMUtilitiesStandard.csproj" />
     <ProjectReference Include="..\..\GeneralPurposeLibs\Utilities\UtilitiesStandard\UtilitiesStandard.csproj" />
+    <ProjectReference Include="..\CommonDBModels\CommonDBModels.csproj" />
   </ItemGroup>
 </Project>

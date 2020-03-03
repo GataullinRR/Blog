@@ -1,4 +1,5 @@
-﻿using Blog.Attributes;
+﻿using ASPCoreUtilities.Types;
+using Blog.Attributes;
 using Blog.Misc;
 using DBModels;
 using Microsoft.EntityFrameworkCore;
@@ -141,7 +142,7 @@ namespace Blog.Services
             }
         }
 
-        async Task  updateCommentariesViewStatistic(int totalViewsDelta, int registredUserViewsDelta)
+        async Task updateCommentariesViewStatistic(int totalViewsDelta, int registredUserViewsDelta)
         {
             var statistic = await ensureHasThisDayBlogStatistic();
             statistic.CommentariesViewStatistic.TotalViews += totalViewsDelta;

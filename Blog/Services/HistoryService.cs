@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Utilities.Extensions;
+using ASPCoreUtilities.Types;
 
 namespace Blog.Services
 {

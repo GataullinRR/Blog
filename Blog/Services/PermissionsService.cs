@@ -15,6 +15,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Utilities.Extensions;
+using ASPCoreUtilities.Types;
+using ASPCoreUtilities.Extensions;
 
 namespace Blog.Services
 {
