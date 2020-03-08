@@ -15,6 +15,6 @@
     <ProjectReference Include="..\..\GeneralPurposeLibs\Utilities\UtilitiesStandard\UtilitiesStandard.csproj" />
     <ProjectReference Include="..\CommonDBModels\CommonDBModels.csproj" />
     <ProjectReference Include="..\StatisticDBModels\StatisticDBModels.csproj" />
-    <ProjectReference Include="..\StatisticServiceInterop\StatisticServiceInterop.csproj" />
+    <ProjectReference Include="..\StatisticServiceInterop\StatisticServiceExports.csproj" />
   </ItemGroup>
 </Project>

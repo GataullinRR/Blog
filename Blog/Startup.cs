@@ -28,6 +28,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Utilities.Types;
+using StatisticServiceExports;
+using StatisticServiceClient;
 
 namespace Blog
 {
@@ -92,6 +94,7 @@ namespace Blog
             services.AddSession();
             services.AddMemoryCache();
             services.AddUrlHelper();
+            services.AddSingleton<IStatisticServiceAPI, StatisticServiceAPI>();
             Assembly.GetExecutingAssembly().FindAndRegisterServicesTo(services);
             overrideObjectModelValidator();
 

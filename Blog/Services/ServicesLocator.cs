@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ASPCoreUtilities.Types;
+using StatisticServiceExports;
 
 namespace Blog.Services
 {
@@ -45,6 +46,7 @@ namespace Blog.Services
         readonly Lazy<ContactEmailProviderService> _contactEmailProvider;
         readonly Lazy<CacheManagerService> _cacheManager;
         readonly Lazy<StatisticService> _statisticService;
+        readonly Lazy<IStatisticServiceAPI> _statisticAPIService;
 
         public IServiceProvider ServiceProvider { get; }
         public BlogContext Db => _db.Value;
@@ -74,6 +76,7 @@ namespace Blog.Services
         public ContactEmailProviderService ContactEmailProvider => _contactEmailProvider.Value;
         public CacheManagerService CacheManager => _cacheManager.Value;
         public StatisticService StatisticService => _statisticService.Value;
+        public IStatisticServiceAPI StatisticServiceAPI => _statisticAPIService.Value;
 
         public ServiceLocator(IServiceProvider serviceProvider)
         {
@@ -106,6 +109,7 @@ namespace Blog.Services
             _contactEmailProvider = ServiceProvider.GetLazyService<ContactEmailProviderService>();
             _cacheManager = ServiceProvider.GetLazyService<CacheManagerService>();
             _statisticService = ServiceProvider.GetLazyService<StatisticService>();
+            _statisticAPIService = ServiceProvider.GetLazyService<IStatisticServiceAPI>();
         }
     }
 }

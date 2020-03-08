@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyVersion>2020.3.3.3727</AssemblyVersion>
-    <FileVersion>2020.3.3.3727</FileVersion>
+    <AssemblyVersion>2020.3.8.3731</AssemblyVersion>
+    <FileVersion>2020.3.8.3731</FileVersion>
     <UserSecretsId>757ccc5e-bb25-428e-ba76-80b25b862f65</UserSecretsId>
   </PropertyGroup>
 
@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.IServiceCollection.AddIUrlHelper" Version="1.1.0" />
+    <PackageReference Include="Confluent.Kafka" Version="1.3.0" />
     <PackageReference Include="dotless" Version="1.6.7" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.16" />
     <PackageReference Include="HtmlSanitizer" Version="4.0.217" />
@@ -38,7 +39,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\GeneralPurposeLibs\Utilities\UtilitiesStandard\UtilitiesStandard.csproj" />
     <ProjectReference Include="..\ASPCoreUtilities\ASPCoreUtilities.csproj" />
+    <ProjectReference Include="..\BlogStatisticServicelementation\StatisticServiceClient.csproj" />
     <ProjectReference Include="..\DBModels\DBModels.csproj" />
+    <ProjectReference Include="..\StatisticServiceInterop\StatisticServiceExports.csproj" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties wwwroot_4users_1json__JsonSchema="http://json-schema.org/draft-04/schema" /></VisualStudio></ProjectExtensions>

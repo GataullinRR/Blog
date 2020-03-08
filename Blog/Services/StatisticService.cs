@@ -1,9 +1,11 @@
 ﻿using ASPCoreUtilities.Types;
 using Blog.Attributes;
 using Blog.Misc;
+using Confluent.Kafka;
 using DBModels;
 using Microsoft.EntityFrameworkCore;
 using MVVMUtilities.Types;
+using StatisticServiceExports;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +39,7 @@ namespace Blog.Services
                             var stateProperty = entry.Property(nameof(ProfileStatus.State));
                             if (entry.State == EntityState.Added)
                             {
-                                await updateUsersWithStateCount(stateProperty.CurrentValue.To<ProfileState>());
+                                await updateUsersWithStateCount(stateProperty.OriginalValue.To<ProfileState>(), stateProperty.CurrentValue.To<ProfileState>());
                             }
                             else if (stateProperty.IsModified)
                             {
@@ -58,13 +60,13 @@ namespace Blog.Services
                             var registredUserViewsProperty = entry.Property(nameof(IViewStatistic.RegisteredUserViews));
                             var totalViewsDelta = totalViewsProperty.CurrentValue.To<int>() - totalViewsProperty.OriginalValue.To<int>();
                             var registredUserViewsDelta = registredUserViewsProperty.CurrentValue.To<int>() - registredUserViewsProperty.OriginalValue.To<int>();
-                            if (viewStatistic is IViewStatistic<Commentary>)
+                            if (viewStatistic is IViewStatistic<Commentary> commentaryVStat)
                             {
-                                await updateCommentariesViewStatistic(totalViewsDelta, registredUserViewsDelta);
+                                await updateCommentariesViewStatistic(commentaryVStat.Owner.Id, totalViewsDelta, registredUserViewsDelta);
                             }
-                            else if (viewStatistic is IViewStatistic<Post>)
+                            else if (viewStatistic is IViewStatistic<Post> postVStat)
                             {
-                                await updatePostsViewStatistic(totalViewsDelta, registredUserViewsDelta);
+                                await updatePostsViewStatistic(postVStat.Owner.Id, totalViewsDelta, registredUserViewsDelta);
                             }
                         }
                         else if (entity is UserAction userAction && entry.State == EntityState.Added) // Update user stat
@@ -97,6 +99,8 @@ namespace Blog.Services
 
         async Task updatePostsCount(Post post, bool isCreated)
         {
+            S.StatisticServiceAPI.OnPostAction(new PostNotification(post.Id, isCreated ? PostAction.CREATED : PostAction.DELETED));
+
             var currentDayStatistic = await ensureHasThisDayBlogStatistic();
             currentDayStatistic.PostsCount += isCreated
                 ? 1
@@ -104,21 +108,32 @@ namespace Blog.Services
         }
         async Task updateCommentariesCount(Commentary commentary, bool isCreated)
         {
+            S.StatisticServiceAPI.OnCommentaryAction(new CommentaryNotification(commentary.Id, isCreated ? CommentaryAction.CREATED : CommentaryAction.CREATED));
+
             var currentDayStatistic = await ensureHasThisDayBlogStatistic();
             currentDayStatistic.CommentariesCount += isCreated
                 ? 1
                 : (commentary.IsDeleted ? -1 : 0);
         }
 
-        async Task updateUsersWithStateCount(ProfileState newState)
+        async Task updateUsersWithStateCount(ProfileState? oldState, ProfileState newState)
         {
+            UserNotification userEvent = null;
+            if (oldState == null)
+            {
+                userEvent = new UserNotification(new UserNotification.RegisteredInfo((int)newState));
+            }
+            else
+            {
+                userEvent = new UserNotification(new UserNotification.StateChangedInfo((int)oldState, (int)newState));
+            }
+            S.StatisticServiceAPI.OnUserAction(userEvent);
+
             var currentDayStatistic = await ensureHasThisDayBlogStatistic();
-            updateUsersWithStateCount(currentDayStatistic, newState, 1);
-        }
-        async Task updateUsersWithStateCount(ProfileState oldState, ProfileState newState)
-        {
-            var currentDayStatistic = await ensureHasThisDayBlogStatistic();
-            updateUsersWithStateCount(currentDayStatistic, oldState, -1);
+            if (oldState != null)
+            {
+                updateUsersWithStateCount(currentDayStatistic, oldState.Value, -1);
+            }
             updateUsersWithStateCount(currentDayStatistic, newState, 1);
         }
         void updateUsersWithStateCount(BlogDayStatistic blogDayStatistic, ProfileState state, int delta)
@@ -142,17 +157,35 @@ namespace Blog.Services
             }
         }
 
-        async Task updateCommentariesViewStatistic(int totalViewsDelta, int registredUserViewsDelta)
+        async Task updateCommentariesViewStatistic(int commentaryId, int totalViews, int registeredUserViews)
         {
+            S.StatisticServiceAPI.OnSeen(new SeenNotification(false)
+            {
+                SeenCommentaries = new Dictionary<int, int> { { commentaryId, totalViews } }
+            });
+            S.StatisticServiceAPI.OnSeen(new SeenNotification(true)
+            {
+                SeenCommentaries = new Dictionary<int, int> { { commentaryId, registeredUserViews } }
+            });
+
             var statistic = await ensureHasThisDayBlogStatistic();
-            statistic.CommentariesViewStatistic.TotalViews += totalViewsDelta;
-            statistic.CommentariesViewStatistic.RegisteredUserViews += registredUserViewsDelta;
+            statistic.CommentariesViewStatistic.TotalViews += totalViews;
+            statistic.CommentariesViewStatistic.RegisteredUserViews += registeredUserViews;
         }
-        async Task updatePostsViewStatistic(int totalViewsDelta, int registredUserViewsDelta)
+        async Task updatePostsViewStatistic(int postId, int totalViews, int registeredUserViews)
         {
+            S.StatisticServiceAPI.OnSeen(new SeenNotification(false)
+            {
+                SeenCommentaries = new Dictionary<int, int> { { postId, totalViews } }
+            });
+            S.StatisticServiceAPI.OnSeen(new SeenNotification(true)
+            {
+                SeenCommentaries = new Dictionary<int, int> { { postId, registeredUserViews } }
+            });
+
             var statistic = await ensureHasThisDayBlogStatistic();
-            statistic.PostsViewStatistic.TotalViews += totalViewsDelta;
-            statistic.PostsViewStatistic.RegisteredUserViews += registredUserViewsDelta;
+            statistic.PostsViewStatistic.TotalViews += totalViews;
+            statistic.PostsViewStatistic.RegisteredUserViews += registeredUserViews;
         }
 
         async Task<BlogDayStatistic> ensureHasThisDayBlogStatistic()
@@ -208,6 +241,9 @@ namespace Blog.Services
 
         async Task updateResolvedEntitiesStatisticAsync(ModeratorsGroup entityOwner, IEntityToCheck entity)
         {
+            S.StatisticServiceAPI.OnEntityResolved(
+                new EntityResolvedNotification(entityOwner.Id, entity.EntityOwner.Id, entity.AddTime, entity.AssignationTime.Value, entity.ResolvingTime.Value));
+
             if (entity.IsResolved)
             {
                 var statistic = await ensureHasThisDayModeratorsGroupStatisticAsync(entityOwner);
@@ -255,6 +291,10 @@ namespace Blog.Services
 
         void updateUserActionsStatistic(UserAction addedAction)
         {
+            S.StatisticServiceAPI.OnUserAction(
+                new UserNotification(new UserNotification.ActionPerformedInfo(addedAction.ActionType.To<int>()))
+                );
+
             var statistic = ensureHasThisDayUserStatistic(addedAction.Author);
             ensureHasAppropriateCounter().Count++;
 
