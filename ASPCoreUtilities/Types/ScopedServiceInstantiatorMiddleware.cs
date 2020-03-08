@@ -1,6 +1,4 @@
-﻿using Blog.Misc;
-using Blog.Pages.Errors;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using System;
 using System.Collections.Generic;
@@ -9,7 +7,7 @@ using System.Net;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 
-namespace Blog.Middlewares
+namespace ASPCoreUtilities.Types
 {
     public class ScopedServiceInstantiatorMiddleware<T>
     {

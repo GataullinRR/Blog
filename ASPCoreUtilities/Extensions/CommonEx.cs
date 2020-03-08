@@ -47,11 +47,6 @@ namespace ASPCoreUtilities.Extensions
             }
         }
 
-        public static IQueryable<T> AsAsyncQuerable<T>(this IEnumerable<T> sequence)
-        {
-            return new TestAsyncEnumerable<T>(sequence).AsQueryable();
-        }
-
         public static string GetController(this string controllerNameOf)
         {
             return controllerNameOf.Remove("Controller");

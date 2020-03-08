@@ -4,6 +4,7 @@ using StatisticServiceExports;
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
 
 namespace StatisticServiceClient
 {
@@ -20,7 +21,6 @@ namespace StatisticServiceClient
             }
         }
 
-
 #warning move to config
         const string TOPIC = "statistic";
 
@@ -36,7 +36,6 @@ namespace StatisticServiceClient
             var conf = new ProducerConfig
             {
                 BootstrapServers = "localhost:9092",
-                
             };
 
             _postActionProducer = createProducer<PostNotification>();
@@ -51,29 +50,29 @@ namespace StatisticServiceClient
             }
         }
 
-        public void OnPostAction(PostNotification info)
-        {
-            _postActionProducer.Produce(TOPIC, new Message<Null, PostNotification>() { Value = info });
-        }
-
-        public void OnCommentaryAction(CommentaryNotification info)
+        public async Task OnCommentaryActionAsunc(CommentaryNotification info)
         {
             _commentaryActionProducer.Produce(TOPIC, new Message<Null, CommentaryNotification>() { Value = info });
         }
 
-        public void OnSeen(SeenNotification info)
+        public async Task OnSeenAsync(SeenNotification info)
         {
             _seenProducer.Produce(TOPIC, new Message<Null, SeenNotification>() { Value = info });
         }
 
-        public void OnUserAction(UserNotification info)
+        public async Task OnUserActionAsync(UserNotification info)
         {
             _userActionProducer.Produce(TOPIC, new Message<Null, UserNotification>() { Value = info });
         }
 
-        public void OnEntityResolved(EntityResolvedNotification info)
+        public async Task OnEntityResolvedAsync(EntityResolvedNotification info)
         {
             _entityResolvedProducer.Produce(TOPIC, new Message<Null, EntityResolvedNotification>() { Value = info });
+        }
+
+        public async Task OnPostActionAsync(PostNotification info)
+        {
+            _postActionProducer.Produce(TOPIC, new Message<Null, PostNotification>() { Value = info });
         }
     }
 }

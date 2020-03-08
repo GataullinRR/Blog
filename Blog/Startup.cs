@@ -30,6 +30,7 @@ using Microsoft.Net.Http.Headers;
 using Utilities.Types;
 using StatisticServiceExports;
 using StatisticServiceClient;
+using ASPCoreUtilities.Types;
 
 namespace Blog
 {

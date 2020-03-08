@@ -1,11 +1,13 @@
-﻿namespace StatisticServiceExports
+﻿using System.Threading.Tasks;
+
+namespace StatisticServiceExports
 {
     public interface IStatisticServiceAPI
     {
-        void OnPostAction(PostNotification info);
-        void OnCommentaryAction(CommentaryNotification info);
-        void OnSeen(SeenNotification info);
-        void OnUserAction(UserNotification info);
-        void OnEntityResolved(EntityResolvedNotification info);
+        Task OnPostActionAsync(PostNotification info);
+        Task OnCommentaryActionAsunc(CommentaryNotification info);
+        Task OnSeenAsync(SeenNotification info);
+        Task OnUserActionAsync(UserNotification info);
+        Task OnEntityResolvedAsync(EntityResolvedNotification info);
     }
 }

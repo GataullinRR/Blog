@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ASPCoreUtilities
+namespace EFCore22Utilities
 {
     class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
     {

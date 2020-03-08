@@ -13,6 +13,10 @@ using Microsoft.Extensions.Logging;
 using StatisticDBModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
+using ASPCoreUtilities.Types;
+using StatisticService.Services;
+using System.Reflection;
+using ASPCoreUtilities.Extensions;
 
 namespace InputSanitizationService
 {
@@ -28,9 +32,11 @@ namespace InputSanitizationService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<BlogStatisticContext>(options => options
-                    .UseSqlServer(connection, sqlOpt => sqlOpt.CommandTimeout(60)));
+            //string connection = Configuration.GetConnectionString("DefaultConnection");
+            //services.AddDbContext<BlogStatisticContext>(options => options
+            //        .UseSqlServer(connection, sqlOpt => sqlOpt.CommandTimeout(60)));
+
+            Assembly.GetExecutingAssembly().FindAndRegisterServicesTo(services);
 
             services.AddControllers();
         }
@@ -43,12 +49,11 @@ namespace InputSanitizationService
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseMiddleware<ScopedServiceInstantiatorMiddleware<KafkaAPIConsumer>>();
+
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

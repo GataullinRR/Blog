@@ -99,7 +99,7 @@ namespace Blog.Services
 
         async Task updatePostsCount(Post post, bool isCreated)
         {
-            S.StatisticServiceAPI.OnPostAction(new PostNotification(post.Id, isCreated ? PostAction.CREATED : PostAction.DELETED));
+            S.StatisticServiceAPI.OnPostActionAsync(new PostNotification(post.Id, isCreated ? PostAction.CREATED : PostAction.DELETED));
 
             var currentDayStatistic = await ensureHasThisDayBlogStatistic();
             currentDayStatistic.PostsCount += isCreated
@@ -108,7 +108,7 @@ namespace Blog.Services
         }
         async Task updateCommentariesCount(Commentary commentary, bool isCreated)
         {
-            S.StatisticServiceAPI.OnCommentaryAction(new CommentaryNotification(commentary.Id, isCreated ? CommentaryAction.CREATED : CommentaryAction.CREATED));
+            S.StatisticServiceAPI.OnCommentaryActionAsunc(new CommentaryNotification(commentary.Id, isCreated ? CommentaryAction.CREATED : CommentaryAction.CREATED));
 
             var currentDayStatistic = await ensureHasThisDayBlogStatistic();
             currentDayStatistic.CommentariesCount += isCreated
@@ -127,7 +127,7 @@ namespace Blog.Services
             {
                 userEvent = new UserNotification(new UserNotification.StateChangedInfo((int)oldState, (int)newState));
             }
-            S.StatisticServiceAPI.OnUserAction(userEvent);
+            S.StatisticServiceAPI.OnUserActionAsync(userEvent);
 
             var currentDayStatistic = await ensureHasThisDayBlogStatistic();
             if (oldState != null)
@@ -159,11 +159,11 @@ namespace Blog.Services
 
         async Task updateCommentariesViewStatistic(int commentaryId, int totalViews, int registeredUserViews)
         {
-            S.StatisticServiceAPI.OnSeen(new SeenNotification(false)
+            S.StatisticServiceAPI.OnSeenAsync(new SeenNotification(false)
             {
                 SeenCommentaries = new Dictionary<int, int> { { commentaryId, totalViews } }
             });
-            S.StatisticServiceAPI.OnSeen(new SeenNotification(true)
+            S.StatisticServiceAPI.OnSeenAsync(new SeenNotification(true)
             {
                 SeenCommentaries = new Dictionary<int, int> { { commentaryId, registeredUserViews } }
             });
@@ -174,11 +174,11 @@ namespace Blog.Services
         }
         async Task updatePostsViewStatistic(int postId, int totalViews, int registeredUserViews)
         {
-            S.StatisticServiceAPI.OnSeen(new SeenNotification(false)
+            S.StatisticServiceAPI.OnSeenAsync(new SeenNotification(false)
             {
                 SeenCommentaries = new Dictionary<int, int> { { postId, totalViews } }
             });
-            S.StatisticServiceAPI.OnSeen(new SeenNotification(true)
+            S.StatisticServiceAPI.OnSeenAsync(new SeenNotification(true)
             {
                 SeenCommentaries = new Dictionary<int, int> { { postId, registeredUserViews } }
             });
@@ -241,7 +241,7 @@ namespace Blog.Services
 
         async Task updateResolvedEntitiesStatisticAsync(ModeratorsGroup entityOwner, IEntityToCheck entity)
         {
-            S.StatisticServiceAPI.OnEntityResolved(
+            S.StatisticServiceAPI.OnEntityResolvedAsync(
                 new EntityResolvedNotification(entityOwner.Id, entity.EntityOwner.Id, entity.AddTime, entity.AssignationTime.Value, entity.ResolvingTime.Value));
 
             if (entity.IsResolved)
@@ -291,7 +291,7 @@ namespace Blog.Services
 
         void updateUserActionsStatistic(UserAction addedAction)
         {
-            S.StatisticServiceAPI.OnUserAction(
+            S.StatisticServiceAPI.OnUserActionAsync(
                 new UserNotification(new UserNotification.ActionPerformedInfo(addedAction.ActionType.To<int>()))
                 );
 

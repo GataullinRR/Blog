@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using CommonDBModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,35 +12,35 @@ using Utilities;
 
 namespace InputSanitizationService.Controllers
 {
-    [ApiController]
-    [Route("/api/[controller]")]
-    public class StatisticController : ControllerBase
-    {
-        readonly BlogStatisticContext _db;
+    //[ApiController]
+    //[Route("/api/[controller]")]
+    //public class StatisticController : ControllerBase
+    //{
+    //    readonly BlogStatisticContext _db;
 
-        public StatisticController()
-        {
+    //    public StatisticController()
+    //    {
 
-        }
+    //    }
 
-        [HttpPost(Name = "UpdateActionStatistic")]
-        public async Task UpdateActionsStatistic([Required]ActionPerformedInfo actionInfo)
-        {
+    //    [HttpPost(Name = "UpdateActionStatistic")]
+    //    public async Task UpdateActionsStatistic([Required]ActionPerformedInfo actionInfo)
+    //    {
 
-        }
+    //    }
 
-        [HttpPost(Name = "UpdateActionStatistic")]
-        public async Task CommentaryCreated([Required]ActionPerformedInfo actionInfo)
-        {
+    //    [HttpPost(Name = "UpdateActionStatistic")]
+    //    public async Task CommentaryCreated([Required]ActionPerformedInfo actionInfo)
+    //    {
 
-        }
+    //    }
 
-        [HttpPost(Name = "UpdateActionStatistic")]
-        public async Task CommentaryCreated([Required]ActionPerformedInfo actionInfo)
-        {
+    //    [HttpPost(Name = "UpdateActionStatistic")]
+    //    public async Task CommentaryCreated([Required]ActionPerformedInfo actionInfo)
+    //    {
 
-        }
-    }
+    //    }
+    //}
 
     //[ApiController]
     //[Route("/api/[controller]")]
