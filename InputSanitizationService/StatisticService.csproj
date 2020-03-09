@@ -2,15 +2,19 @@
 
   <PropertyGroup>
     <Nullable>enable</Nullable>
-    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)Nullability.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>C:\Users\Radmir\Documents\Visual Studio 2019\Projects\Blog\Nullability.ruleset</CodeAnalysisRuleSet>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <AssemblyVersion>2020.3.8.11</AssemblyVersion>
-    <FileVersion>2020.3.8.11</FileVersion>
+    <AssemblyVersion>2020.3.9.32</AssemblyVersion>
+    <FileVersion>2020.3.9.32</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Confluent.Kafka" Version="1.3.0" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.0" />
     <PackageReference Include="System.Interactive.Async" Version="3.2.0" />
   </ItemGroup>

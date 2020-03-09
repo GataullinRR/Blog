@@ -36,8 +36,16 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatisticServiceClient", "BlogStatisticServicelementation\StatisticServiceClient.csproj", "{3D37A88D-B6DF-4437-9E80-9FB253CC8587}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StatsisticService", "StatsisticService", "{A339417C-386C-4C9A-B289-9A79701D9506}"
+	ProjectSection(SolutionItems) = preProject
+		Nullability.ruleset = Nullability.ruleset
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFCore22Utilities", "EFCore22Utilities\EFCore22Utilities.csproj", "{D4E70AFC-1B56-435B-A06D-D3CA633A72A0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9F6CABFC-6790-4C42-9144-A666A38097F8}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

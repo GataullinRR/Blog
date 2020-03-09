@@ -6,12 +6,12 @@ namespace StatisticServiceExports
     public class PostNotification
     {
         public int PostId { get; set; }
-        public PostAction PostAction { get; set; }
+        public PostAction Action { get; set; }
 
         public PostNotification(int postId, PostAction postAction)
         {
             PostId = postId;
-            PostAction = postAction;
+            Action = postAction;
         }
     }
 

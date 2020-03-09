@@ -65,20 +65,21 @@ namespace StatisticService.Services
                 try
                 {
                     var message = _consumer.Consume();
-                    var controller = _scopeBuilder
-                        .CreateScope().ServiceProvider
+                    var scope = _scopeBuilder
+                        .CreateScope();
+                    var controller = scope.ServiceProvider
                         .GetRequiredService<IStatisticServiceAPI>();
                     var parameter = message.Value;
                     var handler = getHandler();
                     executeAsync();
 
-                    _logger.LogInformation($"Consumed message '{message.Value}' at: '{message.TopicPartitionOffset}'.");
+                    /////////////////////////////////////////////
 
                     Func<Task> getHandler()
                     {
                         return message.Value switch
                         {
-                            CommentaryNotification cn => () => controller.OnCommentaryActionAsunc(cn),
+                            CommentaryNotification cn => () => controller.OnCommentaryActionAsync(cn),
                             EntityResolvedNotification ern => () => controller.OnEntityResolvedAsync(ern),
                             PostNotification pn => () => controller.OnPostActionAsync(pn),
                             SeenNotification sn => () => controller.OnSeenAsync(sn),
@@ -89,9 +90,14 @@ namespace StatisticService.Services
 
                     async void executeAsync()
                     {
-                        await ThreadingUtils.ContinueAtThreadPull();
+                        using (scope)
+                        {
+                            await ThreadingUtils.ContinueAtThreadPull();
 
-                        await handler();
+                            await handler();
+
+                            _logger.LogInformation($"Consumed message '{message.Value}' at: '{message.TopicPartitionOffset}'.");
+                        }
                     }
                 }
                 catch (Exception ex)

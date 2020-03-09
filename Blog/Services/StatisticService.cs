@@ -108,7 +108,7 @@ namespace Blog.Services
         }
         async Task updateCommentariesCount(Commentary commentary, bool isCreated)
         {
-            S.StatisticServiceAPI.OnCommentaryActionAsunc(new CommentaryNotification(commentary.Id, isCreated ? CommentaryAction.CREATED : CommentaryAction.CREATED));
+            S.StatisticServiceAPI.OnCommentaryActionAsync(new CommentaryNotification(commentary.Id, isCreated ? CommentaryAction.CREATED : CommentaryAction.CREATED));
 
             var currentDayStatistic = await ensureHasThisDayBlogStatistic();
             currentDayStatistic.CommentariesCount += isCreated

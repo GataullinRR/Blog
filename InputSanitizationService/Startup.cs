@@ -32,9 +32,9 @@ namespace InputSanitizationService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //string connection = Configuration.GetConnectionString("DefaultConnection");
-            //services.AddDbContext<BlogStatisticContext>(options => options
-            //        .UseSqlServer(connection, sqlOpt => sqlOpt.CommandTimeout(60)));
+            string connection = Configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<StatisticContext>(options => options
+                    .UseSqlServer(connection, sqlOpt => sqlOpt.CommandTimeout(60)));
 
             Assembly.GetExecutingAssembly().FindAndRegisterServicesTo(services);
 

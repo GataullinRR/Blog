@@ -18,8 +18,6 @@ namespace StatisticServiceExports
     public enum CommentaryAction
     {
         CREATED,
-        DELETED,
-        SEEN,
-        SEEN_BY_REGISTERED_USER,
+        DELETED
     }
 }

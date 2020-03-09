@@ -50,7 +50,7 @@ namespace StatisticServiceClient
             }
         }
 
-        public async Task OnCommentaryActionAsunc(CommentaryNotification info)
+        public async Task OnCommentaryActionAsync(CommentaryNotification info)
         {
             _commentaryActionProducer.Produce(TOPIC, new Message<Null, CommentaryNotification>() { Value = info });
         }

@@ -5,7 +5,7 @@ namespace StatisticServiceExports
     public interface IStatisticServiceAPI
     {
         Task OnPostActionAsync(PostNotification info);
-        Task OnCommentaryActionAsunc(CommentaryNotification info);
+        Task OnCommentaryActionAsync(CommentaryNotification info);
         Task OnSeenAsync(SeenNotification info);
         Task OnUserActionAsync(UserNotification info);
         Task OnEntityResolvedAsync(EntityResolvedNotification info);
