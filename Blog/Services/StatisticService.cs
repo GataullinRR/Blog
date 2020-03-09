@@ -241,9 +241,6 @@ namespace Blog.Services
 
         async Task updateResolvedEntitiesStatisticAsync(ModeratorsGroup entityOwner, IEntityToCheck entity)
         {
-            S.StatisticServiceAPI.OnEntityResolvedAsync(
-                new EntityResolvedNotification(entityOwner.Id, entity.EntityOwner.Id, entity.AddTime, entity.AssignationTime.Value, entity.ResolvingTime.Value));
-
             if (entity.IsResolved)
             {
                 var statistic = await ensureHasThisDayModeratorsGroupStatisticAsync(entityOwner);
@@ -291,10 +288,6 @@ namespace Blog.Services
 
         void updateUserActionsStatistic(UserAction addedAction)
         {
-            S.StatisticServiceAPI.OnUserActionAsync(
-                new UserNotification(new UserNotification.ActionPerformedInfo(addedAction.ActionType.To<int>()))
-                );
-
             var statistic = ensureHasThisDayUserStatistic(addedAction.Author);
             ensureHasAppropriateCounter().Count++;
 

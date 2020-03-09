@@ -20,6 +20,10 @@ namespace StatisticDBModels
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder
+                .Entity<UserWithStateCount>()
+                .HasKey(e => new { e.Day, e.Count });
+
             //modelBuilder.Entity<BlogDayStatistic>()
             //    .Property(ds => ds.Day)
             //    .HasField(BlogDayStatistic.ID_FIELD_NAME)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 
 namespace StatisticServiceExports
 {
@@ -29,20 +30,8 @@ namespace StatisticServiceExports
             }
         }
 
-        [Serializable]
-        public class ActionPerformedInfo
-        {
-            public int ActionType { get; }
-
-            public ActionPerformedInfo(int actionType)
-            {
-                ActionType = actionType;
-            }
-        }
-
         public RegisteredInfo Registered { get; set; }
         public StateChangedInfo StateChanged { get; set; }
-        public ActionPerformedInfo ActionPerformed { get; set; }
 
         public UserNotification(RegisteredInfo registered)
         {
@@ -52,9 +41,11 @@ namespace StatisticServiceExports
         {
             StateChanged = stateChanged ?? throw new ArgumentNullException(nameof(stateChanged));
         }
-        public UserNotification(ActionPerformedInfo actionPerformed)
+
+        public void Deconstruct(out RegisteredInfo registered, out StateChangedInfo stateChanged)
         {
-            ActionPerformed = actionPerformed ?? throw new ArgumentNullException(nameof(actionPerformed));
-        } 
+            registered = Registered;
+            stateChanged = StateChanged;
+        }
     }
 }

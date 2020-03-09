@@ -21,9 +21,10 @@ namespace StatisticService.Controllers
         readonly StatisticContext _db;
         readonly IDbAccess _dbAccess;
 
-        public KafkaAPIController(StatisticContext db)
+        public KafkaAPIController(StatisticContext db, IDbAccess dbAccess)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db));
+            _dbAccess = dbAccess ?? throw new ArgumentNullException(nameof(dbAccess));
         }
 
         public async Task OnCommentaryActionAsync(CommentaryNotification info)
@@ -35,8 +36,9 @@ namespace StatisticService.Controllers
                 CommentaryAction.DELETED => -1,
                 _ => throw new NotSupportedException()
             };
-            currentDayStatistic.CommentaryCount += countDelta;
+            currentDayStatistic.CommentariesCount += countDelta;
 
+#warning save changes should not be here
             await _db.SaveChangesAsync();
         }
 
@@ -100,12 +102,26 @@ namespace StatisticService.Controllers
 
         public async Task OnUserActionAsync(UserNotification info)
         {
+            var currentDayStatistic = await _dbAccess.GetBlogDayStatisticAsync(DateTime.UtcNow.Date);
+            var handler = getHandler();
+            await handler();
+            
+            await _db.SaveChangesAsync();
 
-        }
-
-        public async Task OnEntityResolvedAsync(EntityResolvedNotification info)
-        {
-
+            Func<Task> getHandler() => info switch
+            {
+                UserNotification(_, null) => async () =>
+                {
+                    var state = info.Registered.ProfileState;
+                    currentDayStatistic.UsersWithStateCount.First(u => u.State == state).Count++;
+                },
+                UserNotification(null, _) => async () =>
+                {
+                    currentDayStatistic.UsersWithStateCount.First(u => u.State == info.StateChanged.NewProfileState).Count++;
+                    currentDayStatistic.UsersWithStateCount.First(u => u.State == info.StateChanged.OldProfileState).Count--;
+                },
+                _ => throw new NotSupportedException()
+            };
         }
     }
 }

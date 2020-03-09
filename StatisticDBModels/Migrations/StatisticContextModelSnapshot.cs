@@ -24,7 +24,7 @@ namespace StatisticDBModels.Migrations
                     b.Property<DateTime>("Day")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CommentaryCount")
+                    b.Property<int>("CommentariesCount")
                         .HasColumnType("int");
 
                     b.Property<int>("PostsCount")
@@ -36,6 +36,27 @@ namespace StatisticDBModels.Migrations
                     b.HasKey("Day");
 
                     b.ToTable("BlogDaysStatistic");
+                });
+
+            modelBuilder.Entity("StatisticDBModels.UserWithStateCount", b =>
+                {
+                    b.Property<DateTime>("Day")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("BlogDayStatisticDay")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("State")
+                        .HasColumnType("int");
+
+                    b.HasKey("Day", "Count");
+
+                    b.HasIndex("BlogDayStatisticDay");
+
+                    b.ToTable("UserWithStateCount");
                 });
 
             modelBuilder.Entity("StatisticDBModels.ViewStatistic<int, StatisticDBModels.Markers+AClass>", b =>
@@ -90,6 +111,13 @@ namespace StatisticDBModels.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ProfilesViewStatistic");
+                });
+
+            modelBuilder.Entity("StatisticDBModels.UserWithStateCount", b =>
+                {
+                    b.HasOne("StatisticDBModels.BlogDayStatistic", null)
+                        .WithMany("UsersWithStateCount")
+                        .HasForeignKey("BlogDayStatisticDay");
                 });
 #pragma warning restore 612, 618
         }

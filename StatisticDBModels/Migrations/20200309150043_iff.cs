@@ -13,7 +13,7 @@ namespace StatisticDBModels.Migrations
                 {
                     Day = table.Column<DateTime>(nullable: false),
                     PostsCount = table.Column<int>(nullable: false),
-                    CommentaryCount = table.Column<int>(nullable: false),
+                    CommentariesCount = table.Column<int>(nullable: false),
                     UsersCount = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -62,13 +62,35 @@ namespace StatisticDBModels.Migrations
                 {
                     table.PrimaryKey("PK_ProfilesViewStatistic", x => x.Id);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "UserWithStateCount",
+                columns: table => new
+                {
+                    Day = table.Column<DateTime>(nullable: false),
+                    Count = table.Column<int>(nullable: false),
+                    State = table.Column<int>(nullable: false),
+                    BlogDayStatisticDay = table.Column<DateTime>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserWithStateCount", x => new { x.Day, x.Count });
+                    table.ForeignKey(
+                        name: "FK_UserWithStateCount_BlogDaysStatistic_BlogDayStatisticDay",
+                        column: x => x.BlogDayStatisticDay,
+                        principalTable: "BlogDaysStatistic",
+                        principalColumn: "Day",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserWithStateCount_BlogDayStatisticDay",
+                table: "UserWithStateCount",
+                column: "BlogDayStatisticDay");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "BlogDaysStatistic");
-
             migrationBuilder.DropTable(
                 name: "CommentariesViewStatistic");
 
@@ -77,6 +99,12 @@ namespace StatisticDBModels.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProfilesViewStatistic");
+
+            migrationBuilder.DropTable(
+                name: "UserWithStateCount");
+
+            migrationBuilder.DropTable(
+                name: "BlogDaysStatistic");
         }
     }
 }

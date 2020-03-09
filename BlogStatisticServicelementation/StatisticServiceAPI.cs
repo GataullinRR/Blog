@@ -27,7 +27,6 @@ namespace StatisticServiceClient
         readonly IProducer<Null, PostNotification> _postActionProducer;
         readonly IProducer<Null, CommentaryNotification> _commentaryActionProducer;
         readonly IProducer<Null, UserNotification> _userActionProducer;
-        readonly IProducer<Null, EntityResolvedNotification> _entityResolvedProducer;
         readonly IProducer<Null, SeenNotification> _seenProducer;
 
         public StatisticServiceAPI()
@@ -41,7 +40,6 @@ namespace StatisticServiceClient
             _postActionProducer = createProducer<PostNotification>();
             _commentaryActionProducer = createProducer<CommentaryNotification>();
             _userActionProducer = createProducer<UserNotification>();
-            _entityResolvedProducer = createProducer<EntityResolvedNotification>();
             _seenProducer = createProducer<SeenNotification>();
 
             IProducer<Null, T> createProducer<T>()
@@ -63,11 +61,6 @@ namespace StatisticServiceClient
         public async Task OnUserActionAsync(UserNotification info)
         {
             _userActionProducer.Produce(TOPIC, new Message<Null, UserNotification>() { Value = info });
-        }
-
-        public async Task OnEntityResolvedAsync(EntityResolvedNotification info)
-        {
-            _entityResolvedProducer.Produce(TOPIC, new Message<Null, EntityResolvedNotification>() { Value = info });
         }
 
         public async Task OnPostActionAsync(PostNotification info)

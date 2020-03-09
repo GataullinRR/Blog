@@ -8,6 +8,5 @@ namespace StatisticServiceExports
         Task OnCommentaryActionAsync(CommentaryNotification info);
         Task OnSeenAsync(SeenNotification info);
         Task OnUserActionAsync(UserNotification info);
-        Task OnEntityResolvedAsync(EntityResolvedNotification info);
     }
 }

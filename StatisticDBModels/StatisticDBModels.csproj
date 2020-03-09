@@ -4,8 +4,8 @@
     <Nullable>enable</Nullable>
     <CodeAnalysisRuleSet>C:\Users\Radmir\Documents\Visual Studio 2019\Projects\Blog\Nullability.ruleset</CodeAnalysisRuleSet>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <AssemblyVersion>2020.3.9.38</AssemblyVersion>
-    <FileVersion>2020.3.9.38</FileVersion>
+    <AssemblyVersion>2020.3.9.43</AssemblyVersion>
+    <FileVersion>2020.3.9.43</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

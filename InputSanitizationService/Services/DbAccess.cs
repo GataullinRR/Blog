@@ -13,15 +13,22 @@ namespace StatisticService.Services
         Task<BlogDayStatistic> GetBlogDayStatisticAsync(DateTime date);
     }
 
+#warning add caching
     [Service(ServiceType.SCOPED, typeof(IDbAccess))]
     class DbAccess : IDbAccess
     {
         readonly StatisticContext _db;
 
+        public DbAccess(StatisticContext db)
+        {
+            _db = db ?? throw new ArgumentNullException(nameof(db));
+        }
+
         public async Task<BlogDayStatistic> GetBlogDayStatisticAsync(DateTime date)
         {
             var currentDayStatistic = await _db.BlogDaysStatistic
                 .OrderByDescending(ds => ds.Day)
+                .Include(ds => ds.UsersWithStateCount)
                 .FirstOrDefaultAsync();
             if (currentDayStatistic == null)
             {

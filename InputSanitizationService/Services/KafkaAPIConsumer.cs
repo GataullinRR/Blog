@@ -80,7 +80,6 @@ namespace StatisticService.Services
                         return message.Value switch
                         {
                             CommentaryNotification cn => () => controller.OnCommentaryActionAsync(cn),
-                            EntityResolvedNotification ern => () => controller.OnEntityResolvedAsync(ern),
                             PostNotification pn => () => controller.OnPostActionAsync(pn),
                             SeenNotification sn => () => controller.OnSeenAsync(sn),
                             UserNotification un => () => controller.OnUserActionAsync(un),
