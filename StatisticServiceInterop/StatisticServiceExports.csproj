@@ -2,12 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyVersion>2020.3.9.11</AssemblyVersion>
-    <FileVersion>2020.3.9.11</FileVersion>
+    <AssemblyVersion>2020.3.22.13</AssemblyVersion>
+    <FileVersion>2020.3.22.13</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CommonDBModels\CommonDBModels.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="REST\" />
   </ItemGroup>
 
 </Project>

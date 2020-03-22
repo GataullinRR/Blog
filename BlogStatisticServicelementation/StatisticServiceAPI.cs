@@ -1,6 +1,7 @@
 ﻿using Confluent.Kafka;
 using Newtonsoft.Json;
 using StatisticServiceExports;
+using StatisticServiceExports.Kafka;
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;

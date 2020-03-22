@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ASPCoreUtilities.Types;
 using StatisticServiceExports;
+using StatisticServiceExports.Kafka;
 
 namespace Blog.Services
 {

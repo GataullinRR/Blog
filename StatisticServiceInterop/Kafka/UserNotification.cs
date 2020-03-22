@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 
-namespace StatisticServiceExports
+namespace StatisticServiceExports.Kafka
 {
     [Serializable]
     public class UserNotification

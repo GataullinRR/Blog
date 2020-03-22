@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace StatisticServiceExports
+namespace StatisticServiceExports.Kafka
 {
     public interface IStatisticServiceAPI
     {

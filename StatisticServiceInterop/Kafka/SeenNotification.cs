@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace StatisticServiceExports
+namespace StatisticServiceExports.Kafka
 {
     [Serializable]
     public class SeenNotification

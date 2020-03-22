@@ -6,6 +6,7 @@ using DBModels;
 using Microsoft.EntityFrameworkCore;
 using MVVMUtilities.Types;
 using StatisticServiceExports;
+using StatisticServiceExports.Kafka;
 using System;
 using System.Collections.Generic;
 using System.Linq;

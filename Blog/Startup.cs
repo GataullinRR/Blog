@@ -31,6 +31,7 @@ using Utilities.Types;
 using StatisticServiceExports;
 using StatisticServiceClient;
 using ASPCoreUtilities.Types;
+using StatisticServiceExports.Kafka;
 
 namespace Blog
 {

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using StatisticDBModels;
 using StatisticService.Services;
 using StatisticServiceExports;
+using StatisticServiceExports.Kafka;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

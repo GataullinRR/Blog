@@ -3,6 +3,7 @@ using Confluent.Kafka;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StatisticServiceExports;
+using StatisticServiceExports.Kafka;
 using System;
 using System.Collections.Generic;
 using System.IO;

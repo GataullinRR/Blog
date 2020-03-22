@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyVersion>2020.3.9.29</AssemblyVersion>
-    <FileVersion>2020.3.9.29</FileVersion>
+    <AssemblyVersion>2020.3.22.31</AssemblyVersion>
+    <FileVersion>2020.3.22.31</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
