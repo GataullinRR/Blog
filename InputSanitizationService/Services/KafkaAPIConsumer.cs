@@ -1,4 +1,4 @@
-﻿using ASPCoreUtilities.Types;
+﻿using Utilities.Types;
 using Confluent.Kafka;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -51,7 +51,9 @@ namespace StatisticService.Services
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
 
-            _consumer = new ConsumerBuilder<Null, object>(conf).SetValueDeserializer(new BinaryKafkaDeserializer<object>()).Build();
+            _consumer = new ConsumerBuilder<Null, object>(conf)
+                .SetValueDeserializer(new BinaryKafkaDeserializer<object>())
+                .Build();
             _consumer.Subscribe(TOPIC);
 
             dispatcherLoopAsync();

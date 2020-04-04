@@ -15,7 +15,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Utilities.Extensions;
-using ASPCoreUtilities.Types;
+using Utilities.Types;
 using ASPCoreUtilities.Extensions;
 using EFCore22Utilities.Extensions;
 
@@ -442,7 +442,7 @@ namespace Blog.Services
         public async Task<bool> CanSeeServiceInformationAsync()
         {
             var user = await getCurrentUserOrNullAsync();
-            return user.Role >= Role.MODERATOR;
+            return user?.Role >= Role.MODERATOR;
         }
 
         public async Task<bool> CanEditProfileAsync(User targetUser)

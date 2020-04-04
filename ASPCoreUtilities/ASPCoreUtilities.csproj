@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyVersion>2020.3.22.852</AssemblyVersion>
-    <FileVersion>2020.3.22.852</FileVersion>
+    <AssemblyVersion>2020.4.4.889</AssemblyVersion>
+    <FileVersion>2020.4.4.889</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +15,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\GeneralPurposeLibs\Utilities\UtilitiesStandard\UtilitiesStandard.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Types\" />
   </ItemGroup>
 
 </Project>

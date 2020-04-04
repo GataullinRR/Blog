@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Utilities;
-using ASPCoreUtilities.Types;
+using Utilities.Types;
 
 namespace Blog.Services
 {

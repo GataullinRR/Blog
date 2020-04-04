@@ -1,5 +1,4 @@
-﻿using ASPCoreUtilities.Types;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -17,36 +16,6 @@ namespace ASPCoreUtilities.Extensions
 {
     public static class CommonEx
     {
-        public static void FindAndRegisterServicesTo(this Assembly assemblyWithServices, IServiceCollection services)
-        {
-            var allTypes = assemblyWithServices.DefinedTypes
-                .Select(t => t.AsType())
-                .ToArray();
-            foreach (var implementationType in allTypes)
-            {
-                var serviceInfo = implementationType.GetCustomAttribute<ServiceAttribute>();
-                if (serviceInfo != null)
-                {
-                    var serviceType = serviceInfo.RegisterAs ?? implementationType;
-                    switch (serviceInfo.ServiceType)
-                    {
-                        case ServiceType.SCOPED:
-                            services.AddScoped(serviceType, implementationType);
-                            break;
-                        case ServiceType.SINGLETON:
-                            services.AddSingleton(serviceType, implementationType);
-                            break;
-                        case ServiceType.TRANSIENT:
-                            services.AddTransient(serviceType, implementationType);
-                            break;
-
-                        default:
-                            throw new NotSupportedException();
-                    }
-                }
-            }
-        }
-
         public static string GetController(this string controllerNameOf)
         {
             return controllerNameOf.Remove("Controller");

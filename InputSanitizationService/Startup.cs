@@ -13,10 +13,10 @@ using Microsoft.Extensions.Logging;
 using StatisticDBModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
-using ASPCoreUtilities.Types;
+using Utilities.Types;
 using StatisticService.Services;
 using System.Reflection;
-using ASPCoreUtilities.Extensions;
+using Utilities.Extensions;
 
 namespace InputSanitizationService
 {

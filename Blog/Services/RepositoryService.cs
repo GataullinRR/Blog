@@ -9,7 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Blog.Attributes;
-using ASPCoreUtilities.Types;
+using Utilities.Types;
 
 namespace Blog.Services
 {

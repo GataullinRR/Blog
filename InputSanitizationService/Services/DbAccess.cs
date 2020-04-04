@@ -1,4 +1,4 @@
-﻿using ASPCoreUtilities.Types;
+﻿using Utilities.Types;
 using Microsoft.EntityFrameworkCore;
 using StatisticDBModels;
 using System;

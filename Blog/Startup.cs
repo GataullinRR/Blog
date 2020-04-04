@@ -20,7 +20,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +29,7 @@ using Microsoft.Net.Http.Headers;
 using Utilities.Types;
 using StatisticServiceExports;
 using StatisticServiceClient;
-using ASPCoreUtilities.Types;
+using Utilities.Extensions;
 using StatisticServiceExports.Kafka;
 
 namespace Blog
@@ -49,7 +48,6 @@ namespace Blog
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<BlogContext>(options => options
-                    //.UseLazyLoadingProxies()
                     .UseSqlServer(connection,
                         sqlOpt => sqlOpt.CommandTimeout(60)));
             //services.AddResponseCaching();
@@ -79,8 +77,7 @@ namespace Blog
                 options.Lockout.AllowedForNewUsers = true;
 
                 // User settings.
-                options.User.AllowedUserNameCharacters =
-                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
                 options.User.RequireUniqueEmail = false;
             });
             services.AddMvc(options =>
@@ -91,7 +88,7 @@ namespace Blog
                 options.Filters.Add(new ClientResponseCacheAsyncFilter());
 
                 options.ModelBinderProviders.Insert(0, new IdToEntityModelBinderProvider());
-            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            });
 
             services.AddSession();
             services.AddMemoryCache();
@@ -113,24 +110,15 @@ namespace Blog
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             // Required to run
             app.ApplicationServices.GetService<AutounbanService>();
             app.ApplicationServices.GetRequiredService<IObjectModelValidator>();
 
-            if (env.IsDevelopment())
-            {
-                app.UseBrowserLink();
-            }
-            else
-            {
-
-            }
-
             //app.UseResponseCaching();
             app.UseAuthentication();
-            app.UseEndpointRouting();
+            //app.UseEndpointRouting();
             app.UseMiddleware<ServerResponseCachingMiddleware>();
             app.UseMiddleware<ErrorsHandlerMiddleware>();
             app.UseMiddleware<ScopedServiceInstantiatorMiddleware<StatisticService>>(); // to execute before all other services
@@ -148,10 +136,13 @@ namespace Blog
                 }
             });
             app.UseSession();
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
-            });
+            app.UseRouting();
+            app.UseEndpoints(b => b.MapRazorPages());
+            //app.UseMvc();
+            //app.UseMvc(routes =>
+            //{
+            //    routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
+            //});
         }
     }
 }

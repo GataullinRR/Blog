@@ -71,8 +71,8 @@ namespace Blog.Pages.Account
                 .Include(u => u.Reports)
                 .ThenInclude(p => p.CommentaryObject)
 
-                .Include(u => u.ReportedReports)
-                .ThenInclude(v => v.Reporter)
+                //.Include(u => u.ReportedReports)
+                //.ThenInclude(v => v.Reporter)
                 .Include(u => u.ReportedReports)
                 .ThenInclude(p => p.ProfileObject)
                 .Include(u => u.ReportedReports)

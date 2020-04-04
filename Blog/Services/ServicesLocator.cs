@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ASPCoreUtilities.Types;
+using Utilities.Types;
 using StatisticServiceExports;
 using StatisticServiceExports.Kafka;
 

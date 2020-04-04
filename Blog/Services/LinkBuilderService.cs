@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using ASPCoreUtilities.Types;
+using Utilities.Types;
 using ASPCoreUtilities.Extensions;
 
 namespace Blog.Services

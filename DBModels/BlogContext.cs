@@ -21,8 +21,9 @@ namespace DBModels
         /// <summary>
         /// To wait each async event handler to finish execution
         /// </summary>
-        readonly BusyObject _savingChanges = new BusyObject();
+        readonly BusyObject _eventHandlerProcessing = new BusyObject();
         public event Action<BusyObject> SavingChanges;
+        public event Action<SaveChangesResult, BusyObject> ChangesSaved;
 
         public DbSet<Post> Posts { get; set; }
         public DbSet<Commentary> Commentaries { get; set; }
@@ -64,7 +65,7 @@ namespace DBModels
             // Dont want to spend 4ms each time on
             // IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE') SELECT 1 ELSE SELECT 0
             // query
-            //Database.EnsureCreated();
+            // Database.EnsureCreated();
 
             ChangeTracker.LazyLoadingEnabled = false;
         }
@@ -185,10 +186,35 @@ namespace DBModels
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            SavingChanges?.Invoke(_savingChanges);
-            await _savingChanges.WaitAsync();
+            SavingChanges?.Invoke(_eventHandlerProcessing);
+            await _eventHandlerProcessing.WaitAsync();
 
-            return await base.SaveChangesAsync(cancellationToken);
+            var saveChangesResult = await trySaveChangesAsync();
+
+            ChangesSaved?.Invoke(saveChangesResult, _eventHandlerProcessing);
+            await _eventHandlerProcessing.WaitAsync();
+
+            return saveChangesResult.IsSuccessful
+                ? saveChangesResult.RowsUpdated
+                : throw saveChangesResult.Exception;
+
+            //////////////////////////////////////////
+
+            async Task<SaveChangesResult> trySaveChangesAsync()
+            {
+                SaveChangesResult result = null;
+                try
+                {
+                    var rowsUpdated = await base.SaveChangesAsync(cancellationToken);
+                    result = new SaveChangesResult(rowsUpdated);
+                }
+                catch (Exception ex)
+                {
+                    result = new SaveChangesResult(ex);
+                }
+
+                return result;
+            }
         }
     }
 }

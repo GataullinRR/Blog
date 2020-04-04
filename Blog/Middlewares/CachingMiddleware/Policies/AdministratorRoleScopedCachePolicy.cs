@@ -1,4 +1,4 @@
-﻿using ASPCoreUtilities.Types;
+﻿using Utilities.Types;
 using Blog.Attributes;
 using Blog.Services;
 using Microsoft.AspNetCore.Http;

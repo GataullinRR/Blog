@@ -6,7 +6,7 @@ using System;
 using System.Linq;
 using Utilities.Extensions;
 using System.Threading.Tasks;
-using ASPCoreUtilities.Types;
+using Utilities.Types;
 
 namespace Blog.Middlewares.CachingMiddleware.Policies
 {

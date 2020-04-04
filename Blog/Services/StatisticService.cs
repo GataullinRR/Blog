@@ -1,4 +1,4 @@
-﻿using ASPCoreUtilities.Types;
+﻿using Utilities.Types;
 using Blog.Attributes;
 using Blog.Misc;
 using Confluent.Kafka;
@@ -19,9 +19,18 @@ namespace Blog.Services
     [Service(ServiceType.SCOPED)]
     public class StatisticService : ServiceBase
     {
+        enum ExecutionOrder
+        {
+            EXECUTE_AFTER_SAVE_CHANGES
+        }
+
+        delegate IAsyncEnumerator<ExecutionOrder> StepDelegate();
+        StepDelegate _queue;
+
         public StatisticService(ServiceLocator services) : base(services)
         {
             S.Db.SavingChanges += Db_SavingChanges;
+            S.Db.ChangesSaved += Db_ChangesSaved;
         }
 
         async void Db_SavingChanges(BusyObject savingChanges)
@@ -49,11 +58,11 @@ namespace Blog.Services
                         }
                         if (entity is Post post) // Update blog statistic
                         {
-                            await updatePostsCount(post, entry.State == EntityState.Added);
+                            _queue += () => updatePostsCount(post, entry.State == EntityState.Added);
                         }
                         if (entity is Commentary commentary) // Update blog statistic
                         {
-                            await updateCommentariesCount(commentary, entry.State == EntityState.Added);
+                            _queue += () => updateCommentariesCount(commentary, entry.State == EntityState.Added);
                         }
                         else if (entry.Entity is IViewStatistic viewStatistic && entry.State == EntityState.Modified) // Update blog statistic
                         {
@@ -63,11 +72,11 @@ namespace Blog.Services
                             var registredUserViewsDelta = registredUserViewsProperty.CurrentValue.To<int>() - registredUserViewsProperty.OriginalValue.To<int>();
                             if (viewStatistic is IViewStatistic<Commentary> commentaryVStat)
                             {
-                                await updateCommentariesViewStatistic(commentaryVStat.Owner.Id, totalViewsDelta, registredUserViewsDelta);
+                                await updateCommentariesViewStatisticAsync(commentaryVStat.Owner.Id, totalViewsDelta, registredUserViewsDelta);
                             }
                             else if (viewStatistic is IViewStatistic<Post> postVStat)
                             {
-                                await updatePostsViewStatistic(postVStat.Owner.Id, totalViewsDelta, registredUserViewsDelta);
+                                await updatePostsViewStatisticAsync(postVStat.Owner.Id, totalViewsDelta, registredUserViewsDelta);
                             }
                         }
                         else if (entity is UserAction userAction && entry.State == EntityState.Added) // Update user stat
@@ -93,34 +102,84 @@ namespace Blog.Services
                         }
                     }
                 }
+
+                StepDelegate newQueue = null;
+                // WTF. Why _queue?.GetInvocationList()?.Select(d => (StepDelegate)d)?.NullToEmpty() fails with NullRefEx?
+                foreach (var action in  _queue?.GetInvocationList()?.Select(d => (StepDelegate)d) ?? Enumerable.Empty<StepDelegate>())
+                {
+                    var iterator = action();
+                    var hasValue = await iterator.MoveNextAsync();
+                    if (hasValue) // go to next step
+                    {
+                        switch (iterator.Current)
+                        {
+                            case ExecutionOrder.EXECUTE_AFTER_SAVE_CHANGES:
+                                newQueue += () => iterator;
+                                break;
+                         
+                            default:
+                                throw new NotSupportedException();
+                        }
+                    }
+                }
+                _queue = newQueue;
+            }
+        }
+
+        async void Db_ChangesSaved(SaveChangesResult result, BusyObject busy)
+        {
+            using (busy.BusyMode)
+            {
+                if (result.IsSuccessful && _queue != null)
+                {
+                    foreach (var action in _queue.GetInvocationList().Select(d => (StepDelegate)d))
+                    {
+                        var iterator = action();
+                        var hasValue = await iterator.MoveNextAsync();
+                        if (hasValue)
+                        {
+                            throw new InvalidOperationException();
+                        }
+                    }
+                }
             }
         }
 
         #region ### Blog-wide statistic ###
 
-        async Task updatePostsCount(Post post, bool isCreated)
+        async IAsyncEnumerator<ExecutionOrder> updatePostsCount(Post post, bool isCreated)
         {
-            S.StatisticServiceAPI.OnPostActionAsync(new PostNotification(post.Id, isCreated ? PostAction.CREATED : PostAction.DELETED));
-
             var currentDayStatistic = await ensureHasThisDayBlogStatistic();
             currentDayStatistic.PostsCount += isCreated
                 ? 1
                 : (post.IsDeleted ? -1 : 0);
-        }
-        async Task updateCommentariesCount(Commentary commentary, bool isCreated)
-        {
-            S.StatisticServiceAPI.OnCommentaryActionAsync(new CommentaryNotification(commentary.Id, isCreated ? CommentaryAction.CREATED : CommentaryAction.CREATED));
 
+            if (isCreated) // Because before save changes id is not set
+            {
+                yield return ExecutionOrder.EXECUTE_AFTER_SAVE_CHANGES;
+            }
+
+            await S.StatisticServiceAPI.OnPostActionAsync(new PostNotification(post.Id, isCreated ? PostAction.CREATED : PostAction.DELETED));
+        }
+        async IAsyncEnumerator<ExecutionOrder> updateCommentariesCount(Commentary commentary, bool isCreated)
+        {
             var currentDayStatistic = await ensureHasThisDayBlogStatistic();
             currentDayStatistic.CommentariesCount += isCreated
                 ? 1
                 : (commentary.IsDeleted ? -1 : 0);
+
+            if (isCreated) // Because before save changes commentary id is not set
+            {
+                yield return ExecutionOrder.EXECUTE_AFTER_SAVE_CHANGES;
+            }
+
+            await S.StatisticServiceAPI.OnCommentaryActionAsync(new CommentaryNotification(commentary.Id, isCreated ? CommentaryAction.CREATED : CommentaryAction.DELETED));
         }
 
         async Task updateUsersWithStateCount(ProfileState? oldState, ProfileState newState)
         {
             UserNotification userEvent = null;
-            if (oldState == null)
+            if (oldState == null) // User've just registered
             {
                 userEvent = new UserNotification(new UserNotification.RegisteredInfo((int)newState));
             }
@@ -128,7 +187,7 @@ namespace Blog.Services
             {
                 userEvent = new UserNotification(new UserNotification.StateChangedInfo((int)oldState, (int)newState));
             }
-            S.StatisticServiceAPI.OnUserActionAsync(userEvent);
+            await S.StatisticServiceAPI.OnUserActionAsync(userEvent);
 
             var currentDayStatistic = await ensureHasThisDayBlogStatistic();
             if (oldState != null)
@@ -158,13 +217,13 @@ namespace Blog.Services
             }
         }
 
-        async Task updateCommentariesViewStatistic(int commentaryId, int totalViews, int registeredUserViews)
+        async Task updateCommentariesViewStatisticAsync(int commentaryId, int totalViews, int registeredUserViews)
         {
-            S.StatisticServiceAPI.OnSeenAsync(new SeenNotification(false)
+            await S.StatisticServiceAPI.OnSeenAsync(new SeenNotification(false)
             {
                 SeenCommentaries = new Dictionary<int, int> { { commentaryId, totalViews } }
             });
-            S.StatisticServiceAPI.OnSeenAsync(new SeenNotification(true)
+            await S.StatisticServiceAPI.OnSeenAsync(new SeenNotification(true)
             {
                 SeenCommentaries = new Dictionary<int, int> { { commentaryId, registeredUserViews } }
             });
@@ -173,13 +232,13 @@ namespace Blog.Services
             statistic.CommentariesViewStatistic.TotalViews += totalViews;
             statistic.CommentariesViewStatistic.RegisteredUserViews += registeredUserViews;
         }
-        async Task updatePostsViewStatistic(int postId, int totalViews, int registeredUserViews)
+        async Task updatePostsViewStatisticAsync(int postId, int totalViews, int registeredUserViews)
         {
-            S.StatisticServiceAPI.OnSeenAsync(new SeenNotification(false)
+            await S.StatisticServiceAPI.OnSeenAsync(new SeenNotification(false)
             {
                 SeenCommentaries = new Dictionary<int, int> { { postId, totalViews } }
             });
-            S.StatisticServiceAPI.OnSeenAsync(new SeenNotification(true)
+            await S.StatisticServiceAPI.OnSeenAsync(new SeenNotification(true)
             {
                 SeenCommentaries = new Dictionary<int, int> { { postId, registeredUserViews } }
             });

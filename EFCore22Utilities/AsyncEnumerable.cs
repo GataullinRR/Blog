@@ -47,6 +47,11 @@ namespace EFCore22Utilities
         {
             return Task.FromResult(Execute<TResult>(expression));
         }
+
+        TResult IAsyncQueryProvider.ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     class TestAsyncEnumerable<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>
@@ -59,15 +64,12 @@ namespace EFCore22Utilities
             : base(expression)
         { }
 
-        public IAsyncEnumerator<T> GetEnumerator()
+        public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
             return new TestAsyncEnumerator<T>(this.AsEnumerable().GetEnumerator());
         }
 
-        IQueryProvider IQueryable.Provider
-        {
-            get { return new TestAsyncQueryProvider<T>(this); }
-        }
+        IQueryProvider IQueryable.Provider => new TestAsyncQueryProvider<T>(this);
     }
 
     class TestAsyncEnumerator<T> : IAsyncEnumerator<T>
@@ -79,11 +81,6 @@ namespace EFCore22Utilities
             _inner = inner;
         }
 
-        public void Dispose()
-        {
-            _inner.Dispose();
-        }
-
         public T Current
         {
             get
@@ -92,9 +89,14 @@ namespace EFCore22Utilities
             }
         }
 
-        public Task<bool> MoveNext(CancellationToken cancellationToken)
+        public async ValueTask<bool> MoveNextAsync()
         {
-            return Task.FromResult(_inner.MoveNext());
+            return _inner.MoveNext();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            _inner.Dispose();
         }
     }
 }

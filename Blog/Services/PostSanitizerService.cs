@@ -12,7 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Utilities;
 using Utilities.Extensions;
-using ASPCoreUtilities.Types;
+using Utilities.Types;
 
 namespace Blog.Services
 {

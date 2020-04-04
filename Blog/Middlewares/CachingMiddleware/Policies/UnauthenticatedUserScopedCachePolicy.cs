@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Threading.Tasks;
-using ASPCoreUtilities.Types;
+using Utilities.Types;
 
 namespace Blog.Middlewares.CachingMiddleware.Policies
 {

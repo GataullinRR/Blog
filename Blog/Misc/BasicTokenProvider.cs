@@ -1,6 +1,7 @@
 ﻿using DBModels;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -22,8 +23,9 @@ namespace Blog.Misc
     {
         public BasicTokenProvider(
             IDataProtectionProvider dataProtectionProvider,
-            IOptions<EMailChangeTokenProviderOptions> options)
-            : base(dataProtectionProvider, options)
+            IOptions<EMailChangeTokenProviderOptions> options,
+            ILogger<DataProtectorTokenProvider<User>> logger)
+            : base(dataProtectionProvider, options, logger)
         {
 
         }

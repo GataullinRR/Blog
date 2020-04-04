@@ -4,8 +4,8 @@
     <Nullable>enable</Nullable>
     <CodeAnalysisRuleSet>C:\Users\Radmir\Documents\Visual Studio 2019\Projects\Blog\Nullability.ruleset</CodeAnalysisRuleSet>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <AssemblyVersion>2020.3.22.41</AssemblyVersion>
-    <FileVersion>2020.3.22.41</FileVersion>
+    <AssemblyVersion>2020.4.4.77</AssemblyVersion>
+    <FileVersion>2020.4.4.77</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\GeneralPurposeLibs\Utilities\UtilitiesStandard.ASPCore\UtilitiesStandard.ASPCore.csproj" />
     <ProjectReference Include="..\..\GeneralPurposeLibs\Utilities\UtilitiesStandard\UtilitiesStandard.csproj" />
     <ProjectReference Include="..\ASPCoreUtilities\ASPCoreUtilities.csproj" />
     <ProjectReference Include="..\CommonDBModels\CommonDBModels.csproj" />
